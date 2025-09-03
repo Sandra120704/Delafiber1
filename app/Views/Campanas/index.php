@@ -42,11 +42,11 @@
                                 <td><?= $c->fechafin ?></td>
                                 <td><?= $c->inversion ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-estado <?= $c->estado === 'activo' ? 'btn-success' : 'btn-danger' ?>"
-                                            data-id="<?= $c->idcampania ?>"
-                                            data-estado="<?= $c->estado ?>">
-                                        <?= ucfirst($c->estado) ?>
-                                    </button>
+                                <button class="btn btn-sm <?= $c->estado == 'activo' ? 'btn-success' : 'btn-secondary' ?> btn-estado"
+                                        data-id="<?= $c->idcampania ?>"
+                                        data-estado="<?= $c->estado ?>">
+                                    <?= ucfirst($c->estado) ?>
+                                </button>
                                 </td>
                                 <td>
                                     <button class="btn btn-warning btn-edit" data-id="<?= $c->idcampania ?>">✏️</button>
@@ -67,8 +67,7 @@
 <?= $footer ?>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script>
-    const base_url = "<?= site_url('') ?>"; // termina con /
+    window.base_url = "<?= site_url('') ?>"; // ahora es global
 </script>
 <script src="<?= base_url('js/campana.js') ?>"></script>

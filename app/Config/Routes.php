@@ -8,12 +8,14 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 $routes->get('personas', 'PersonaController::index');
 
+$routes->get('campanas', 'CampanaController::index');
+$routes->get('campana/form', 'CampanaController::form');
+$routes->get('campana/form/(:num)', 'CampanaController::form/$1');
+$routes->post('campana/guardar', 'CampanaController::guardar');
+$routes->post('campana/eliminar', 'CampanaController::eliminar');
+$routes->post('campana/cambiarEstado', 'CampanaController::cambiarEstado');
 
-$routes->get('campanas', 'CampanaController::index');          // listado
-$routes->get('campana/form', 'CampanaController::form');       // crear
-$routes->get('campana/form/(:num)', 'CampanaController::form/$1'); // editar
-$routes->post('campana/guardar', 'CampanaController::guardar');    // guardar
-$routes->post('campana/eliminar', 'CampanaController::eliminar');  // eliminar
+
 
 /* Personas */
 $routes->get('personas', 'PersonaController::index');  // Listado

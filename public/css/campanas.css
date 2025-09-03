@@ -138,4 +138,17 @@
 .campana-table-card {
     padding: 15px;
 }
+.form-check {
+    margin-right: 1rem; /* espacio horizontal entre radios */
+    margin-bottom: 0.25rem; /* espacio vertical */
+}
+
+.form-check-input {
+    margin-right: 0.25rem; /* reduce la separación del texto */
+}
+
+.form-check-label {
+    margin-bottom: 0; /* opcional, elimina espacio vertical */
+}
+
 

@@ -226,3 +226,8 @@ SELECT l.idlead, p.nombres, p.apellidos, e.nombreetapa, l.estatus_global
 FROM leads l
 INNER JOIN personas p ON l.idpersona = p.idpersona
 INNER JOIN etapas e ON l.idetapa = e.idetapa;
+SELECT c.*, GROUP_CONCAT(m.medio SEPARATOR ', ') as medios
+FROM campanias c
+LEFT JOIN difusiones d ON c.idcampania = d.idcampania
+LEFT JOIN medios m ON d.idmedio = m.idmedio
+GROUP BY c.idcampania;
