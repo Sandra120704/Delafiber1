@@ -80,23 +80,27 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    $('#tablaCampanas').DataTable({
-        "order": [[0, "asc"]],
-        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }
-    });
+$(document).on("submit", "#formCampana", function(e) {
+    e.preventDefault();
+    const form = $(this);
 
-    $('#tablaCampanas tbody').on('click', 'tr', function(e) {
-        if(!$(e.target).is('a, button')) {
-            var row = $(this);
-            $('#modalNombre').text(row.data('nombre'));
-            $('#modalDescripcion').text(row.data('descripcion'));
-            $('#modalFechas').text(row.data('fechainicio') + ' - ' + row.data('fechafin'));
-            $('#modalInversion').text(parseFloat(row.data('inversion')).toFixed(2));
-            $('#modalEstado').text(row.data('estado'));
-            var modal = new bootstrap.Modal(document.getElementById('detalleModal'));
-            modal.show();
+    $.post(form.attr("action"), form.serialize(), function(res) {
+        if (res.success) {
+            const tabla = $('#tablaCampanas').DataTable();
+            const c = res.campana;
+
+            tabla.row.add([
+                c.nombre,
+                c.fechainicio + " - " + c.fechafin,
+                `<span class="badge ${c.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">
+                    ${c.estado.charAt(0).toUpperCase() + c.estado.slice(1)}
+                 </span>`
+            ]).draw(false);
+
+            form.trigger("reset");
         }
-    });
+    }, "json");
 });
+
 </script>
+

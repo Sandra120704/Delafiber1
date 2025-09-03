@@ -4,7 +4,7 @@
             <h6 class="mb-0">Registrar Nueva Campaña</h6>
         </div>
         <div class="card-body p-2">
-            <form method="post" action="<?= base_url('campanas/crear') ?>">
+            <form id="formCampana" method="post" action="<?= site_url('campanas/crear') ?>">
                 <div class="mb-2">
                     <label class="form-label small">Nombre</label>
                     <input type="text" name="nombre" class="form-control form-control-sm" required>

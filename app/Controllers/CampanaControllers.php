@@ -11,30 +11,42 @@ class CampanaControllers extends BaseController
         $this->campanaModel = new CampanaModels();
     }
 
-    public function index() {
-        $data['campanas'] = $this->campanaModel->findAll();
-        $data['header'] = view('Layouts/header');
-        $data['footer'] = view('Layouts/footer');
-
-        return view('campanas/index', $data);
+    public function index()
+    {
+        $model = new CampanaModels();
+        $data['campanas'] = $model->findAll();
+        return view('Campanas/index', $data);
     }
 
-    public function crear() {
-        $data['header'] = view('Layouts/header');
-        $data['footer'] = view('Layouts/footer');
+    public function crear()
+    {
+        $model = new CampanaModels();
 
-        if ($this->request->getMethod() === 'post') {
-            $this->campanaModel->save([
-                'nombre' => $this->request->getPost('nombre'),
-                'descripcion' => $this->request->getPost('descripcion'),
-                'fechainicio' => $this->request->getPost('fechainicio'),
-                'fechafin' => $this->request->getPost('fechafin'),
-                'inversion' => $this->request->getPost('inversion'),
-                'estado' => $this->request->getPost('estado')
+        // Recibir datos
+        $data = [
+            'nombre'      => $this->request->getPost('nombre'),
+            'descripcion' => $this->request->getPost('descripcion'),
+            'fechainicio' => $this->request->getPost('fechainicio'),
+            'fechafin'    => $this->request->getPost('fechafin'),
+            'inversion'   => $this->request->getPost('inversion'),
+            'estado'      => $this->request->getPost('estado'),
+        ];
+
+        // Guardar en DB
+        if ($model->insert($data)) {
+            $data['id'] = $model->getInsertID();
+
+            // Respuesta JSON
+            return $this->response->setJSON([
+                'success' => true,
+                'campana' => $data
             ]);
-            return redirect()->to('/campanas');
         }
 
-        return view('campanas/crear', $data);
+        // Si falla
+        return $this->response->setJSON([
+            'success' => false,
+            'mensaje' => 'No se pudo guardar la campaña'
+        ]);
     }
 }

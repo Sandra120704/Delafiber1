@@ -1,7 +1,7 @@
 <?= $header ?>
 <link rel="stylesheet" href="<?= base_url('css/persona.css') ?>">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <button id="btnNuevaPersona" class="btn btn-primary"> Nueva Persona</button>
+        <button id="btnNuevaPersona" class="btn btn-primary">➕ Nueva Persona</button>
     </div>
 <div class="container form-wrapper">
     <!-- Contenedor dinámico -->
@@ -35,8 +35,8 @@
                                 <td><?= $persona->distrito ?></td>
                                 <td><span class="badge bg-success">Activo</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $persona->idpersona ?>">✏️</button>
-                                    <button class="btn btn-sm btn-danger btn-delete" data-id="<?= $persona->idpersona ?>">🗑️</button>
+                                    <a href="<?= base_url('personas/editar/' . $persona->idpersona) ?>" class="btn btn-sm btn-warning">✏️</a>
+                                    <button class="btn btn-sm btn-danger">🗑️</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -55,39 +55,58 @@
 <script>
 $(document).ready(function () {
 
-    // ABRIR FORMULARIO NUEVA PERSONA
+    // Abrir formulario nueva persona
     $("#btnNuevaPersona").on("click", function () {
-        $.get("<?= base_url('persona/form') ?>", function (data) {
+        $.get("<?= site_url('persona/form') ?>", function (data) {
             $("#contenido-persona").html(data);
         });
     });
 
-    // EDITAR PERSONA (carga el formulario de editar en el mismo contenedor)
-    $("#tablaPersonas").on("click", ".btn-edit", function () {
+    // Guardar persona vía AJAX
+    $("#contenido-persona").on("submit", "#formPersona", function (e) {
+        e.preventDefault();
+        const form = $(this);
+        
+        $.post(form.attr("action"), form.serialize(), function(res) {
+            alert(res.mensaje); // Mensaje de éxito o error
+            
+            if(res.success){
+                // Cargar la lista de personas en el mismo div
+                $.get("<?= site_url('personas') ?>", function(data){
+                    $("#contenido-persona").html(data);
+                });
+            }
+        }, "json");
+    });
+
+    // Volver a la lista sin recargar
+    $("#contenido-persona").on("click", "#btnVolverLista", function () {
+        $.get("<?= site_url('personas') ?>", function(data){
+            $("#contenido-persona").html(data);
+        });
+    });
+
+    // Editar persona
+    $("#contenido-persona").on("click", ".btn-edit", function(){
         const id = $(this).data("id");
-        $.get("<?= base_url('persona/editar/') ?>" + id, function (data) {
+        $.get("<?= site_url('persona/form') ?>/" + id, function(data){
             $("#contenido-persona").html(data);
         });
     });
 
-    // ELIMINAR PERSONA
-    $("#tablaPersonas").on("click", ".btn-delete", function () {
+    // Eliminar persona
+    $("#contenido-persona").on("click", ".btn-delete", function() {
         const id = $(this).data("id");
         if(confirm("¿Seguro de eliminar esta persona?")) {
-            $.post("<?= base_url('persona/eliminar') ?>", {idpersona: id}, function(res) {
+            $.post("<?= site_url('persona/eliminar') ?>", {idpersona: id}, function(res) {
                 alert(res.mensaje);
-                location.reload();
+                $.get("<?= site_url('personas') ?>", function(data){
+                    $("#contenido-persona").html(data);
+                });
             }, "json");
         }
     });
 
-    // VOLVER A LISTA desde cualquier formulario cargado
-    $("#contenido-persona").on("click", "#btnVolverLista", function (e) {
-        e.preventDefault();
-        $.get("<?= base_url('persona') ?>", function (data) {
-            $("#contenido-persona").html(data);
-        });
-    });
-
 });
+
 </script>

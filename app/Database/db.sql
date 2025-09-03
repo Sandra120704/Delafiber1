@@ -1,4 +1,3 @@
--- Crear la base de datos
 CREATE DATABASE delafiber;
 USE delafiber;
 
@@ -36,6 +35,7 @@ CREATE TABLE personas (
     CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito)
 );
 
+
 CREATE TABLE roles (
     idrol INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -54,7 +54,6 @@ CREATE TABLE usuarios (
     CONSTRAINT fk_usuario_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona),
     CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES roles(idrol)
 );
-
 
 CREATE TABLE campanias (
     idcampania INT AUTO_INCREMENT PRIMARY KEY,
@@ -86,6 +85,7 @@ CREATE TABLE difusiones (
     CONSTRAINT fk_difusion_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio)
 );
 
+
 CREATE TABLE pipelines (
     idpipeline INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE leads (
     idusuarioresponsable INT NOT NULL,
     idetapa INT NOT NULL,
     fechasignacion DATE NOT NULL,
-    estado ENUM('nuevo', 'contactado', 'interesado', 'no interesado', 'perdido') DEFAULT 'nuevo',
+    estatus_global ENUM('nuevo', 'en proceso', 'ganado', 'perdido') DEFAULT 'nuevo',
     fecharegistro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME,
@@ -120,6 +120,7 @@ CREATE TABLE leads (
     CONSTRAINT fk_leads_usuario_responsable FOREIGN KEY (idusuarioresponsable) REFERENCES usuarios(idusuario),
     CONSTRAINT fk_leads_etapa FOREIGN KEY (idetapa) REFERENCES etapas(idetapa)
 );
+
 
 CREATE TABLE modalidades_contacto (
     idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
@@ -136,11 +137,28 @@ CREATE TABLE seguimientos (
     resultado_contacto ENUM('interesado','no contesta','rechazado','equivocado'),
     proxima_accion VARCHAR(150),
     proxima_fecha DATE,
+    estado ENUM('pendiente','realizado') DEFAULT 'pendiente',
+    iniciador ENUM('cliente','asesor') DEFAULT 'asesor',
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME,
     CONSTRAINT fk_seguimiento_lead FOREIGN KEY (idlead) REFERENCES leads(idlead),
     CONSTRAINT fk_seguimiento_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades_contacto(idmodalidad)
 );
+
+
+CREATE TABLE tareas (
+    idtarea INT AUTO_INCREMENT PRIMARY KEY,
+    idlead INT NOT NULL,
+    idusuario INT NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    fecha_vencimiento DATETIME NOT NULL,
+    estado ENUM('pendiente','completada','vencida') DEFAULT 'pendiente',
+    creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tarea_lead FOREIGN KEY (idlead) REFERENCES leads(idlead),
+    CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario)
+);
+
+
 
 INSERT INTO departamentos (departamento) VALUES ('Ica');
 
@@ -190,11 +208,12 @@ INSERT INTO etapas (idpipeline, nombreetapa, activo) VALUES
 (1, 'VENTA', TRUE),
 (1, 'FIDELIZACIÓN', TRUE);
 
-INSERT INTO leads (iddifusion, idpersona, idusuarioregistro, idusuarioresponsable, idetapa, fechasignacion, estado) VALUES
+INSERT INTO leads (iddifusion, idpersona, idusuarioregistro, idusuarioresponsable, idetapa, fechasignacion, estatus_global) VALUES
 (1, 1, 1, 2, 1, '2025-02-01', 'nuevo'),
-(1, 2, 1, 3, 2, '2025-02-05', 'contactado'),
-(2, 3, 1, 4, 3, '2025-02-10', 'interesado'),
-(2, 4, 1, 1, 4, '2025-02-15', 'contactado');
+(1, 2, 1, 3, 2, '2025-02-05', 'en proceso'),
+(2, 3, 1, 4, 3, '2025-02-10', 'en proceso'),
+(2, 4, 1, 1, 4, '2025-02-15', 'perdido');
+
 
 INSERT INTO modalidades_contacto (nombre) VALUES
 ('Llamada telefónica'),
@@ -203,7 +222,7 @@ INSERT INTO modalidades_contacto (nombre) VALUES
 ('Reunión presencial');
 
 -- Consulta de prueba
-SELECT l.idlead, p.nombres, p.apellidos, e.nombreetapa, l.estado
+SELECT l.idlead, p.nombres, p.apellidos, e.nombreetapa, l.estatus_global
 FROM leads l
 INNER JOIN personas p ON l.idpersona = p.idpersona
 INNER JOIN etapas e ON l.idetapa = e.idetapa;
