@@ -1,43 +1,70 @@
-<div class="campana-form-container">
-    <div class="campana-form-card card shadow-sm p-2">
-        <div class="card-header py-1">
-            <h6 class="mb-0">Registrar Nueva Campaña</h6>
-        </div>
-        <div class="card-body p-2">
-            <form id="formCampana" method="post" action="<?= site_url('campanas/crear') ?>">
-                <div class="mb-2">
-                    <label class="form-label small">Nombre</label>
-                    <input type="text" name="nombre" class="form-control form-control-sm" required>
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between">
+        <h5><?= isset($campania) ? 'Editar Campaña' : 'Nueva Campaña' ?></h5>
+        <button id="btnVolverLista" class="btn btn-secondary btn-sm">🔙 Volver</button>
+    </div>
+    <div class="card-body">
+        <form id="formCampana" action="<?= base_url('campana/guardar') ?>" method="post">
+            <?php if(isset($campania)): ?>
+                <input type="hidden" name="idcampania" value="<?= $campania->idcampania ?>">
+            <?php endif; ?>
+            <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" name="nombre" class="form-control" required value="<?= $campania->nombre ?? '' ?>">
+            </div>
+            <div class="mb-3">
+                <label>Descripción</label>
+                <textarea name="descripcion" class="form-control"><?= $campania->descripcion ?? '' ?></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Fecha Inicio</label>
+                    <input type="date" name="fechainicio" class="form-control" required value="<?= $campania->fechainicio ?? '' ?>">
                 </div>
-                <div class="mb-2">
-                    <label class="form-label small">Descripción</label>
-                    <textarea name="descripcion" class="form-control form-control-sm" rows="2"></textarea>
+                <div class="col-md-6 mb-3">
+                    <label>Fecha Fin</label>
+                    <input type="date" name="fechafin" class="form-control" required value="<?= $campania->fechafin ?? '' ?>">
                 </div>
-                <div class="row mb-2">
-                    <div class="col">
-                        <label class="form-label small">Fecha Inicio</label>
-                        <input type="date" name="fechainicio" class="form-control form-control-sm" required>
-                    </div>
-                    <div class="col">
-                        <label class="form-label small">Fecha Fin</label>
-                        <input type="date" name="fechafin" class="form-control form-control-sm" required>
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col">
-                        <label class="form-label small">Inversión</label>
-                        <input type="number" step="0.01" name="inversion" class="form-control form-control-sm">
-                    </div>
-                    <div class="col">
-                        <label class="form-label small">Estado</label>
-                        <select name="estado" class="form-select form-select-sm">
-                            <option value="activo">Activo</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-success btn-sm w-100">Guardar Campaña</button>
-            </form>
-        </div>
+            </div>
+            <div class="mb-3">
+                <label>Inversión</label>
+                <input type="number" step="0.01" name="inversion" class="form-control" value="<?= $campania->inversion ?? '' ?>">
+            </div>
+            <div>
+                <button type="submit" class="btn btn-success"><?= isset($campania) ? 'Guardar Cambios' : 'Registrar' ?></button>
+            </div>
+            
+        </form>
     </div>
 </div>
+
+<script>
+$(function(){
+    // Volver a la lista
+    $("#btnVolverLista").on("click", function(){
+        $.get("<?= site_url('campana') ?>", function(html){
+            $("#contenido-campana").html(html); // coincide con el contenedor
+        });
+    });
+
+    // Guardar formulario
+    $("#formCampana").on("submit", function(e){
+        e.preventDefault();
+        const form = $(this);
+        const btn = form.find('button[type="submit"]');
+        btn.prop('disabled', true); // deshabilitar mientras procesa
+
+        $.post(form.attr("action"), form.serialize(), function(res){
+            alert(res.mensaje);
+            if(res.success){
+                $.get("<?= site_url('campana') ?>", function(html){
+                    $("#contenido-campana").html(html);
+                });
+            }
+        }, "json")
+        .fail(() => alert("Error al guardar"))
+        .always(() => btn.prop('disabled', false)); // volver a habilitar
+    });
+});
+
+</script>

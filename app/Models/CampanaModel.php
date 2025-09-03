@@ -3,7 +3,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class CampanaModels extends Model {
+class CampanaModel extends Model {
     protected $table = 'campanias';
     protected $primaryKey = 'idcampania';
     protected $allowedFields = ['nombre','descripcion','fechainicio','fechafin','inversion','estado'];

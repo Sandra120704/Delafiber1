@@ -7,17 +7,14 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 $routes->get('personas', 'PersonaController::index');
-/* Rutas Campañas */
-$routes->get('campanas', 'CampanaControllers::index');        // Listado
-$routes->get('campanas', 'CampanaControllers::index');          // Listado
-$routes->post('campanas/crear', 'CampanaControllers::crear'); 
 
-/* Rutas De Direccion */
-$routes->get('campanas', 'CampanaControllers::index');        // Mostrar listado + formulario
-$routes->post('campanas/crear', 'CampanaControllers::crear');
 
-/* Rutas Registrar Persona */
-// Personas
+$routes->get('campanas', 'CampanaController::index');          // listado
+$routes->get('campana/form', 'CampanaController::form');       // crear
+$routes->get('campana/form/(:num)', 'CampanaController::form/$1'); // editar
+$routes->post('campana/guardar', 'CampanaController::guardar');    // guardar
+$routes->post('campana/eliminar', 'CampanaController::eliminar');  // eliminar
+
 /* Personas */
 $routes->get('personas', 'PersonaController::index');  // Listado
 $routes->get('persona/form', 'PersonaController::form'); // Crear nueva persona
