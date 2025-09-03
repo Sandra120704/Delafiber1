@@ -17,14 +17,18 @@ $routes->get('campanas', 'CampanaControllers::index');        // Mostrar listado
 $routes->post('campanas/crear', 'CampanaControllers::crear');
 
 /* Rutas Registrar Persona */
-$routes->get('personas', 'PersonaController::index'); // lista de personas
-$routes->get('persona/form', 'PersonaController::form'); // formulario para AJAX
-$routes->post('persona/guardar', 'PersonaController::guardar'); // guardar nueva persona
-$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
-$routes->post('personas/actualizar/(:num)', 'PersonaController::actualizar/$1');
+// Personas
+/* Personas */
+$routes->get('personas', 'PersonaController::index');  // Listado
+$routes->get('persona/form', 'PersonaController::form'); // Crear nueva persona
+$routes->get('persona/form/(:num)', 'PersonaController::form/$1'); // Editar persona
+$routes->post('persona/guardar', 'PersonaController::guardar');
+$routes->post('persona/eliminar', 'PersonaController::eliminar');
+
+$routes->get('persona/getProvincias/(:num)', 'PersonaController::getProvincias/$1');
+$routes->get('persona/getDistritos/(:num)', 'PersonaController::getDistritos/$1');
 
 
-// Opcionales para cascada
-$routes->get('persona/provincias/(:num)', 'PersonaController::getProvincias/$1');
-$routes->get('persona/distritos/(:num)', 'PersonaController::getDistritos/$1');
+
+
 

@@ -1,139 +1,23 @@
-/* ===== CONTENEDOR DEL FORMULARIO ===== */
-.form-container {
-    margin-top: 1rem; 
-    margin-bottom: 30px;
+#tablaPersonas {
+    font-size: 0.9rem;
 }
 
-/* ===== CARD FORMULARIO ===== */
-.form-card {
-    max-width: 1000px;
-    margin: 0 auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    border: none;
-    background-color: #f3f0ff; /* lavanda muy suave */
+#tablaPersonas thead {
+    background-color: #f8f9fa;
 }
 
-.form-card .card-header {
-    background: #c8b6ff; /* morado pastel medio */
-    color: #ffffff; /* texto oscuro neutro */
-    font-weight: bold;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 12px;
-    padding: 10px 15px;
-}
-
-/* ===== INPUTS Y TEXTAREAS ===== */
-.form-control, .form-select, textarea {
-    border-radius: 6px;
-    padding: 8px;
-    border: 1px solid #d6caff; /* borde pastel */
-    background-color: #e6e0ff; /* morado muy suave */
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-}
-
-/* ===== BOTONES ===== */
-.btn-primary {
-    background: #a29bfe; /* morado pastel intenso */
-    color: #fff;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-    background: #8176f3; /* morado más profundo */
-}
-
-/* ===== TEXTAREA AJUSTABLE ===== */
-textarea.form-control {
-    resize: vertical;
-}
-
-/* ===== CARD LISTA ===== */
-.list-container.form-card {
-    max-width: 900px;       /* No tan ancho */
-    margin: 0 auto;         /* Centrado horizontal */
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    border: none;
-    background-color: #f3f0ff; /* lavanda muy suave */
-}
-
-/* Cabecera del card */
-.list-container.form-card .card-header {
-    background: #c8b6ff;
-    color: #000000;
-    font-weight: bold;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    padding: 10px 15px;
-}
-
-/* Tabla más compacta y centrada */
-.table-morado {
-    width: 100%;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    font-family: "Segoe UI", sans-serif;
-    font-size: 10px;       /* Fuente un poco más pequeña */
+#tablaPersonas td, 
+#tablaPersonas th {
     text-align: center;
-}
-
-/* Celdas con menos padding */
-.table-morado td, .table-morado th {
-    padding: 5px 8px;
-}
-
-/* Hover y filas alternas ya definidas */
-.table-morado tbody tr:nth-child(odd) {
-    background-color: #f3f0ff;
-}
-
-.table-morado tbody tr:nth-child(even) {
-    background-color: #e6e0ff;
-}
-
-.table-morado tbody tr:hover {
-    background-color: #d6caff !important;
-    transition: background 0.3s ease;
-}
-
-/* Botones más compactos */
-.table-morado .btn-sm {
-    padding: 4px 8px;
-    font-size: 13px;
-}
-
-/* Celdas */
-.table-morado td {
-    padding: 10px;
     vertical-align: middle;
-    border: 1px solid #e6e0ff;
 }
 
-/* ===== BOTONES EN TABLA ===== */
-.table-morado .btn-warning {
-    background-color: #d6caff;
-    color: #2c2c54;
-    border: none;
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    margin-bottom: 10px;
 }
 
-.table-morado .btn-warning:hover {
-    background-color: #b299ff;
-    color: #fff;
-}
-
-.table-morado .btn-danger {
-    background-color: #d6caff;
-    color: #2c2c54;
-    border: none;
-}
-
-.table-morado .btn-danger:hover {
-    background-color: #a29bfe;
-    color: #fff;
+.dataTables_wrapper .dataTables_length {
+    float: left;
+    margin-bottom: 10px;
 }

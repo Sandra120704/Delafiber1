@@ -2,7 +2,7 @@
 namespace App\Models;
 use CodeIgniter\Model;
 
-class DistritoModels extends Model
+class DistritoModel extends Model
 {
     protected $table = 'distritos';
     protected $primaryKey = 'iddistrito';
