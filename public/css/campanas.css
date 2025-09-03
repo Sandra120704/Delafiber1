@@ -1,0 +1,141 @@
+/* ===== CONTENEDOR DEL FORMULARIO ===== */
+.campana-form-container {
+    margin-top: 1rem; 
+    margin-bottom: 30px;
+}
+
+/* ===== CARD FORMULARIO ===== */
+.campana-form-card {
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: none;
+    background-color: #f7f5ff; /* lavanda muy suave */
+}
+
+.campana-form-card .card-header {
+    background: #bfa2ff; /* morado pastel medio */
+    color: #ffffff;
+    font-weight: bold;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 10px 15px;
+}
+
+/* ===== INPUTS, TEXTAREAS Y SELECTS ===== */
+.campana-form-card .form-control,
+.campana-form-card .form-select,
+.campana-form-card textarea {
+    border-radius: 6px;
+    padding: 8px;
+    border: 1px solid #fff9f9;
+    background-color: #ebe6ff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* ===== BOTONES ===== */
+.campana-form-card .btn-success {
+    background: #a28fff;
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.campana-form-card .btn-success:hover {
+    background: #8266f3;
+}
+
+/* ===== TEXTAREA AJUSTABLE ===== */
+.campana-form-card textarea.form-control {
+    resize: vertical;
+}
+/* ===== TARJETA DE TABLA ===== */
+.campana-table-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background-color: #f3f0ff; /* mismo color que el formulario */
+    overflow: hidden;
+}
+
+/* Cabecera tarjeta */
+.campana-table-card .card-header {
+    background-color: #c8b6ff; /* mismo morado pastel del formulario */
+    color: #fff;
+    font-weight: bold;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 10px 15px;
+    font-size: 1rem;
+}
+
+/* Tabla */
+.table-campanas {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95rem;
+}
+
+/* Cabecera tabla */
+.table-campanas thead th {
+    background-color: #c8b6ff; /* morado pastel */
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Filas alternas */
+.table-campanas tbody tr:nth-child(odd) {
+    background-color: #f3f0ff; /* lavanda muy suave */
+}
+
+.table-campanas tbody tr:nth-child(even) {
+    background-color: #e6e0ff; /* morado muy suave */
+}
+
+/* Hover fila */
+.table-campanas tbody tr:hover {
+    background-color: #d6caff; /* resalta suavemente */
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Celdas */
+.table-campanas td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+/* Badges */
+.table-campanas .badge {
+    font-size: 0.85rem;
+}
+
+/* Scroll dentro del body */
+.campana-table-card .card-body {
+    max-height: 600px; /* altura visible */
+    overflow-y: auto;
+    padding: 0;
+}
+/* Margen entre la tabla y el formulario */
+.col-lg-5 {
+    margin-top: 20px; /* separación superior si hay scroll en dispositivos pequeños */
+}
+
+.col-lg-7 {
+    margin-bottom: 20px; /* separación inferior de la tabla */
+}
+
+/* O un padding interno en la tarjeta */
+.campana-table-card {
+    padding: 15px;
+}
+

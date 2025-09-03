@@ -1,243 +1,209 @@
--- Active: 1743133057434@@127.0.0.1@3306@mascotas
-CREATE DATABASE Delafiber;
+-- Crear la base de datos
+CREATE DATABASE delafiber;
+USE delafiber;
 
-USE Delafiber;
+CREATE TABLE departamentos (
+    iddepartamento INT AUTO_INCREMENT PRIMARY KEY,
+    departamento VARCHAR(50) NOT NULL
+);
 
--- Departamentos
-CREATE TABLE departamento(
-    idDepartamento INT AUTO_INCREMENT PRIMARY KEY,
-    departamento   VARCHAR(50) NOT NULL
-) ENGINE = InnoDB;
+CREATE TABLE provincias (
+    idprovincia INT AUTO_INCREMENT PRIMARY KEY,
+    provincia VARCHAR(50) NOT NULL,
+    iddepartamento INT NOT NULL,
+    CONSTRAINT fk_provincia_departamento FOREIGN KEY (iddepartamento) REFERENCES departamentos(iddepartamento)
+);
 
--- Provincias
-CREATE TABLE provincias(
-    idprovincias    INT AUTO_INCREMENT PRIMARY KEY,
-    provincias      VARCHAR(50) NOT NULL,
-    iddepartamento  INT NOT NULL,
-    CONSTRAINT fk_departamento FOREIGN KEY (iddepartamento) REFERENCES departamento(idDepartamento)
-) ENGINE = InnoDB;
+CREATE TABLE distritos (
+    iddistrito INT AUTO_INCREMENT PRIMARY KEY,
+    distrito VARCHAR(50) NOT NULL,
+    idprovincia INT NOT NULL,
+    CONSTRAINT fk_distrito_provincia FOREIGN KEY (idprovincia) REFERENCES provincias(idprovincia)
+);
 
--- Distritos
-CREATE TABLE distritos(
-    iddistrito      INT AUTO_INCREMENT PRIMARY KEY,
-    distrito        VARCHAR(50) NOT NULL,
-    idprovincias    INT NOT NULL,
-    CONSTRAINT fk_provincias FOREIGN KEY (idprovincias) REFERENCES provincias(idprovincias)
-) ENGINE = InnoDB;
+CREATE TABLE personas (
+    idpersona INT AUTO_INCREMENT PRIMARY KEY,
+    apellidos VARCHAR(100) NOT NULL,
+    nombres VARCHAR(100) NOT NULL,
+    telprimario VARCHAR(20) NOT NULL,
+    telalternativo VARCHAR(20),
+    email VARCHAR(150),
+    direccion TEXT,
+    referencia TEXT,
+    iddistrito INT NOT NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME,
+    CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito)
+);
 
--- Persona
-CREATE TABLE persona(
-    idpersona       INT AUTO_INCREMENT PRIMARY KEY,
-    apellidos       VARCHAR(80) NOT NULL,
-    nombres         VARCHAR(80) NOT NULL,
-    telprimario     VARCHAR(9) NOT NULL,
-    telalternativo  VARCHAR(9) NOT NULL,
-    email           VARCHAR(100),
-    direccion       VARCHAR(100) NOT NULL,
-    referencias     VARCHAR(150),
-    iddistrito      INT NOT NULL,
-    CONSTRAINT fk_distritos FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito),
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+CREATE TABLE roles (
+    idrol INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(150)
+);
 
--- Usuarios
 CREATE TABLE usuarios (
-    idusuario       INT PRIMARY KEY AUTO_INCREMENT,
-    idpersona       INT NOT NULL UNIQUE,
-    nombreusuario   VARCHAR(50) NOT NULL UNIQUE,
-    claveacceso     VARCHAR(200) NOT NULL,
-    estado          ENUM('activo','inactivo') DEFAULT 'activo',
-    CONSTRAINT fk_persona FOREIGN KEY (idpersona) REFERENCES persona(idpersona),
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+    idusuario INT AUTO_INCREMENT PRIMARY KEY,
+    idpersona INT NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    idrol INT NOT NULL,
+    activo TINYINT(1) DEFAULT 1,
+    creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modificado TIMESTAMP NULL,
+    CONSTRAINT fk_usuario_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona),
+    CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES roles(idrol)
+);
 
--- Campañas
-CREATE TABLE campañas (
-    idcampaña       INT PRIMARY KEY AUTO_INCREMENT,
-    nombre          VARCHAR(150) NOT NULL,
-    descripcion     TEXT,
-    fechainicio     DATE NOT NULL,
-    fechafin        DATE NOT NULL,
-    inversion       DECIMAL(9,2),
-    estado          ENUM('activo','inactivo') DEFAULT 'activo',
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
 
--- Medios
+CREATE TABLE campanias (
+    idcampania INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    fechainicio DATE NOT NULL,
+    fechafin DATE NOT NULL,
+    inversion DECIMAL(9,2),
+    estado ENUM('activo','inactivo') DEFAULT 'activo',
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME
+);
+
 CREATE TABLE medios (
-    idmedio         INT PRIMARY KEY AUTO_INCREMENT,
-    tipo            ENUM('REDES SOCIALES','PRESENCIAL') NOT NULL,
-    medio           VARCHAR(100) NOT NULL,
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+    idmedio INT AUTO_INCREMENT PRIMARY KEY,
+    tipo_medio ENUM('REDES SOCIALES','PRESENCIAL') NOT NULL,
+    medio VARCHAR(100) NOT NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME
+);
 
--- Difusiones
 CREATE TABLE difusiones (
-    iddifusion      INT PRIMARY KEY AUTO_INCREMENT,
-    idcampaña       INT NOT NULL,
-    idmedio         INT NOT NULL,
-    CONSTRAINT fk_campaña FOREIGN KEY (idcampaña) REFERENCES campañas(idcampaña),
-    CONSTRAINT fk_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio),
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+    iddifusion INT AUTO_INCREMENT PRIMARY KEY,
+    idcampania INT NOT NULL,
+    idmedio INT NOT NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME,
+    CONSTRAINT fk_difusion_campania FOREIGN KEY (idcampania) REFERENCES campanias(idcampania),
+    CONSTRAINT fk_difusion_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio)
+);
 
--- Leads
-CREATE TABLE leads (
-    idlead          INT PRIMARY KEY AUTO_INCREMENT,
-    iddifusion      INT NOT NULL,
-    idpersona       INT NOT NULL,
-    fecharegistro    DATETIME DEFAULT CURRENT_TIMESTAMP,
-    idusuarioregistro INT NOT NULL,
-    CONSTRAINT fk_difusion FOREIGN KEY (iddifusion) REFERENCES difusiones(iddifusion),
-    CONSTRAINT fk_personas FOREIGN KEY (idpersona) REFERENCES persona(idpersona),
-    CONSTRAINT fk_usuario FOREIGN KEY (idusuarioregistro) REFERENCES usuarios(idusuario),
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+CREATE TABLE pipelines (
+    idpipeline INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(150)
+);
 
--- Etapas
 CREATE TABLE etapas (
-    idetapa         INT PRIMARY KEY AUTO_INCREMENT,
-    idleadasignado  INT NOT NULL,
-    nombreetapa     VARCHAR(100) NOT NULL,
-    fechainicio     DATE NOT NULL,
-    fechafin        DATE NOT NULL,
-    estado          ENUM('en_proceso','finalizado') DEFAULT 'en_proceso',
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+    idetapa INT AUTO_INCREMENT PRIMARY KEY,
+    idpipeline INT NOT NULL,
+    nombreetapa VARCHAR(100) NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME,
+    CONSTRAINT fk_etapa_pipeline FOREIGN KEY (idpipeline) REFERENCES pipelines(idpipeline)
+);
 
--- Leads Asignados
-CREATE TABLE leadasignados (
-    idleadasigando  INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE leads (    
+    idlead INT AUTO_INCREMENT PRIMARY KEY,
+    iddifusion INT NOT NULL,
+    idpersona INT NOT NULL,
+    idusuarioregistro INT NOT NULL,
     idusuarioresponsable INT NOT NULL,
-    idlead          INT NOT NULL,
-    fechasignacion  DATE NOT NULL,
-    CONSTRAINT fk_usuarios FOREIGN KEY (idusuarioresponsable) REFERENCES usuarios(idusuario),
-    CONSTRAINT fk_lead FOREIGN KEY (idlead) REFERENCES leads(idlead),    
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB;
+    idetapa INT NOT NULL,
+    fechasignacion DATE NOT NULL,
+    estado ENUM('nuevo', 'contactado', 'interesado', 'no interesado', 'perdido') DEFAULT 'nuevo',
+    fecharegistro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME,
+    CONSTRAINT fk_leads_difusion FOREIGN KEY (iddifusion) REFERENCES difusiones(iddifusion),
+    CONSTRAINT fk_leads_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona),
+    CONSTRAINT fk_leads_usuario_registro FOREIGN KEY (idusuarioregistro) REFERENCES usuarios(idusuario),
+    CONSTRAINT fk_leads_usuario_responsable FOREIGN KEY (idusuarioresponsable) REFERENCES usuarios(idusuario),
+    CONSTRAINT fk_leads_etapa FOREIGN KEY (idetapa) REFERENCES etapas(idetapa)
+);
 
--- Seguimientos
+CREATE TABLE modalidades_contacto (
+    idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE seguimientos (
-    idseguimiento    INT PRIMARY KEY AUTO_INCREMENT,
-    modalidadcontacto VARCHAR(50),
-    fecha            DATE NOT NULL,
-    hora             TIME NOT NULL,
-    comentarios      TEXT,
-    idetapa         INT NOT NULL,
-    CONSTRAINT fk_seguimiento FOREIGN KEY (idetapa) REFERENCES etapas(idetapa),
-    creado          DATETIME NOT NULL DEFAULT NOW(),
-    modificado      DATETIME
-) ENGINE = InnoDB; 
+    idseguimiento INT AUTO_INCREMENT PRIMARY KEY,
+    idlead INT NOT NULL,
+    idmodalidad INT,
+    fecha DATE NOT NULL,
+    hora TIME,
+    comentarios TEXT,
+    resultado_contacto ENUM('interesado','no contesta','rechazado','equivocado'),
+    proxima_accion VARCHAR(150),
+    proxima_fecha DATE,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME,
+    CONSTRAINT fk_seguimiento_lead FOREIGN KEY (idlead) REFERENCES leads(idlead),
+    CONSTRAINT fk_seguimiento_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades_contacto(idmodalidad)
+);
 
-/** Inserciones De Registros **/
+INSERT INTO departamentos (departamento) VALUES ('Ica');
 
-INSERT INTO departamento (departamento) VALUES 
-    ('Ica');
+INSERT INTO provincias (provincia, iddepartamento) VALUES ('Chincha', 1);
 
-INSERT INTO provincias (provincias, iddepartamento) VALUES 
-    ('Chincha', 1),
-    ('Ica', 1),
-    ('Pisco', 1);
+INSERT INTO distritos (distrito, idprovincia) VALUES 
+('Chincha Alta', 1),
+('Sunampe', 1),
+('Grocio Prado', 1),
+('Pueblo Nuevo', 1);
 
-INSERT INTO distritos (distrito, idprovincias) VALUES 
-    ('Chincha Alta', 1),
-    ('El Carmen', 1),
-    ('Grocio Prado', 1),
-    ('Chincha Baja', 1),
-    ('Sunampe', 1);
+SELECT * FROM personas;
+INSERT INTO personas (apellidos, nombres, telprimario, telalternativo, email, direccion, referencia, iddistrito) VALUES
+('Perez', 'Juan', '999111222', NULL, 'juan.perez@gmail.com', 'Av. Los Incas 123', 'Frente al mercado', 1),
+('Lopez', 'Maria', '999222333', '988776655', 'maria.lopez@yahoo.com', 'Calle Principal 456', 'Cerca al colegio', 2),
+('Garcia', 'Carlos', '999333444', NULL, 'carlos.garcia@hotmail.com', 'Jr. Libertad 789', 'Esquina con Av. Grau', 3),
+('Torres', 'Ana', '999444555', NULL, 'ana.torres@gmail.com', 'Urb. Las Flores Mz A Lt 10', 'Altura parque central', 4);
 
-INSERT INTO persona (apellidos, nombres, telprimario, telalternativo, email, direccion, referencias, iddistrito) VALUES 
-    ('García Pérez', 'María Elena', '987654321', '912345678', 'maria.garcia@example.com', 'Av. Ejército 456', 'Frente al parque', 1),
-    ('Rodríguez Vargas', 'Carlos Alberto', '976543218', '923456789', 'carlos.rodriguez@example.com', 'Jr. Unión 123', 'Cerca del mercado', 2),
-    ('López Medina', 'Ana Cecilia', '965432187', '934567890', 'ana.lopez@example.com', 'Calle Los Pinos 789', 'Esquina principal', 3),
-    ('Martínez Ríos', 'Luis Fernando', '954321876', '945678901', 'luis.martinez@example.com', 'Av. La Marina 321', 'Al lado del colegio', 4),
-    ('Díaz Cordero', 'Sofía Patricia', '943218765', '956789012', 'sofia.diaz@example.com', 'Urb. San Nicolas', 'Portón verde', 5);
+INSERT INTO roles (nombre, descripcion) VALUES
+('admin', 'Acceso total al sistema'),
+('vendedor', 'Gestiona leads y clientes'),
+('supervisor', 'Supervisa y controla reportes');
 
+INSERT INTO usuarios (idpersona, username, password, idrol) VALUES
+(1, 'jperez', '123456', 1),
+(2, 'mlopez', '123456', 2),
+(3, 'cgarcia', '123456', 2),
+(4, 'atorres', '123456', 2);
 
-INSERT INTO usuarios (idpersona, nombreusuario, claveacceso, estado) VALUES 
-    (1, 'maria.garcia', 'password123', 'activo'),
-    (2, 'carlos.rodriguez', 'securepass', 'activo'),
-    (3, 'ana.lopez', 'test1234', 'inactivo'),
-    (4, 'luis.martinez', 'mipassword', 'activo'),
-    (5, 'sofia.diaz', 'clave123', 'activo');
+INSERT INTO campanias (nombre, descripcion, fechainicio, fechafin, inversion, estado) VALUES 
+('Campaña Facebook Chincha', 'Captación de clientes por redes sociales', '2025-01-01', '2025-03-31', 1500.00, 'activo');
 
+INSERT INTO medios (tipo_medio, medio) VALUES
+('REDES SOCIALES', 'Facebook Ads'),
+('PRESENCIAL', 'Volanteo en Chincha');
 
-INSERT INTO campañas (nombre, descripcion, fechainicio, fechafin, inversion, estado) VALUES 
-    ('Fibra Óptica Primavera 2025', 'Promoción para nuevos clientes de fibra óptica', '2025-09-01', '2025-09-30', 1500.00, 'activo'),
-    ('Internet para tu negocio', 'Campaña dirigida a PYMES', '2025-10-01', '2025-10-31', 2500.00, 'activo'),
-    ('Navidad con Delafiber', 'Ofertas especiales por navidad', '2025-12-01', '2025-12-31', 1200.00, 'inactivo'),
-    ('Verano Full Internet', 'Promoción veraniega', '2026-01-05', '2026-02-28', 1800.00, 'activo');
+INSERT INTO difusiones (idcampania, idmedio) VALUES
+(1, 1),
+(1, 2);
 
+INSERT INTO pipelines (nombre, descripcion) VALUES
+('Ventas principales', 'Pipeline general de ventas');
 
-INSERT INTO medios (tipo, medio) VALUES 
-    ('REDES SOCIALES', 'Facebook'),
-    ('REDES SOCIALES', 'Instagram'),
-    ('REDES SOCIALES', 'LinkedIn'),
-    ('PRESENCIAL', 'Ferias'),
-    ('PRESENCIAL', 'Eventos corporativos');
+INSERT INTO etapas (idpipeline, nombreetapa, activo) VALUES 
+(1, 'CAPTACIÓN', TRUE),
+(1, 'CONVERSIÓN', TRUE),
+(1, 'VENTA', TRUE),
+(1, 'FIDELIZACIÓN', TRUE);
 
+INSERT INTO leads (iddifusion, idpersona, idusuarioregistro, idusuarioresponsable, idetapa, fechasignacion, estado) VALUES
+(1, 1, 1, 2, 1, '2025-02-01', 'nuevo'),
+(1, 2, 1, 3, 2, '2025-02-05', 'contactado'),
+(2, 3, 1, 4, 3, '2025-02-10', 'interesado'),
+(2, 4, 1, 1, 4, '2025-02-15', 'contactado');
 
-INSERT INTO difusiones (idcampaña, idmedio) VALUES 
-    (1, 1),
-    (1, 4),
-    (2, 2),
-    (2, 5),
-    (3, 3),
-    (4, 1),
-    (4, 2);
+INSERT INTO modalidades_contacto (nombre) VALUES
+('Llamada telefónica'),
+('WhatsApp'),
+('Correo electrónico'),
+('Reunión presencial');
 
-
-INSERT INTO leads (iddifusion, idpersona, idusuarioregistro) VALUES 
-    (1, 2, 1),
-    (2, 3, 2),
-    (3, 4, 3),
-    (4, 5, 1),
-    (5, 1, 4),
-    (6, 2, 5),
-    (7, 3, 2);
-
-
-INSERT INTO leadasignados (idusuarioresponsable, idlead, fechasignacion) VALUES 
-    (1, 1, '2025-09-01'),
-    (2, 2, '2025-09-10'),
-    (3, 3, '2025-10-20'),
-    (4, 4, '2025-11-15'),
-    (5, 5, '2025-12-01'),
-    (2, 6, '2025-12-10'),
-    (3, 7, '2025-12-15');
-    
-INSERT INTO etapas (idleadasignado, nombreetapa, fechainicio, fechafin, estado) VALUES 
-    (1, 'Captación', '2025-09-01', '2025-09-05', 'finalizado'),
-    (1, 'Conversión', '2025-09-06', '2025-09-10', 'finalizado'),
-    (1, 'Venta', '2025-09-11', '2025-09-15', 'en_proceso'),
-    (2, 'Captación', '2025-09-10', '2025-09-15', 'finalizado'),
-    (3, 'Conversión', '2025-10-21', '2025-10-25', 'en_proceso'),
-    (4, 'Captación', '2025-11-16', '2025-11-20', 'finalizado');
-
-
-INSERT INTO seguimientos (modalidadcontacto, fecha, hora, comentarios, idetapa) VALUES 
-    ('Llamada telefónica', '2025-09-02', '10:30:00', 'Cliente interesado en servicio residencial', 1),
-    ('Email', '2025-09-05', '14:15:00', 'Enviada información detallada del paquete', 1),
-    ('Visita presencial', '2025-09-08', '16:00:00', 'Presentación completa del servicio', 2),
-    ('Mensaje Whatsapp', '2025-10-22', '09:45:00', 'Cliente solicitó cotización especial', 5),
-    ('Llamada telefónica', '2025-11-18', '11:20:00', 'Confirmar disponibilidad en su zona', 6);
-    
-    SELECT 
-    u.nombreusuario AS Usuario_Responsable,
-    p.nombres AS Nombre,
-    p.apellidos AS Apellidos,
-    l.idlead AS ID_Lead,
-    la.fechasignacion AS Fecha_Asignacion
-	FROM leadasignados la
-	JOIN usuarios u ON la.idusuarioresponsable = u.idusuario
-	JOIN leads l ON la.idlead = l.idlead
-	JOIN persona p ON l.idpersona = p.idpersona
-	ORDER BY u.nombreusuario, la.fechasignacion;
+-- Consulta de prueba
+SELECT l.idlead, p.nombres, p.apellidos, e.nombreetapa, l.estado
+FROM leads l
+INNER JOIN personas p ON l.idpersona = p.idpersona
+INNER JOIN etapas e ON l.idetapa = e.idetapa;

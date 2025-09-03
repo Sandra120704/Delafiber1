@@ -1,65 +1,139 @@
-/* ===== ESTILO TABLA CORPORATIVA ===== */
+/* ===== CONTENEDOR DEL FORMULARIO ===== */
+.form-container {
+    margin-top: 1rem; 
+    margin-bottom: 30px;
+}
+
+/* ===== CARD FORMULARIO ===== */
+.form-card {
+    max-width: 1000px;
+    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: none;
+    background-color: #f3f0ff; /* lavanda muy suave */
+}
+
+.form-card .card-header {
+    background: #c8b6ff; /* morado pastel medio */
+    color: #ffffff; /* texto oscuro neutro */
+    font-weight: bold;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 12px;
+    padding: 10px 15px;
+}
+
+/* ===== INPUTS Y TEXTAREAS ===== */
+.form-control, .form-select, textarea {
+    border-radius: 6px;
+    padding: 8px;
+    border: 1px solid #d6caff; /* borde pastel */
+    background-color: #e6e0ff; /* morado muy suave */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* ===== BOTONES ===== */
+.btn-primary {
+    background: #a29bfe; /* morado pastel intenso */
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #8176f3; /* morado más profundo */
+}
+
+/* ===== TEXTAREA AJUSTABLE ===== */
+textarea.form-control {
+    resize: vertical;
+}
+
+/* ===== CARD LISTA ===== */
+.list-container.form-card {
+    max-width: 900px;       /* No tan ancho */
+    margin: 0 auto;         /* Centrado horizontal */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: none;
+    background-color: #f3f0ff; /* lavanda muy suave */
+}
+
+/* Cabecera del card */
+.list-container.form-card .card-header {
+    background: #c8b6ff;
+    color: #000000;
+    font-weight: bold;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 10px 15px;
+}
+
+/* Tabla más compacta y centrada */
 .table-morado {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  font-family: "Segoe UI", sans-serif;
-  font-size: 15px;
-  text-align: center;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10px;       /* Fuente un poco más pequeña */
+    text-align: center;
 }
 
-/* Cabecera */
-.table-morado thead th {
-  background: linear-gradient(90deg, #7b1fa2, #d81b60); /* morado → rosado fuerte */
-  color: #fff;
-  font-weight: bold;
-  padding: 14px;
-  border: none;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+/* Celdas con menos padding */
+.table-morado td, .table-morado th {
+    padding: 5px 8px;
 }
 
-/* Filas alternas */
+/* Hover y filas alternas ya definidas */
 .table-morado tbody tr:nth-child(odd) {
-  background-color: #ffffff; /* blanco */
+    background-color: #f3f0ff;
 }
 
 .table-morado tbody tr:nth-child(even) {
-  background-color: #fdf0f7; /* rosado muy suave */
+    background-color: #e6e0ff;
 }
 
-/* Hover fila */
 .table-morado tbody tr:hover {
-  background-color: #f3e5f5 !important; /* morado claro */
-  transition: background 0.3s ease;
-  cursor: pointer;
+    background-color: #d6caff !important;
+    transition: background 0.3s ease;
+}
+
+/* Botones más compactos */
+.table-morado .btn-sm {
+    padding: 4px 8px;
+    font-size: 13px;
 }
 
 /* Celdas */
 .table-morado td {
-  padding: 12px;
-  vertical-align: middle;
-  border: 1px solid #eee;
+    padding: 10px;
+    vertical-align: middle;
+    border: 1px solid #e6e0ff;
 }
 
-/* ===== BOTÓN CORPORATIVO ===== */
-.btn-corporativo {
-  background: linear-gradient(90deg, #9c27b0, #ec407a); /* morado → rosado */
-  color: #fff;
-  font-weight: bold;
-  border: none;
-  border-radius: 50px;
-  padding: 10px 22px;
-  transition: all 0.3s ease;
-  box-shadow: 0px 4px 8px rgba(156, 39, 176, 0.3);
+/* ===== BOTONES EN TABLA ===== */
+.table-morado .btn-warning {
+    background-color: #d6caff;
+    color: #2c2c54;
+    border: none;
 }
 
-.btn-corporativo:hover {
-  background: linear-gradient(90deg, #6a1b9a, #d81b60);
-  transform: translateY(-2px);
-  box-shadow: 0px 6px 12px rgba(156, 39, 176, 0.4);
+.table-morado .btn-warning:hover {
+    background-color: #b299ff;
+    color: #fff;
 }
 
-.btn-corporativo:active {
-  transform: scale(0.96);
+.table-morado .btn-danger {
+    background-color: #d6caff;
+    color: #2c2c54;
+    border: none;
+}
+
+.table-morado .btn-danger:hover {
+    background-color: #a29bfe;
+    color: #fff;
 }
