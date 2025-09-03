@@ -20,6 +20,9 @@ $routes->get('persona/getDistritos/(:num)', 'PersonaController::getDistritos/$1'
 $routes->get('personas', 'PersonaController::index'); // lista de personas
 $routes->get('persona/form', 'PersonaController::form'); // formulario para AJAX
 $routes->post('persona/guardar', 'PersonaController::guardar'); // guardar nueva persona
+$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
+$routes->post('personas/actualizar/(:num)', 'PersonaController::actualizar/$1');
+
 
 // Opcionales para cascada
 $routes->get('persona/provincias/(:num)', 'PersonaController::getProvincias/$1');

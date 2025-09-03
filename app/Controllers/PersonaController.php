@@ -77,5 +77,39 @@ class PersonaController extends BaseController
         $distritos = $distritoModel->where('idprovincia', $idProvincia)->findAll();
         return $this->response->setJSON($distritos);
     }
-    
+    public function editar($idpersona)
+    {
+        $personaModel = new PersonaModel();
+        $departamentosModel = new DepartamentoModel();
+
+        // Traer persona con distrito, provincia y departamento
+        $persona = $personaModel
+            ->select('personas.*, distritos.idprovincia, provincias.iddepartamento')
+            ->join('distritos', 'personas.iddistrito = distritos.iddistrito')
+            ->join('provincias', 'distritos.idprovincia = provincias.idprovincia')
+            ->where('personas.idpersona', $idpersona)
+            ->asObject() // <-- fuerza objeto
+            ->first();
+
+        $data['persona'] = $persona;
+        $data['departamentos'] = $departamentosModel->asObject()->findAll(); // asegurar objetos
+
+        return view('Personas/editar', $data);
+    }
+
+
+
+
+
+    public function actualizar($idpersona)
+    {
+        $personaModel = new PersonaModel();
+        $datos = $this->request->getPost();
+        $datos['modificado'] = date('Y-m-d H:i:s');
+
+        $personaModel->update($idpersona, $datos);
+
+        return redirect()->to(base_url('persona'));
+    }
+
 }

@@ -1,7 +1,7 @@
 <?= $header ?>
 <link rel="stylesheet" href="<?= base_url('css/persona.css') ?>">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <button id="btnNuevaPersona" class="btn btn-primary">➕ Nueva Persona</button>
+        <button id="btnNuevaPersona" class="btn btn-primary"> Nueva Persona</button>
     </div>
 <div class="container form-wrapper">
     <!-- Contenedor dinámico -->
@@ -35,8 +35,8 @@
                                 <td><?= $persona->distrito ?></td>
                                 <td><span class="badge bg-success">Activo</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning">✏️</button>
-                                    <button class="btn btn-sm btn-danger">🗑️</button>
+                                    <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $persona->idpersona ?>">✏️</button>
+                                    <button class="btn btn-sm btn-danger btn-delete" data-id="<?= $persona->idpersona ?>">🗑️</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -55,16 +55,38 @@
 <script>
 $(document).ready(function () {
 
-    // Abrir formulario vía AJAX
+    // ABRIR FORMULARIO NUEVA PERSONA
     $("#btnNuevaPersona").on("click", function () {
         $.get("<?= base_url('persona/form') ?>", function (data) {
             $("#contenido-persona").html(data);
         });
     });
 
-    // Botón para volver a la lista dentro del formulario
-    $("#contenido-persona").on("click", "#btnVolverLista", function () {
-        location.reload();
+    // EDITAR PERSONA (carga el formulario de editar en el mismo contenedor)
+    $("#tablaPersonas").on("click", ".btn-edit", function () {
+        const id = $(this).data("id");
+        $.get("<?= base_url('persona/editar/') ?>" + id, function (data) {
+            $("#contenido-persona").html(data);
+        });
+    });
+
+    // ELIMINAR PERSONA
+    $("#tablaPersonas").on("click", ".btn-delete", function () {
+        const id = $(this).data("id");
+        if(confirm("¿Seguro de eliminar esta persona?")) {
+            $.post("<?= base_url('persona/eliminar') ?>", {idpersona: id}, function(res) {
+                alert(res.mensaje);
+                location.reload();
+            }, "json");
+        }
+    });
+
+    // VOLVER A LISTA desde cualquier formulario cargado
+    $("#contenido-persona").on("click", "#btnVolverLista", function (e) {
+        e.preventDefault();
+        $.get("<?= base_url('persona') ?>", function (data) {
+            $("#contenido-persona").html(data);
+        });
     });
 
 });
