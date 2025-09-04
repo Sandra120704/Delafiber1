@@ -2,7 +2,7 @@ $(function () {
 
     // ===== Base URL global =====
     if (!window.base_url) {
-        console.error("⚠️ base_url no definido");
+        console.error("base_url no definido");
         window.base_url = ""; // fallback
     }
 
@@ -16,7 +16,7 @@ $(function () {
         $("#contenido-campanas").html('<div class="text-center p-5">Cargando...</div>');
         $.get(u('campana/form'), function (html) {
             $("#contenido-campanas").html(html);
-        }).fail(() => alert("❌ No se pudo cargar el formulario"));
+        }).fail(() => alert("No se pudo cargar el formulario"));
     });
 
     // ===== Editar campaña =====
@@ -26,7 +26,7 @@ $(function () {
         $("#contenido-campanas").html('<div class="text-center p-5">Cargando...</div>');
         $.get(u('campana/form/' + id), function (html) {
             $("#contenido-campanas").html(html);
-        }).fail(() => alert("❌ No se pudo cargar el formulario"));
+        }).fail(() => alert(" No se pudo cargar el formulario"));
     });
 
     // ===== Guardar campaña (crear/editar) =====
@@ -36,13 +36,21 @@ $(function () {
         const btn = form.find("button[type=submit]");
         btn.prop("disabled", true); // desactiva botón mientras envía
 
+        // Validar que haya un medio seleccionado
+        const medioSeleccionado = form.find('input[name="medio"]:checked').val();
+        if (!medioSeleccionado) {
+            alert("Debes seleccionar un medio de difusión");
+            btn.prop("disabled", false);
+            return;
+        }
+
         $.post(form.attr("action"), form.serialize(), function (res) {
             alert(res.mensaje || 'Operación realizada');
             btn.prop("disabled", false); // reactivar botón
             if (res.success) recargarLista();
         }, 'json').fail(() => {
-            alert("❌ Error al guardar");
-            btn.prop("disabled", false); // reactivar botón
+            alert("Error al guardar");
+            btn.prop("disabled", false);
         });
     });
 
@@ -54,7 +62,7 @@ $(function () {
         $.post(u('campana/eliminar'), { idcampania: id }, function (res) {
             alert(res.mensaje || 'Operación realizada');
             if (res.success) recargarLista();
-        }, 'json').fail(() => alert("❌ Error al eliminar"));
+        }, 'json').fail(() => alert("Error al eliminar"));
     });
 
     // ===== Cambiar estado =====
@@ -69,15 +77,17 @@ $(function () {
                 btn.toggleClass('btn-success btn-secondary');
                 btn.data("estado", nuevoEstado);
             } else alert(res.mensaje);
-        }, "json").fail(() => alert("❌ Error al cambiar estado"));
+        }, "json").fail(() => alert(" Error al cambiar estado"));
     });
 
     // ===== Recargar lista =====
     function recargarLista() {
         $.get(u('campanas'), function (html) {
-            // Reemplaza solo el contenido dinámico
-            $("#contenido-campanas").html($(html).find('#contenido-campanas').html());
-        }).fail(() => alert("❌ No se pudo recargar la lista"));
+            const nuevoContenido = $(html).find('#contenido-campanas').html();
+            $("#contenido-campanas").fadeOut(200, function () {
+                $(this).html(nuevoContenido).fadeIn(200);
+            });
+        }).fail(() => alert(" No se pudo recargar la lista"));
     }
 
 });

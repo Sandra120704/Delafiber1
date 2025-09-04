@@ -15,19 +15,15 @@
         <!-- Lista de campañas -->
         <div class="card shadow-sm">
             <div class="card-header bg-light">
-                <h5>📋 Lista de Campañas</h5>
+                <h5>📋 Lista de Campañas y Medios</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="tablaCampanas" class="table table-hover table-bordered">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Fecha Inicio</th>
-                                <th>Fecha Fin</th>
-                                <th>Inversión</th>
+                                <th>Campaña</th>
+                                <th>Medio</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -35,22 +31,18 @@
                         <tbody>
                             <?php foreach($campanas as $c): ?>
                             <tr>
-                                <td><?= $c->idcampania ?></td>
-                                <td><?= $c->nombre ?></td>
-                                <td><?= $c->descripcion ?></td>
-                                <td><?= $c->fechainicio ?></td>
-                                <td><?= $c->fechafin ?></td>
-                                <td><?= $c->inversion ?></td>
+                                <td><?= $c['nombre'] ?></td>
+                                <td><?= $c['medio'] ?></td>
                                 <td>
-                                <button class="btn btn-sm <?= $c->estado == 'activo' ? 'btn-success' : 'btn-secondary' ?> btn-estado"
-                                        data-id="<?= $c->idcampania ?>"
-                                        data-estado="<?= $c->estado ?>">
-                                    <?= ucfirst($c->estado) ?>
-                                </button>
+                                    <button class="btn btn-sm <?= $c['estado'] == 'activo' ? 'btn-success' : 'btn-secondary' ?> btn-estado"
+                                            data-id="<?= $c['idcampania'] ?>"
+                                            data-estado="<?= $c['estado'] ?>">
+                                        <?= ucfirst($c['estado']) ?>
+                                    </button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-warning btn-edit" data-id="<?= $c->idcampania ?>">✏️</button>
-                                    <button class="btn btn-danger btn-delete" data-id="<?= $c->idcampania ?>">🗑️</button>
+                                    <button class="btn btn-warning btn-edit" data-id="<?= $c['idcampania'] ?>">✏️</button>
+                                    <button class="btn btn-danger btn-delete" data-id="<?= $c['idcampania'] ?>">🗑️</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
