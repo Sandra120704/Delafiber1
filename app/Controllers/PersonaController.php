@@ -7,19 +7,9 @@ use App\Models\PersonaModel;
 use App\Models\DepartamentoModel;
 use App\Models\ProvinciaModel;
 use App\Models\DistritoModels;
-use App\Models\LeadModel;
 
 class PersonaController extends BaseController
 {
-    protected $personaModel;
-    protected $leadModel;
-    
-    public function __construct()
-    {
-        $this->personaModel = new PersonaModel();
-        $this->leadModel = new LeadModel();
-    }
-
     public function index()
     {
         $personaModel = new PersonaModel();
@@ -99,26 +89,30 @@ class PersonaController extends BaseController
      */
     public function convertirALead($idpersona)
     {
+        $personaModel = new PersonaModel(); // Instanciamos el modelo
+
         // 1. Verificar que la persona exista
-        $persona = $this->personaModel->find($idpersona);
+        $persona = $personaModel->find($idpersona);
         if (!$persona) {
             session()->setFlashdata('error', 'Persona no encontrada.');
             return redirect()->back();
         }
 
         // 2. Crear el Lead con los datos básicos
+        $leadModel = new \App\Models\LeadModel(); // Instanciamos el modelo de Leads
         $data = [
             'idpersona' => $idpersona,
             'idusuarioregistro' => session()->get('idusuario') ?? 1,
             'estatus_global' => 'nuevo',
             'fechasignacion' => date('Y-m-d H:i:s'),
-            'idetapa' => 1 // primera etapa del pipeline
+            'idetapa' => 1 // Primera etapa del pipeline
         ];
 
-        $this->leadModel->insert($data);
+        $leadModel->insert($data);
 
-        // 3. Redirigir al Kanban de Leads completo
+        // 3. Redirigir al Kanban de Leads completo con mensaje de éxito
         session()->setFlashdata('success', 'Persona convertida a Lead correctamente.');
         return redirect()->to(base_url('lead/kanban'));
     }
+
 }

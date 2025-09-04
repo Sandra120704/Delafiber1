@@ -1,16 +1,7 @@
 <?= $header ?>
-
 <link rel="stylesheet" href="<?= base_url('css/leads.css') ?>">
 
 <div class="kanban-container">
-
-    <?php if(!empty($mensajeExito)): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($mensajeExito) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
-    <?php endif; ?>
-
     <!-- Cabecera con etapas -->
     <div class="kanban-header">
         <?php foreach ($etapas as $etapa): ?>
@@ -21,13 +12,14 @@
     <!-- Cuerpo con columnas y tarjetas -->
     <div class="kanban-body">
         <?php foreach ($etapas as $etapa): ?>
-            <div class="kanban-column" data-etapa="<?= $etapa->idetapa ?>">
+            <div class="kanban-column" id="kanban-column-<?= $etapa->idetapa ?>" data-etapa="<?= $etapa->idetapa ?>">
                 <?php
                 $leadsEtapa = array_filter($leads, fn($l) => $l->idetapa == $etapa->idetapa);
                 foreach ($leadsEtapa as $lead):
                 ?>
-                    <div class="kanban-card"
-                         data-id="<?= $lead->idlead ?>"
+                    <div class="kanban-card" 
+                         id="kanban-card-<?= $lead->idlead ?>"
+                         data-id="<?= $lead->idlead ?>" 
                          style="border-left: 5px solid <?= htmlspecialchars($lead->estatus_color) ?>;"
                          draggable="true">
                         <div class="card-title"><?= htmlspecialchars($lead->nombres . ' ' . $lead->apellidos) ?></div>

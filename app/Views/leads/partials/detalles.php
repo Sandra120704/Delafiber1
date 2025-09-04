@@ -36,7 +36,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-danger btn-desistir" data-id="<?= $lead->idlead ?>">Desistir</button>
+        <button type="button" class="btn btn-danger btn-desistir" data-idlead="<?= $lead->idlead ?>">Desistir</button>
       </div>
     </div>
   </div>

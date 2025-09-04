@@ -1,5 +1,4 @@
 $(function () {
-    const base_url = "<?= base_url() ?>";
 
     // ==========================
     // Función auxiliar para URLs
@@ -86,23 +85,14 @@ $(function () {
         const idpersona = $(this).data('idpersona');
         if(!idpersona) return;
 
-        $.post(u('lead/convertir'), { idpersona }, function(res) {
-            if(res.success){
-                // Agregar tarjeta a la columna correspondiente
-                const columna = $('#kanban-column-' + res.idetapa);
-                if(columna.length){
-                    columna.append(res.html_card);
-                    initKanbanCards();
-                }
-            } else {
-                alert('Error al convertir persona a Lead');
-            }
-        }, 'json');
+        // Redirigir directamente al controller para evitar CSRF
+        window.location.href = u('persona/convertirALead/' + idpersona);
     });
 
     // ==========================
     // Desistir / Eliminar Lead
     // ==========================
+        
     $(document).on('click', '.btn-desistir', function() {
         const idlead = $(this).data('idlead');
         if(!idlead) return;
@@ -111,7 +101,16 @@ $(function () {
 
         $.post(u('lead/eliminar'), { idlead }, function(res) {
             if(res.success){
-                $('#kanban-card-' + idlead).fadeOut(400, function(){ $(this).remove(); });
+                // Elimina visualmente la tarjeta del Kanban
+                $('#kanban-card-' + idlead).fadeOut(400, function(){
+                    $(this).remove();
+                });
+                // Cierra el modal si estaba abierto
+                const modalEl = document.getElementById('modalLeadDetalle');
+                if(modalEl){
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                }
             } else {
                 alert('Error al desistir Lead');
             }

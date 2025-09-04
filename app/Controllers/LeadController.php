@@ -21,11 +21,9 @@ class LeadController extends BaseController
     public function kanban()
     {
         $data = $this->getDatosLeads();
+        // Carga completa: header + footer
         $data['header'] = view('Layouts/header');
         $data['footer'] = view('Layouts/footer');
-
-        // Obtener mensaje flash si existe
-        $data['mensajeExito'] = session()->getFlashdata('success') ?? null;
 
         return view('leads/index', $data);
     }
@@ -147,16 +145,11 @@ class LeadController extends BaseController
     public function eliminar()
     {
         $idlead = $this->request->getPost('idlead');
-        if (!$idlead) {
-            return $this->response->setJSON(['success' => false, 'error' => 'ID no definido']);
-        }
+        $success = $this->leadModel->delete($idlead);
 
-        try {
-            $this->leadModel->delete($idlead); // elimina el lead
-            return $this->response->setJSON(['success' => true]);
-        } catch (\Exception $e) {
-            return $this->response->setJSON(['success' => false, 'error' => $e->getMessage()]);
-        }
+        return $this->response->setJSON([
+            'success' => $success ? true : false
+        ]);
     }
 
 }
