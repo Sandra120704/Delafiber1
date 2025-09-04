@@ -32,16 +32,15 @@ $routes->get('usuarios/crear', 'UsuarioController::crear'); // Formulario para c
 $routes->post('usuarios/guardar', 'UsuarioController::guardar'); // Guardar usuario
 
 /* Leads */
-
-$routes->post('leads/avanzar-etapa', 'LeadController::avanzarEtapa');
-$routes->get('lead/kanban', 'LeadController::kanban'); 
+$routes->get('lead/kanban', 'LeadController::kanban');
 $routes->get('leads', 'LeadController::kanban'); 
 $routes->get('lead/crear', 'LeadController::crear');
 $routes->post('lead/guardar', 'LeadController::guardar');
-$routes->get('lead/kanban', 'LeadController::kanban');
 $routes->get('lead/detalle/(:num)', 'LeadController::detalle/$1');
+$routes->post('leads/avanzar-etapa', 'LeadController::avanzarEtapa');
 $routes->post('lead/guardarSeguimiento', 'LeadController::guardarSeguimiento');
 $routes->post('lead/guardarTarea', 'LeadController::guardarTarea');
+$routes->post('lead/eliminar', 'LeadController::eliminar');
 
 
 

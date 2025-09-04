@@ -21,9 +21,11 @@ class LeadController extends BaseController
     public function kanban()
     {
         $data = $this->getDatosLeads();
-        // Carga completa: header + footer
         $data['header'] = view('Layouts/header');
         $data['footer'] = view('Layouts/footer');
+
+        // Obtener mensaje flash si existe
+        $data['mensajeExito'] = session()->getFlashdata('success') ?? null;
 
         return view('leads/index', $data);
     }
@@ -50,13 +52,20 @@ class LeadController extends BaseController
     // Detalle lead (modal)
     public function detalle($id)
     {
-        $lead = $this->leadModel->getPersona($id);
-        if (!$lead) return $this->response->setJSON(['success'=>false,'error'=>'Lead no encontrado']);
+        if (!$id) {
+            return $this->response->setJSON(['success' => false, 'error' => 'ID no definido']);
+        }
+
+        $lead = $this->leadModel->getLeadConPersona($id);
+        if (!$lead) {
+            return $this->response->setJSON(['success' => false, 'error' => 'Lead no encontrado']);
+        }
 
         $seguimientos = $this->seguimientoModel->getByLead($id) ?: [];
         $tareas = $this->tareaModel->getByLead($id) ?: [];
 
-        return view('leads/partials/detalles', compact('lead','seguimientos','tareas'));
+        // Retorna la vista parcial del modal
+        return view('leads/partials/detalles', compact('lead', 'seguimientos', 'tareas'));
     }
 
     // Guardar lead
@@ -135,4 +144,19 @@ class LeadController extends BaseController
             'difusiones' => $this->leadModel->getDifusiones()
         ];
     }
+    public function eliminar()
+    {
+        $idlead = $this->request->getPost('idlead');
+        if (!$idlead) {
+            return $this->response->setJSON(['success' => false, 'error' => 'ID no definido']);
+        }
+
+        try {
+            $this->leadModel->delete($idlead); // elimina el lead
+            return $this->response->setJSON(['success' => true]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
 }

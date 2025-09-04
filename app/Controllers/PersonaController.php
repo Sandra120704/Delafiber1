@@ -7,9 +7,19 @@ use App\Models\PersonaModel;
 use App\Models\DepartamentoModel;
 use App\Models\ProvinciaModel;
 use App\Models\DistritoModels;
+use App\Models\LeadModel;
 
 class PersonaController extends BaseController
 {
+    protected $personaModel;
+    protected $leadModel;
+    
+    public function __construct()
+    {
+        $this->personaModel = new PersonaModel();
+        $this->leadModel = new LeadModel();
+    }
+
     public function index()
     {
         $personaModel = new PersonaModel();
@@ -83,5 +93,32 @@ class PersonaController extends BaseController
     {
         $distritos = (new DistritoModel())->where('idprovincia', $idProvincia)->findAll();
         return $this->response->setJSON($distritos);
+    }
+    /**
+     * Convertir una persona a Lead
+     */
+    public function convertirALead($idpersona)
+    {
+        // 1. Verificar que la persona exista
+        $persona = $this->personaModel->find($idpersona);
+        if (!$persona) {
+            session()->setFlashdata('error', 'Persona no encontrada.');
+            return redirect()->back();
+        }
+
+        // 2. Crear el Lead con los datos básicos
+        $data = [
+            'idpersona' => $idpersona,
+            'idusuarioregistro' => session()->get('idusuario') ?? 1,
+            'estatus_global' => 'nuevo',
+            'fechasignacion' => date('Y-m-d H:i:s'),
+            'idetapa' => 1 // primera etapa del pipeline
+        ];
+
+        $this->leadModel->insert($data);
+
+        // 3. Redirigir al Kanban de Leads completo
+        session()->setFlashdata('success', 'Persona convertida a Lead correctamente.');
+        return redirect()->to(base_url('lead/kanban'));
     }
 }

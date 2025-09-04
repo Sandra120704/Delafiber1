@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "datatables.net-select": "^3.1.0"
+  }
+}

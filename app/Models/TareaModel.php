@@ -7,15 +7,17 @@ class TareaModel extends Model
     protected $table = 'tareas';
     protected $primaryKey = 'idtarea';
     protected $allowedFields = [
-        'idlead', 'descripcion', 'idusuarioresponsable', 'fecha_limite', 'estado'
+        'idlead', 'idusuario', 'descripcion', 'fecha_vencimiento', 'estado'
     ];
 
-    // Obtener tareas de un lead
     public function getByLead($idlead)
     {
-        return $this->where('idlead', $idlead)
-                    ->join('usuarios', 'usuarios.idusuario = tareas.idusuarioresponsable')
-                    ->select('tareas.*, usuarios.username as usuario')
-                    ->findAll();
+        return $this->db->table('tareas t')
+            ->select('t.*, u.username, u.idusuario, CONCAT(p.nombres, " ", p.apellidos) as nombre_usuario')
+            ->join('usuarios u', 'u.idusuario = t.idusuario')
+            ->join('personas p', 'p.idpersona = u.idpersona')
+            ->where('t.idlead', $idlead)
+            ->get()
+            ->getResult();
     }
 }

@@ -75,30 +75,21 @@ class LeadModel extends Model
     {
         $lead = $this->db->table('leads')
             ->select('leads.*, personas.nombres, personas.apellidos, personas.telprimario as telefono, personas.email, campanias.nombre as campaña, medios.medio as medio, estatus_global')
-            ->join('personas', 'personas.idpersona = leads.idpersona')
-            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion')
-            ->join('campanias', 'campanias.idcampania = difusiones.idcampania')
-            ->join('medios', 'medios.idmedio = difusiones.idmedio')
+            ->join('personas', 'personas.idpersona = leads.idpersona', 'left')
+            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
+            ->join('campanias', 'campanias.idcampania = difusiones.idcampania', 'left')
+            ->join('medios', 'medios.idmedio = difusiones.idmedio', 'left')
             ->where('leads.idlead', $id)
             ->get()
             ->getRow();
 
         if($lead){
             switch($lead->estatus_global){
-                case 'nuevo':
-                    $lead->estatus_color = '#f0ad4e';
-                    break;
-                case 'en proceso':
-                    $lead->estatus_color = '#5bc0de';
-                    break;
-                case 'ganado':
-                    $lead->estatus_color = '#5cb85c';
-                    break;
-                case 'perdido':
-                    $lead->estatus_color = '#d9534f';
-                    break;
-                default:
-                    $lead->estatus_color = '#ccc';
+                case 'nuevo': $lead->estatus_color = '#f0ad4e'; break;
+                case 'en proceso': $lead->estatus_color = '#5bc0de'; break;
+                case 'ganado': $lead->estatus_color = '#5cb85c'; break;
+                case 'perdido': $lead->estatus_color = '#d9534f'; break;
+                default: $lead->estatus_color = '#ccc';
             }
         }
 
