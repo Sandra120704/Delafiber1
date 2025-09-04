@@ -27,6 +27,12 @@ $routes->post('persona/eliminar', 'PersonaController::eliminar');
 $routes->get('persona/getProvincias/(:num)', 'PersonaController::getProvincias/$1');
 $routes->get('persona/getDistritos/(:num)', 'PersonaController::getDistritos/$1');
 
+$routes->get('usuarios', 'UsuarioController::index');      // Listado de usuarios
+$routes->get('usuarios/crear', 'UsuarioController::crear'); // Formulario para crear usuario
+$routes->post('usuarios/guardar', 'UsuarioController::guardar'); // Guardar usuario
+
+
+
 
 
 

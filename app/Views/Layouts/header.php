@@ -169,6 +169,7 @@
             <div class="collapse" id="form-elements">
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"><a class="nav-link" href="<?= base_url('personas') ?>">Personas</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= base_url('usuarios') ?>">Usuarios</a></li> 
               </ul>
             </div>
           </li>
