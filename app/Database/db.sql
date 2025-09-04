@@ -194,6 +194,7 @@ INSERT INTO campanias (nombre, descripcion, fechainicio, fechafin, inversion, es
 INSERT INTO medios (tipo_medio, medio) VALUES
 ('REDES SOCIALES', 'Facebook Ads'),
 ('PRESENCIAL', 'Volanteo en Chincha');
+DESCRIBE medios;
 
 INSERT INTO difusiones (idcampania, idmedio) VALUES
 (1, 1),

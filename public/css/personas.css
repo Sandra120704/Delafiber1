@@ -12,9 +12,9 @@
     color: #5b3e7a; /* morado corporativo suave */
 }
 
-/* Botón "Nueva Campaña" */
-#btnNuevaCampana {
-    background: linear-gradient(135deg, #8f6bb5, #eaa1c1); /* morado-rosado pastel más corporativo */
+/* Botón "Nueva Persona" */
+#btnNuevaPersona {
+    background: linear-gradient(135deg, #8f6bb5, #eaa1c1); /* morado-rosado pastel corporativo */
     border: none;
     color: #fff;
     padding: 0.5rem 1rem;
@@ -24,7 +24,7 @@
     transition: background 0.3s, transform 0.2s;
 }
 
-#btnNuevaCampana:hover {
+#btnNuevaPersona:hover {
     background: linear-gradient(135deg, #7e589e, #e78fae);
     transform: translateY(-2px);
 }
@@ -35,6 +35,7 @@
     box-shadow: 0 4px 10px rgba(91,62,122,0.08); /* sombra suave */
 }
 
+/* Card header */
 .card-header {
     background-color: #d9c1e0; /* morado pastel corporativo suave */
     font-weight: 600;
@@ -108,28 +109,22 @@
     transform: translateY(-1px);
 }
 
-/* Botón de estado activo/inactivo */
-.btn-estado {
-    font-weight: 600;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.btn-estado.btn-success {
+/* Badge activo */
+.badge.bg-success {
     background-color: #b9d7ea; /* verde pastel suave */
     color: #2f4f4f;
+    font-weight: 500;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
 }
 
-.btn-estado.btn-success:hover {
-    background-color: #9fc5db;
-}
-
-.btn-estado.btn-secondary {
+/* Badge inactivo */
+.badge.bg-secondary {
     background-color: #dcdcdc;
     color: #555;
-}
-
-.btn-estado.btn-secondary:hover {
-    background-color: #c0c0c0;
+    font-weight: 500;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
 }

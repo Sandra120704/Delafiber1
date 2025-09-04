@@ -31,6 +31,14 @@ $routes->get('usuarios', 'UsuarioController::index');      // Listado de usuario
 $routes->get('usuarios/crear', 'UsuarioController::crear'); // Formulario para crear usuario
 $routes->post('usuarios/guardar', 'UsuarioController::guardar'); // Guardar usuario
 
+/* Leads */
+$routes->get('leads', 'LeadController::kanban');
+$routes->get('leads/detalle/(:num)', 'LeadController::detalle/$1');
+$routes->post('leads/guardar', 'LeadController::guardar');
+$routes->post('leads/avanzar-etapa', 'LeadController::avanzarEtapa');
+$routes->post('leads/seguimiento', 'LeadController::guardarSeguimiento');
+$routes->post('leads/tarea', 'LeadController::guardarTarea');
+
 
 
 

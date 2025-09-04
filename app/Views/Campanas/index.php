@@ -1,5 +1,5 @@
 <?= $header ?>
-<link rel="stylesheet" href="<?= base_url('css/persona.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/campanas.css') ?>">
 
 <div class="container-fluid mt-4">
 

@@ -1,5 +1,5 @@
 <?= $header ?>
-<link rel="stylesheet" href="<?= base_url('css/persona.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/personas.css') ?>">
 
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -15,9 +15,14 @@
                     <table id="tablaPersonas" class="table table-hover table-bordered">
                         <thead>
                             <tr>
-                                <th>ID</th><th>Apellidos</th><th>Nombres</th>
-                                <th>Teléfono</th><th>Email</th><th>Distrito</th>
-                                <th>Estado</th><th>Acciones</th>
+                                <th>ID</th>
+                                <th>Apellidos</th>
+                                <th>Nombres</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Distrito</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -31,9 +36,10 @@
                                 <td><?= $p->distrito ?></td>
                                 <td><span class="badge bg-success">Activo</span></td>
                                 <td>
-                                    <button class="btn btn-warning btn-sm btn-edit" data-id="<?= $p->idpersona ?>">✏️</button>
-                                    <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $p->idpersona ?>">🗑️</button>
-                                </td>
+                                <button class="btn btn-warning btn-sm btn-edit" data-id="<?= $p->idpersona ?>">✏️</button>
+                                <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $p->idpersona ?>">🗑️</button>
+                                <button class="btn btn-primary btn-sm btn-convert" data-id="<?= $p->idpersona ?>">➡️ Lead</button>
+                            </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
