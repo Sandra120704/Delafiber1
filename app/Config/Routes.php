@@ -32,12 +32,19 @@ $routes->get('usuarios/crear', 'UsuarioController::crear'); // Formulario para c
 $routes->post('usuarios/guardar', 'UsuarioController::guardar'); // Guardar usuario
 
 /* Leads */
-$routes->get('leads', 'LeadController::kanban');
-$routes->get('leads/detalle/(:num)', 'LeadController::detalle/$1');
-$routes->post('leads/guardar', 'LeadController::guardar');
+/* Leads */
+$routes->get('lead/kanban', 'LeadController::kanban');        // Vista Kanban
+$routes->get('leads/detalle/(:num)', 'LeadController::detalle/$1'); // Modal detalle lead
+ 
 $routes->post('leads/avanzar-etapa', 'LeadController::avanzarEtapa');
 $routes->post('leads/seguimiento', 'LeadController::guardarSeguimiento');
 $routes->post('leads/tarea', 'LeadController::guardarTarea');
+
+// Leads
+$routes->get('lead/crear', 'LeadController::crear');   // para abrir modal
+$routes->post('lead/guardar', 'LeadController::guardar'); // para guardar Lead
+$routes->get('lead/kanban', 'LeadController::kanban'); 
+
 
 
 

@@ -13,6 +13,16 @@ class LeadModel extends Model
     ];
     protected $useTimestamps = false;
 
+    // Devuelve una persona por ID
+    public function getPersona($idpersona)
+    {
+        return $this->db->table('personas')
+            ->where('idpersona', $idpersona)
+            ->get()
+            ->getRow();
+    }
+
+
     // Traer todos los pipelines
     public function getPipelines()
     {
@@ -104,8 +114,13 @@ class LeadModel extends Model
     // Traer difusiones para selects
     public function getDifusiones()
     {
-        return $this->db->table('difusiones')->get()->getResult();
+        $builder = $this->db->table('difusiones d');
+        $builder->select('d.iddifusion, c.nombre as campania, m.medio');
+        $builder->join('campanias c', 'c.idcampania = d.idcampania');
+        $builder->join('medios m', 'm.idmedio = d.idmedio');
+        return $builder->get()->getResult(); // devuelve un array de objetos
     }
+
 
     // Traer usuarios para selects
     public function getUsuarios()

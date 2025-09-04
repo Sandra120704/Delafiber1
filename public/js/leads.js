@@ -1,38 +1,44 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Envío de formulario de creación de lead
-    const form = document.getElementById('formCrearLead');
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+// URLs desde PHP
+const base_url = "<?= site_url('') ?>";
+const leadCrearUrl = "<?= site_url('lead/crear') ?>";
+const leadGuardarUrl = "<?= site_url('lead/guardar') ?>";
 
-        const formData = new FormData(this);
+$(document).ready(function() {
 
-        fetch('<?= base_url("leads/guardar") ?>', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success){
-                alert('Lead creado correctamente');
-                location.reload(); // Recarga la Kanban para mostrar el nuevo lead
-            } else {
-                alert('Error al crear lead');
-            }
-        })
-        .catch(err => console.error(err));
-    });
+    // ===== Abrir modal "Convertir en Lead" =====
+    $(document).on('click', '.btn-convert', function() {
+        const idpersona = $(this).data('id');
 
-    // Click en card lead (modal detalles)
-    document.querySelectorAll('.lead-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const idlead = card.dataset.idlead;
-            fetch('<?= base_url("leads/detalle") ?>/' + idlead)
-                .then(resp => resp.text())
-                .then(html => {
-                    const modalBody = document.querySelector('#modalDetalleLead .modal-body');
-                    modalBody.innerHTML = html;
-                    new bootstrap.Modal(document.getElementById('modalDetalleLead')).show();
+        $.get(leadCrearUrl, { idpersona: idpersona })
+        .done(function(html) {
+            $('#modalContainer').html(html); // inyecta el modal
+
+            const modalEl = document.getElementById('modalLead');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+
+            // ===== Guardar Lead desde el modal =====
+            $('#formLead').off('submit').on('submit', function(e) {
+                e.preventDefault();
+                const data = $(this).serialize();
+
+                $.post(leadGuardarUrl, data, function(response) {
+                    if(response.success) {
+                        window.location.href = base_url + 'lead/kanban';
+                    } else {
+                        alert('Error al crear el Lead');
+                    }
+                }, 'json').fail(function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error, xhr.responseText);
+                    alert('Error en la conexión al servidor');
                 });
+            });
+
+        })
+        .fail(function(xhr, status, error) {
+            console.error('AJAX Error al cargar modal:', status, error, xhr.responseText);
+            alert('No se pudo cargar el modal de Lead');
         });
     });
+
 });

@@ -34,11 +34,22 @@ class LeadController extends BaseController
         $data = $this->getDatosLeads();
         return view('leads/partials/listado', $data); // crea una vista parcial leads/partials/listado.php
     }
+    public function crear()
+    {
+        $idpersona = $this->request->getGet('idpersona');
+        $persona = $this->leadModel->getPersona($idpersona); 
+        $usuarios = $this->leadModel->getUsuarios();
+        $etapas = $this->leadModel->getEtapas();
+        $difusiones = $this->leadModel->getDifusiones();
+
+        return view('leads/crear', compact('persona','usuarios','etapas','difusiones'));
+    }
+
 
     // Detalle lead (modal)
     public function detalle($id)
     {
-        $lead = $this->leadModel->getLeadConPersona($id);
+        $lead = $this->leadModel->getPersona($id);
         $seguimientos = $this->seguimientoModel->getByLead($id);
         $tareas = $this->tareaModel->getByLead($id);
 
@@ -46,20 +57,19 @@ class LeadController extends BaseController
     }
 
     // Guardar lead
+     // Guardar Lead
     public function guardar()
-    {
-        $data = $this->request->getPost();
-        $data['idusuarioregistro'] = session()->get('idusuario');
-        $data['estatus_global'] = 'nuevo';
-        $data['fechasignacion'] = date('Y-m-d H:i:s');
+      {
+          $data = $this->request->getPost();
+          $data['idusuarioregistro'] = session()->get('idusuario'); 
+          $data['estatus_global'] = 'nuevo';
+          $data['fechasignacion'] = date('Y-m-d H:i:s');
 
-        $idlead = $this->leadModel->insert($data);
+          $this->leadModel->insert($data);
+          return $this->response->setJSON(['success' => true]);
+      }
 
-        return $this->response->setJSON([
-            'success' => $idlead ? true : false,
-            'mensaje' => $idlead ? 'Lead guardado correctamente' : 'Error al guardar'
-        ]);
-    }
+
 
     // Avanzar etapa
     public function avanzarEtapa()

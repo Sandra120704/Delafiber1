@@ -36,10 +36,10 @@
                                 <td><?= $p->distrito ?></td>
                                 <td><span class="badge bg-success">Activo</span></td>
                                 <td>
-                                <button class="btn btn-warning btn-sm btn-edit" data-id="<?= $p->idpersona ?>">✏️</button>
-                                <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $p->idpersona ?>">🗑️</button>
-                                <button class="btn btn-primary btn-sm btn-convert" data-id="<?= $p->idpersona ?>">➡️ Lead</button>
-                            </td>
+                                    <button class="btn btn-warning btn-sm btn-edit" data-id="<?= $p->idpersona ?>">✏️</button>
+                                    <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $p->idpersona ?>">🗑️</button>
+                                    <button class="btn btn-primary btn-sm btn-convert" data-id="<?= $p->idpersona ?>">➡️ Lead</button>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -50,10 +50,16 @@
     </div>
 </div>
 
+<!-- Contenedor para cargar el modal dinámicamente -->
+<div id="modalContainer"></div>
+
 <?= $footer ?>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     const base_url = "<?= site_url('') ?>";
+    const leadCrearUrl = "<?= site_url('lead/crear') ?>";
+    const leadGuardarUrl = "<?= site_url('lead/guardar') ?>";
 </script>
+
 <script src="<?= base_url('js/personas.js') ?>"></script>
+<script src="<?= base_url('js/leads.js') ?>"></script>
