@@ -34,13 +34,15 @@ $routes->post('usuarios/guardar', 'UsuarioController::guardar'); // Guardar usua
 /* Leads */
 
 $routes->post('leads/avanzar-etapa', 'LeadController::avanzarEtapa');
-$routes->post('leads/seguimiento', 'LeadController::guardarSeguimiento');
-$routes->post('leads/tarea', 'LeadController::guardarTarea');
 $routes->get('lead/kanban', 'LeadController::kanban'); 
 $routes->get('leads', 'LeadController::kanban'); 
-$routes->get('leads/detalle/(:num)', 'LeadController::detalle/$1');
 $routes->get('lead/crear', 'LeadController::crear');
 $routes->post('lead/guardar', 'LeadController::guardar');
+$routes->get('lead/kanban', 'LeadController::kanban');
+$routes->get('lead/detalle/(:num)', 'LeadController::detalle/$1');
+$routes->post('lead/guardarSeguimiento', 'LeadController::guardarSeguimiento');
+$routes->post('lead/guardarTarea', 'LeadController::guardarTarea');
+
 
 
 

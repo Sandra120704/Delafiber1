@@ -51,10 +51,12 @@ class LeadController extends BaseController
     public function detalle($id)
     {
         $lead = $this->leadModel->getPersona($id);
-        $seguimientos = $this->seguimientoModel->getByLead($id);
-        $tareas = $this->tareaModel->getByLead($id);
+        if (!$lead) return $this->response->setJSON(['success'=>false,'error'=>'Lead no encontrado']);
 
-        return view('leads/partials/detalle', compact('lead','seguimientos','tareas'));
+        $seguimientos = $this->seguimientoModel->getByLead($id) ?: [];
+        $tareas = $this->tareaModel->getByLead($id) ?: [];
+
+        return view('leads/partials/detalles', compact('lead','seguimientos','tareas'));
     }
 
     // Guardar lead
