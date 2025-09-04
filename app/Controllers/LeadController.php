@@ -32,7 +32,7 @@ class LeadController extends BaseController
     public function listar()
     {
         $data = $this->getDatosLeads();
-        return view('leads/partials/listado', $data); // crea una vista parcial leads/partials/listado.php
+        return view('leads/partials/listado', $data); 
     }
     public function crear()
     {
@@ -46,6 +46,7 @@ class LeadController extends BaseController
     }
 
 
+
     // Detalle lead (modal)
     public function detalle($id)
     {
@@ -57,19 +58,38 @@ class LeadController extends BaseController
     }
 
     // Guardar lead
-     // Guardar Lead
     public function guardar()
-      {
-          $data = $this->request->getPost();
-          $data['idusuarioregistro'] = session()->get('idusuario'); 
-          $data['estatus_global'] = 'nuevo';
-          $data['fechasignacion'] = date('Y-m-d H:i:s');
+    {
+        // ====== PRUEBA: forzar usuario en sesión ======
+        if (!session()->get('idusuario')) {
+            session()->set('idusuario', 1); // ID de un usuario válido de tu BD
+        }
+        /* Se incertadorn datos de pruebas, luego se procedera con la logacio. */
 
-          $this->leadModel->insert($data);
-          return $this->response->setJSON(['success' => true]);
-      }
+        $idusuario = session()->get('idusuario');
+        if (!$idusuario) {
+            return $this->response->setJSON([
+                'success' => false,
+                'error' => 'No hay usuario en sesión. Por favor, inicia sesión.'
+            ]);
+        }
 
+        $data = $this->request->getPost();
+        $data['idusuarioregistro'] = $idusuario; 
+        $data['estatus_global'] = 'nuevo';
+        $data['fechasignacion'] = date('Y-m-d H:i:s');
 
+        try {
+            $this->leadModel->insert($data);
+            return $this->response->setJSON(['success' => true]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'data' => $data
+            ]);
+        }
+}
 
     // Avanzar etapa
     public function avanzarEtapa()

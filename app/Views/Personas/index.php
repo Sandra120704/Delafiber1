@@ -54,12 +54,15 @@
 <div id="modalContainer"></div>
 
 <?= $footer ?>
-
 <script>
-    const base_url = "<?= site_url('') ?>";
-    const leadCrearUrl = "<?= site_url('lead/crear') ?>";
-    const leadGuardarUrl = "<?= site_url('lead/guardar') ?>";
+    const base_url = "<?= site_url('') ?>";              // Base para tu proyecto
+    const leadCrearUrl = "<?= site_url('lead/crear') ?>"; // URL para abrir modal
+    const leadGuardarUrl = "<?= site_url('lead/guardar') ?>"; // URL para guardar lead
+    const leadKanbanUrl = "<?= site_url('lead/kanban') ?>";  // URL para redirigir después de guardar
 </script>
-
 <script src="<?= base_url('js/personas.js') ?>"></script>
-<script src="<?= base_url('js/leads.js') ?>"></script>
+
+
+
+
+

@@ -45,11 +45,10 @@ $(function () {
         }, 'json').fail(() => alert("❌ Error al eliminar"));
     });
 
-    // ======== Guardar (crear / editar) ========
+    // ======== Guardar persona (crear / editar) ========
     $(document).on("submit", "#formPersona", function (e) {
         e.preventDefault();
         const form = $(this);
-
         $.post(form.attr("action"), form.serialize(), function (res) {
             alert(res.mensaje || 'Operación realizada');
             if (res.success) recargarLista();
@@ -65,7 +64,6 @@ $(function () {
         const selProv = $form.data('idprovincia') || '';
         const selDist = $form.data('iddistrito') || '';
 
-        // Si viene valor seleccionado (modo editar)
         if (selDep) {
             $("#departamento").val(selDep);
             cargarProvincias(selDep, selProv).then(() => {
@@ -73,25 +71,20 @@ $(function () {
             });
         }
 
-        // Evento cambio Departamento
         $(document).off('change', '#departamento').on('change', '#departamento', function () {
             const idDep = $(this).val();
             $("#provincia").html('<option value="">Cargando...</option>');
             $("#distrito").html('<option value="">Seleccione...</option>');
             if (idDep) cargarProvincias(idDep);
-            else $("#provincia").html('<option value="">Seleccione...</option>');
         });
 
-        // Evento cambio Provincia
         $(document).off('change', '#provincia').on('change', '#provincia', function () {
             const idProv = $(this).val();
             $("#distrito").html('<option value="">Cargando...</option>');
             if (idProv) cargarDistritos(idProv);
-            else $("#distrito").html('<option value="">Seleccione...</option>');
         });
     }
 
-    // ======== Funciones para cargar Provincias y Distritos ========
     function cargarProvincias(idDep, selected = '') {
         return $.get(u('persona/getProvincias/' + idDep), function (list) {
             const $prov = $("#provincia");
@@ -101,7 +94,7 @@ $(function () {
                 if (selected && String(p.idprovincia) === String(selected)) opt.prop('selected', true);
                 $prov.append(opt);
             });
-        }, 'json').fail(() => alert("❌ No se pudieron cargar las provincias"));
+        }, 'json');
     }
 
     function cargarDistritos(idProv, selected = '') {
@@ -113,6 +106,36 @@ $(function () {
                 if (selected && String(d.iddistrito) === String(selected)) opt.prop('selected', true);
                 $dist.append(opt);
             });
-        }, 'json').fail(() => alert("❌ No se pudieron cargar los distritos"));
+        }, 'json');
     }
+
+    // ======== Abrir Modal Lead ========
+    $(document).on('click', '.btn-convert', function() {
+        const idpersona = $(this).data('id');
+        console.log("Click en Convert Lead detectado:", idpersona);
+
+        $.get(leadCrearUrl, { idpersona: idpersona })
+        .done(function(html) {
+            $('#modalContainer').html(html);
+            const modalEl = document.getElementById('modalLead');
+            if(modalEl){
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+                $('#formLead').off('submit').on('submit', function(e){
+                    e.preventDefault();
+                    $.post(leadGuardarUrl, $(this).serialize(), function(res){
+                        if(res.success) {
+                            window.location.href = leadKanbanUrl; // ✅ usa la variable correcta
+                        } else {
+                            alert('Error al crear Lead: ' + (res.error || 'Error desconocido'));
+                            console.log(res.data);
+                        }
+                    }, 'json');
+                });
+            }
+        })
+        .fail(function() { alert('No se pudo cargar el modal de Lead'); });
+        });
 });
+
