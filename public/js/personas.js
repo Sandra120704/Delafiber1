@@ -11,7 +11,7 @@ $(function () {
         $.get(u('persona/form'), function (html) {
             $("#contenido-persona").html(html);
             initUbicacion(); // inicializa select dinámicos
-        }).fail(() => alert("❌ No se pudo cargar el formulario"));
+        }).fail(() => alert("No se pudo cargar el formulario"));
     });
 
     // ======== Editar persona ========
@@ -21,7 +21,7 @@ $(function () {
         $.get(u('persona/form/' + id), function (html) {
             $("#contenido-persona").html(html);
             initUbicacion(true); // inicializa select dinámicos con valores
-        }).fail(() => alert("❌ No se pudo cargar el formulario"));
+        }).fail(() => alert("No se pudo cargar el formulario"));
     });
 
     // ======== Volver a la lista ========
@@ -32,7 +32,7 @@ $(function () {
     function recargarLista() {
         $.get(u('personas'), function (html) {
             $("#contenido-persona").html($(html).find('#contenido-persona').html());
-        }).fail(() => alert("❌ No se pudo recargar la lista"));
+        }).fail(() => alert("No se pudo recargar la lista"));
     }
 
     // ======== Eliminar persona ========
@@ -42,7 +42,7 @@ $(function () {
         $.post(u('persona/eliminar'), { idpersona: id }, function (res) {
             alert(res.mensaje || 'Operación realizada');
             if (res.success) recargarLista();
-        }, 'json').fail(() => alert("❌ Error al eliminar"));
+        }, 'json').fail(() => alert("Error al eliminar"));
     });
 
     // ======== Guardar persona (crear / editar) ========
@@ -52,7 +52,7 @@ $(function () {
         $.post(form.attr("action"), form.serialize(), function (res) {
             alert(res.mensaje || 'Operación realizada');
             if (res.success) recargarLista();
-        }, 'json').fail(() => alert("❌ Error al guardar"));
+        }, 'json').fail(() => alert("Error al guardar"));
     });
 
     // ======== Inicializar select cascada ========

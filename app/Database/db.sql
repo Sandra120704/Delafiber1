@@ -102,6 +102,7 @@ CREATE TABLE etapas (
     modificado DATETIME,
     CONSTRAINT fk_etapa_pipeline FOREIGN KEY (idpipeline) REFERENCES pipelines(idpipeline)
 );
+ALTER TABLE etapas ADD COLUMN orden INT NOT NULL DEFAULT 0;
 
 CREATE TABLE leads (    
     idlead INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,7 +146,6 @@ CREATE TABLE seguimientos (
     CONSTRAINT fk_seguimiento_lead FOREIGN KEY (idlead) REFERENCES leads(idlead),
     CONSTRAINT fk_seguimiento_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades_contacto(idmodalidad)
 );
-
 
 CREATE TABLE tareas (
     idtarea INT AUTO_INCREMENT PRIMARY KEY,

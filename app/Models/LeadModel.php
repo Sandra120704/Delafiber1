@@ -22,7 +22,6 @@ class LeadModel extends Model
             ->getRow();
     }
 
-
     // Traer todos los pipelines
     public function getPipelines()
     {
@@ -32,7 +31,10 @@ class LeadModel extends Model
     // Traer todas las etapas
     public function getEtapas()
     {
-        return $this->db->table('etapas')->get()->getResult();
+        return $this->db->table('etapas')
+            ->orderBy('idetapa', 'ASC')
+            ->get()
+            ->getResult();
     }
 
     // Traer todos los leads con datos de persona, difusión, campaña y medio
@@ -48,22 +50,22 @@ class LeadModel extends Model
             ->getResult();
 
         // Asignar color según estatus_global
-        foreach($leads as $lead){
-            switch($lead->estatus_global){
+        foreach ($leads as $lead) {
+            switch ($lead->estatus_global) {
                 case 'nuevo':
-                    $lead->estatus_color = '#f0ad4e'; // naranja
+                    $lead->estatus_color = '#f0ad4e';
                     break;
                 case 'en proceso':
-                    $lead->estatus_color = '#5bc0de'; // azul
+                    $lead->estatus_color = '#5bc0de';
                     break;
                 case 'ganado':
-                    $lead->estatus_color = '#5cb85c'; // verde
+                    $lead->estatus_color = '#5cb85c';
                     break;
                 case 'perdido':
-                    $lead->estatus_color = '#d9534f'; // rojo
+                    $lead->estatus_color = '#d9534f';
                     break;
                 default:
-                    $lead->estatus_color = '#ccc'; // gris
+                    $lead->estatus_color = '#ccc';
             }
         }
 
@@ -75,21 +77,30 @@ class LeadModel extends Model
     {
         $lead = $this->db->table('leads')
             ->select('leads.*, personas.nombres, personas.apellidos, personas.telprimario as telefono, personas.email, campanias.nombre as campaña, medios.medio as medio, estatus_global')
-            ->join('personas', 'personas.idpersona = leads.idpersona', 'left')
-            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
-            ->join('campanias', 'campanias.idcampania = difusiones.idcampania', 'left')
-            ->join('medios', 'medios.idmedio = difusiones.idmedio', 'left')
+            ->join('personas', 'personas.idpersona = leads.idpersona')
+            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion')
+            ->join('campanias', 'campanias.idcampania = difusiones.idcampania')
+            ->join('medios', 'medios.idmedio = difusiones.idmedio')
             ->where('leads.idlead', $id)
             ->get()
             ->getRow();
 
-        if($lead){
-            switch($lead->estatus_global){
-                case 'nuevo': $lead->estatus_color = '#f0ad4e'; break;
-                case 'en proceso': $lead->estatus_color = '#5bc0de'; break;
-                case 'ganado': $lead->estatus_color = '#5cb85c'; break;
-                case 'perdido': $lead->estatus_color = '#d9534f'; break;
-                default: $lead->estatus_color = '#ccc';
+        if ($lead) {
+            switch ($lead->estatus_global) {
+                case 'nuevo':
+                    $lead->estatus_color = '#f0ad4e';
+                    break;
+                case 'en proceso':
+                    $lead->estatus_color = '#5bc0de';
+                    break;
+                case 'ganado':
+                    $lead->estatus_color = '#5cb85c';
+                    break;
+                case 'perdido':
+                    $lead->estatus_color = '#d9534f';
+                    break;
+                default:
+                    $lead->estatus_color = '#ccc';
             }
         }
 
@@ -109,9 +120,8 @@ class LeadModel extends Model
         $builder->select('d.iddifusion, c.nombre as campania, m.medio');
         $builder->join('campanias c', 'c.idcampania = d.idcampania');
         $builder->join('medios m', 'm.idmedio = d.idmedio');
-        return $builder->get()->getResult(); // devuelve un array de objetos
+        return $builder->get()->getResult();
     }
-
 
     // Traer usuarios para selects
     public function getUsuarios()

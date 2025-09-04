@@ -6,7 +6,7 @@
     <!-- Encabezado con botón -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>📣 Campañas</h4>
-        <button id="btnNuevaCampana" class="btn btn-primary">➕ Nueva Campaña</button>
+        <button id="btnNuevaCampana" class="btn btn-primary">Nueva Campaña</button>
     </div>
 
     <!-- Contenedor dinámico -->

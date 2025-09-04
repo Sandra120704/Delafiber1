@@ -20,14 +20,16 @@ class LeadController extends BaseController
     // Vista completa Kanban
     public function kanban()
     {
-        $data = $this->getDatosLeads();
-        // Carga completa: header + footer
-        $data['header'] = view('Layouts/header');
-        $data['footer'] = view('Layouts/footer');
+        $etapas = $this->leadModel->getEtapas(); // 👈 obtiene etapas
+        $leads = $this->leadModel->getAllLeads(); // 👈 obtiene leads con joins
 
-        return view('leads/index', $data);
+        return view('Leads/index', [
+            'header' => view('Layouts/header'),
+            'footer' => view('Layouts/footer'),
+            'leads'  => $leads,
+            'etapas' => $etapas // 👈 ya disponible en la vista
+        ]);
     }
-
     // Vista parcial para AJAX (solo contenido dinámico)
     public function listar()
     {
