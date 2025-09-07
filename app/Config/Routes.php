@@ -19,13 +19,13 @@ $routes->post('campana/cambiarEstado', 'CampanaController::cambiarEstado');
 
 /* Personas */
 $routes->get('personas', 'PersonaController::index');  // Listado
-$routes->get('persona/form', 'PersonaController::form'); // Crear nueva persona
+$routes->get('personas/crear', 'PersonaController::crear'); // Crear nueva persona
 $routes->get('persona/form/(:num)', 'PersonaController::form/$1'); // Editar persona
-$routes->post('persona/guardar', 'PersonaController::guardar');
+$routes->post('/personas/guardar', 'PersonaController::guardar');
 $routes->post('persona/eliminar', 'PersonaController::eliminar');
+$routes->get('ubicacion/provincias/(:num)', 'UbicacionController::getProvincias/$1');
+$routes->get('ubicacion/distritos/(:num)', 'UbicacionController::getDistritos/$1');
 
-$routes->get('persona/getProvincias/(:num)', 'PersonaController::getProvincias/$1');
-$routes->get('persona/getDistritos/(:num)', 'PersonaController::getDistritos/$1');
 
 $routes->get('usuarios', 'UsuarioController::index');      // Listado de usuarios
 $routes->get('usuarios/crear', 'UsuarioController::crear'); // Formulario para crear usuario
@@ -42,11 +42,12 @@ $routes->post('lead/avanzarEtapa', 'LeadController::avanzarEtapa');
 $routes->get('persona/convertirALead/(:num)', 'PersonaController::convertirALead/$1');
 
 
+$routes->get('api/personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
 
 
 
 
-
+$routes->get('lead/pruebaLeadCompleto', 'LeadController::pruebaLeadCompleto');
 
 
 

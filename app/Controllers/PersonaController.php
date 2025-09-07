@@ -1,118 +1,92 @@
 <?php
-
 namespace App\Controllers;
 
+use App\Controllers\BaseController;
+use App\Models\DepartamentoModel;
 use App\Models\DistritoModel;
 use App\Models\PersonaModel;
-use App\Models\DepartamentoModel;
-use App\Models\ProvinciaModel;
-use App\Models\DistritoModels;
 
 class PersonaController extends BaseController
 {
+    protected $personaModel;
+
+    public function __construct()
+    {
+        $this->personaModel = new PersonaModel();
+    }
+
     public function index()
     {
-        $personaModel = new PersonaModel();
-        $personas = $personaModel->obtenerPersona(); // Método que devuelve todas las personas
-
-        return view('Personas/index', [
-            'header' => view('Layouts/header'),
-            'footer' => view('Layouts/footer'),
-            'personas' => $personas
-        ]);
+        $datos['personas'] = $this->personaModel->orderBy('idpersona','ACD')->findAll();
+        $datos['header'] = view('Layouts/header');
+        $datos['footer'] = view('Layouts/footer');
+        return view('personas/index', $datos);
     }
+    public function crear(){
 
-    public function form($idpersona = null)
-    {
-        $departamentos = (new DepartamentoModel())->findAll();
+        $departamento = new DepartamentoModel();
+        $distrito = new DistritoModel();
 
-        $data = ['departamentos' => $departamentos];
+        $datos['departamentos'] = $departamento->findAll();
+        $datos['distritos'] = $distrito->findAll();
+        $datos['header'] = view('Layouts/header');
+        $datos['footer'] = view('Layouts/footer');
 
-        if ($idpersona) {
-            $persona = (new PersonaModel())
-                ->select('personas.*, distritos.idprovincia, provincias.iddepartamento')
-                ->join('distritos', 'personas.iddistrito = distritos.iddistrito')
-                ->join('provincias', 'distritos.idprovincia = provincias.idprovincia')
-                ->where('personas.idpersona', $idpersona)
-                ->first();
-
-            if (is_array($persona)) $persona = (object)$persona;
-
-            $data['persona'] = $persona;
-        }
-
-        return view('Personas/form', $data);
+        return view('Personas/crear', $datos);
     }
+    public function guardar(){
 
-    public function guardar()
-    {
-        $data = $this->request->getPost();
-        $personaModel = new PersonaModel();
-
-        if (!empty($data['idpersona'])) {
-            $data['modificado'] = date('Y-m-d H:i:s');
-            $success = $personaModel->update($data['idpersona'], $data);
-        } else {
-            $success = $personaModel->insert($data);
-        }
-
-        return $this->response->setJSON([
-            'success' => (bool)$success,
-            'mensaje' => $success ? 'Persona guardada correctamente' : 'Error al guardar'
-        ]);
-    }
-
-    public function eliminar()
-    {
-        $idpersona = $this->request->getPost('idpersona');
-        $success = (new PersonaModel())->delete($idpersona);
-
-        return $this->response->setJSON([
-            'success' => (bool)$success,
-            'mensaje' => $success ? 'Persona eliminada correctamente' : 'Error al eliminar'
-        ]);
-    }
-
-    public function getProvincias($idDepartamento)
-    {
-        $provincias = (new ProvinciaModel())->where('iddepartamento', $idDepartamento)->findAll();
-        return $this->response->setJSON($provincias);
-    }
-
-    public function getDistritos($idProvincia)
-    {
-        $distritos = (new DistritoModel())->where('idprovincia', $idProvincia)->findAll();
-        return $this->response->setJSON($distritos);
-    }
-    /**
-     * Convertir una persona a Lead
-     */
-    public function convertirALead($idpersona)
-    {
-        $personaModel = new PersonaModel(); // Instanciamos el modelo
-
-        // 1. Verificar que la persona exista
-        $persona = $personaModel->find($idpersona);
-        if (!$persona) {
-            session()->setFlashdata('error', 'Persona no encontrada.');
-            return redirect()->back();
-        }
-
-        // 2. Crear el Lead con los datos básicos
-        $leadModel = new \App\Models\LeadModel(); // Instanciamos el modelo de Leads
+        $persona = new PersonaModel();
         $data = [
-            'idpersona' => $idpersona,
-            'idusuarioregistro' => session()->get('idusuario') ?? 1,
-            'estatus_global' => 'nuevo',
-            'fechasignacion' => date('Y-m-d H:i:s'),
-            'idetapa' => 1 // Primera etapa del pipeline
+            'dni'       => $this->request->getPost('dni'),
+            'apellidos' => $this->request->getPost('apellidos'),
+            'nombres'   => $this->request->getPost('nombres'),
+            'telefono'  => $this->request->getPost('telefono'),
+            'correo'    => $this->request->getPost('correo'),
+            'iddistrito'=> $this->request->getPost('iddistrito'),
+            'direccion' => $this->request->getPost('direccion'),
         ];
 
-        $leadModel->insert($data);
-
-        // 3. Redirigir al Kanban de Leads completo con mensaje de éxito
-        session()->setFlashdata('success', 'Persona convertida a Lead correctamente.');
-        return redirect()->to(base_url('lead/kanban'));
+        $persona->insert($data);
+        return $this->response->redirect(base_url('personas'));    
     }
+    public function BuscadorDni($dni = "")
+    {
+        $api_endpoint = "https://api.decolecta.com/v1/reniec/dni?numero=" . $dni;
+        $api_token = "sk_10191.lvruYS7kNuUFi4DEKPT7nBSTZcOFyuTa";
 
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $api_endpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $api_token
+        ]);
+        $api_response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($api_response === false) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No se pudo realizar la consulta'
+            ]);
+        }
+
+        $decoded_response = json_decode($api_response, true);
+
+        if ($http_code !== 200) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No encontramos a la persona'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success'     => true,
+            'apepaterno'  => $decoded_response['first_last_name'] ?? '',
+            'apematerno'  => $decoded_response['second_last_name'] ?? '',
+            'nombres'     => $decoded_response['first_name'] ?? ''
+        ]);
+    }
 }

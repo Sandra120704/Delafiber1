@@ -1,157 +1,138 @@
 <?php
 namespace App\Controllers;
+use App\Models\PersonaModel;
 use App\Models\LeadModel;
 use App\Models\SeguimientoModel;
 use App\Models\TareaModel;
 
 class LeadController extends BaseController
 {
-    protected $leadModel;
-    protected $seguimientoModel;
-    protected $tareaModel;
-
-    public function __construct()
+    public function crearPersona($personaData)
     {
-        $this->leadModel = new LeadModel();
-        $this->seguimientoModel = new SeguimientoModel();
-        $this->tareaModel = new TareaModel();
+        $model = new PersonaModel();
+        return $model->insert($personaData); // retorna ID de la persona creada
     }
 
-    // Vista completa Kanban
-    public function kanban()
+    // 2️⃣ Crear lead
+    public function crearLead($leadData)
     {
-        $etapas = $this->leadModel->getEtapas(); // 👈 obtiene etapas
-        $leads = $this->leadModel->getAllLeads(); // 👈 obtiene leads con joins
-
-        return view('Leads/index', [
-            'header' => view('Layouts/header'),
-            'footer' => view('Layouts/footer'),
-            'leads'  => $leads,
-            'etapas' => $etapas // 👈 ya disponible en la vista
-        ]);
-    }
-    // Vista parcial para AJAX (solo contenido dinámico)
-    public function listar()
-    {
-        $data = $this->getDatosLeads();
-        return view('leads/partials/listado', $data); 
-    }
-    public function crear()
-    {
-        $idpersona = $this->request->getGet('idpersona');
-        $persona = $this->leadModel->getPersona($idpersona); 
-        $usuarios = $this->leadModel->getUsuarios();
-        $etapas = $this->leadModel->getEtapas();
-        $difusiones = $this->leadModel->getDifusiones();
-
-        return view('leads/crear', compact('persona','usuarios','etapas','difusiones'));
+        $model = new LeadModel();
+        return $model->insert($leadData); // retorna ID del lead creado
     }
 
-
-
-    // Detalle lead (modal)
-    public function detalle($id)
+    // 3️⃣ Registrar seguimiento
+    public function registrarSeguimiento($seguimientoData)
     {
-        if (!$id) {
-            return $this->response->setJSON(['success' => false, 'error' => 'ID no definido']);
-        }
-
-        $lead = $this->leadModel->getLeadConPersona($id);
-        if (!$lead) {
-            return $this->response->setJSON(['success' => false, 'error' => 'Lead no encontrado']);
-        }
-
-        $seguimientos = $this->seguimientoModel->getByLead($id) ?: [];
-        $tareas = $this->tareaModel->getByLead($id) ?: [];
-
-        // Retorna la vista parcial del modal
-        return view('leads/partials/detalles', compact('lead', 'seguimientos', 'tareas'));
+        $model = new SeguimientoModel();
+        return $model->insert($seguimientoData);
     }
 
-    // Guardar lead
-    public function guardar()
+    // 4️⃣ Crear tarea
+    public function crearTarea($tareaData)
     {
-        // ====== PRUEBA: forzar usuario en sesión ======
-        if (!session()->get('idusuario')) {
-            session()->set('idusuario', 1); // ID de un usuario válido de tu BD
-        }
-        /* Se incertadorn datos de pruebas, luego se procedera con la logacio. */
-
-        $idusuario = session()->get('idusuario');
-        if (!$idusuario) {
-            return $this->response->setJSON([
-                'success' => false,
-                'error' => 'No hay usuario en sesión. Por favor, inicia sesión.'
-            ]);
-        }
-
-        $data = $this->request->getPost();
-        $data['idusuarioregistro'] = $idusuario; 
-        $data['estatus_global'] = 'nuevo';
-        $data['fechasignacion'] = date('Y-m-d H:i:s');
-
-        try {
-            $this->leadModel->insert($data);
-            return $this->response->setJSON(['success' => true]);
-        } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'data' => $data
-            ]);
-        }
-}
-
-    // Avanzar etapa
-    public function avanzarEtapa()
-    {
-        $idlead = $this->request->getPost('idlead');
-        $nuevaEtapa = $this->request->getPost('idetapa');
-
-        $success = $this->leadModel->update($idlead, ['idetapa' => $nuevaEtapa]);
-
-        return $this->response->setJSON(['success' => $success ? true : false]);
+        $model = new TareaModel();
+        return $model->insert($tareaData);
     }
 
-    // Guardar seguimiento
-    public function guardarSeguimiento()
+    // 🔹 Método completo para crear todo el flujo de un lead
+    public function crearLeadCompleto()
     {
-        $data = $this->request->getPost();
-        $data['fecha'] = date('Y-m-d H:i:s');
-        $id = $this->seguimientoModel->insert($data);
-
-        return $this->response->setJSON(['success' => $id ? true : false]);
-    }
-
-    // Guardar tarea
-    public function guardarTarea()
-    {
-        $data = $this->request->getPost();
-        $id = $this->tareaModel->insert($data);
-
-        return $this->response->setJSON(['success' => $id ? true : false]);
-    }
-
-    // Método privado para obtener datos comunes
-    private function getDatosLeads()
-    {
-        return [
-            'pipelines' => $this->leadModel->getPipelines(),
-            'etapas' => $this->leadModel->getEtapas(),
-            'leads' => $this->leadModel->getAllLeads(),
-            'usuarios' => $this->leadModel->getUsuarios(),
-            'personas' => $this->leadModel->getPersonas(),
-            'difusiones' => $this->leadModel->getDifusiones()
+        // 1️⃣ Crear persona
+        $personaData = [
+            'nombres' => 'Luis',
+            'apellidos' => 'Martinez',
+            'dni' => '55667788',
+            'correo' => 'luis.martinez@gmail.com',
+            'telefono' => '999555666',
+            'direccion' => 'Av. Ejemplo 123',
+            'iddistrito' => 1
         ];
-    }
-    public function eliminar()
-    {
-        $idlead = $this->request->getPost('idlead');
-        $success = $this->leadModel->delete($idlead);
+        $personaID = $this->crearPersona($personaData);
 
-        return $this->response->setJSON([
-            'success' => $success ? true : false
-        ]);
+        // 2️⃣ Crear lead
+        $leadData = [
+            'idpersona' => $personaID,
+            'idcampania' => 1,
+            'idmedio' => 1,
+            'idetapa' => 1,
+            'estado' => 'nuevo'
+        ];
+        $leadID = $this->crearLead($leadData);
+
+        // 3️⃣ Registrar seguimiento
+        $seguimientoData = [
+            'idlead' => $leadID,
+            'idusuario' => 2,
+            'idmodalidad' => 1,
+            'comentario' => 'Llamada realizada, interesado'
+        ];
+        $this->registrarSeguimiento($seguimientoData);
+
+        // 4️⃣ Crear tarea
+        $tareaData = [
+            'idusuario' => 2,
+            'idlead' => $leadID,
+            'descripcion' => 'Seguir contacto con Luis Martinez',
+            'fecha_programada' => '2025-09-05 10:00:00',
+            'estado' => 'pendiente'
+        ];
+        $this->crearTarea($tareaData);
+
+        return "Flujo completo de lead creado correctamente.";
     }
+    public function pruebaLeadCompleto()
+{
+    // 1️⃣ Crear persona
+    $personaData = [
+        'nombres' => 'Luis',
+        'apellidos' => 'Martinez',
+        'dni' => '55667788',
+        'correo' => 'luis.martinez@gmail.com',
+        'telefono' => '999555666',
+        'direccion' => 'Av. Ejemplo 123',
+        'iddistrito' => 1
+    ];
+    $personaID = $this->crearPersona($personaData);
+
+    // 2️⃣ Crear lead
+    $leadData = [
+        'idpersona' => $personaID,
+        'idcampania' => 1,
+        'idmedio' => 1,
+        'idetapa' => 1,
+        'estado' => 'nuevo'
+    ];
+    $leadID = $this->crearLead($leadData);
+
+    // 3️⃣ Registrar seguimiento
+    $seguimientoData = [
+        'idlead' => $leadID,
+        'idusuario' => 2,
+        'idmodalidad' => 1,
+        'comentario' => 'Llamada realizada, interesado'
+    ];
+    $this->registrarSeguimiento($seguimientoData);
+
+    // 4️⃣ Crear tarea
+    $tareaData = [
+        'idusuario' => 2,
+        'idlead' => $leadID,
+        'descripcion' => 'Seguir contacto con Luis Martinez',
+        'fecha_programada' => '2025-09-05 10:00:00',
+        'estado' => 'pendiente'
+    ];
+    $this->crearTarea($tareaData);
+
+    // 5️⃣ Mostrar información completa en pantalla
+    echo "✅ Lead completo creado:<br>";
+    echo "Persona ID: $personaID <br>";
+    echo "Lead ID: $leadID <br>";
+    echo "<pre>";
+    print_r($personaData);
+    print_r($leadData);
+    print_r($seguimientoData);
+    print_r($tareaData);
+    echo "</pre>";
+}
 
 }

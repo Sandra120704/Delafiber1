@@ -28,16 +28,17 @@ CREATE TABLE personas (
     idpersona INT AUTO_INCREMENT PRIMARY KEY,
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
-    dni VARCHAR(20),
-    correo VARCHAR(100),
-    telefono VARCHAR(20),
+    dni VARCHAR(8) NOT NULL,
+    correo VARCHAR(100) NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
     direccion VARCHAR(200),
-    iddistrito INT,
+    iddistrito INT NOT NULL,
     CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito),
     CONSTRAINT unq_persona_dni UNIQUE (dni),
     CONSTRAINT unq_persona_correo UNIQUE (correo),
     CONSTRAINT unq_persona_telefono UNIQUE (telefono)
 );
+
 
 CREATE TABLE roles (
     idrol INT AUTO_INCREMENT PRIMARY KEY,

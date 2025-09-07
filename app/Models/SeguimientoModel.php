@@ -4,17 +4,9 @@ use CodeIgniter\Model;
 
 class SeguimientoModel extends Model
 {
-    protected $table = 'seguimientos';
+    protected $table = 'seguimiento';
     protected $primaryKey = 'idseguimiento';
     protected $allowedFields = [
-        'idlead', 'idmodalidad', 'resultado_contacto', 'proxima_accion', 'fecha'
+        'idlead', 'idusuario', 'idmodalidad', 'comentario'
     ];
-
-    // Obtener seguimientos de un lead ordenados por fecha descendente
-    public function getByLead($idlead)
-    {
-        return $this->where('idlead', $idlead)
-                    ->orderBy('fecha', 'DESC')
-                    ->findAll();
-    }
 }
