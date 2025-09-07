@@ -1,65 +1,97 @@
 <?= $header ?>
-<link rel="stylesheet" href="<?= base_url('css/campanas.css') ?>">
 
-<div class="container-fluid mt-4">
+<div class="container mt-4">
 
-    <!-- Encabezado con botón -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>📣 Campañas</h4>
-        <button id="btnNuevaCampana" class="btn btn-primary">Nueva Campaña</button>
-    </div>
+  <!-- Cabecera -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Campañas</h3>
+    <a href="<?= site_url('campana/crear') ?>" class="btn btn-primary">+ Crear Campaña</a>
+  </div>
 
-    <!-- Contenedor dinámico -->
-    <div id="contenido-campanas">
-
-        <!-- Lista de campañas -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h5>📋 Lista de Campañas y Medios</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tablaCampanas" class="table table-hover table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Campaña</th>
-                                <th>Medio</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach($campanas as $c): ?>
-                            <tr>
-                                <td><?= $c['nombre'] ?></td>
-                                <td><?= $c['medio'] ?></td>
-                                <td>
-                                    <button class="btn btn-sm <?= $c['estado'] == 'activo' ? 'btn-success' : 'btn-secondary' ?> btn-estado"
-                                            data-id="<?= $c['idcampania'] ?>"
-                                            data-estado="<?= $c['estado'] ?>">
-                                        <?= ucfirst($c['estado']) ?>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-warning btn-edit" data-id="<?= $c['idcampania'] ?>">✏️</button>
-                                    <button class="btn btn-danger btn-delete" data-id="<?= $c['idcampania'] ?>">🗑️</button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  <!-- Tarjetas de resumen -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <h5 class="card-title">Total Campañas</h5>
+          <p class="card-text"><?= count($campanas) ?></p>
         </div>
-
+      </div>
     </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <h5 class="card-title">Campañas Activas</h5>
+          <p class="card-text"><?= $campanas_activas ?></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <h5 class="card-title">Presupuesto Total</h5>
+          <p class="card-text">S/ <?= number_format($presupuesto_total, 2) ?></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <h5 class="card-title">Leads Generados</h5>
+          <p class="card-text"><?= $total_leads ?></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de campañas -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <table id="campanasTable" class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Fechas</th>
+            <th>Presupuesto</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if(!empty($campanas)): foreach($campanas as $c): ?>
+          <tr>
+            <td><?= $c['idcampania'] ?></td>
+            <td><?= $c['nombre'] ?></td>
+            <td><?= $c['fecha_inicio'] ?> - <?= $c['fecha_fin'] ?></td>
+            <td>S/ <?= number_format($c['presupuesto'],2) ?></td>
+            <td>
+              <span class="badge <?= $c['estado']=='Activo'?'bg-success':'bg-secondary' ?>">
+                <?= $c['estado'] ?>
+              </span>
+            </td>
+            <td>
+              <a href="<?= site_url('campana/editar/'.$c['idcampania']) ?>" class="btn btn-sm btn-outline-warning">Editar</a>
+              <a href="<?= site_url('campana/eliminar/'.$c['idcampania']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar campaña?')">Eliminar</a>
+            </td>
+          </tr>
+          <?php endforeach; else: ?>
+          <tr>
+            <td colspan="6" class="text-center">No hay campañas registradas.</td>
+          </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 </div>
 
 <?= $footer ?>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <script>
-    window.base_url = "<?= site_url('') ?>"; // ahora es global
+  $(document).ready(function() {
+    $('#campanasTable').DataTable();
+  });
 </script>
-<script src="<?= base_url('js/campana.js') ?>"></script>

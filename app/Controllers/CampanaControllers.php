@@ -1,40 +1,69 @@
-<?php
+<?php namespace App\Controllers;
 
-namespace App\Controllers;
-use App\Models\CampanaModels;
+use App\Models\CampanaModel;
+use CodeIgniter\Controller;
 
-class CampanaControllers extends BaseController
+class CampanaController extends BaseController
 {
     protected $campanaModel;
 
-    public function __construct() {
-        $this->campanaModel = new CampanaModels();
+    public function __construct()
+    {
+        $this->campanaModel = new CampanaModel();
     }
 
-    public function index() {
-        $data['campanas'] = $this->campanaModel->findAll();
-        $data['header'] = view('Layouts/header');
-        $data['footer'] = view('Layouts/footer');
+    // Vista principal de campañas
+    public function index()
+    {
+        $campanas = $this->campanaModel->getCampanasConLeads();
+        $campanas_activas = $this->campanaModel->getCampanasActivas();
+        $presupuesto_total = $this->campanaModel->getPresupuestoTotal();
+        $total_leads = array_sum(array_column($campanas, 'total_leads'));
 
-        return view('campanas/index', $data);
+        return view('campanas/index', compact(
+            'campanas', 'campanas_activas', 'presupuesto_total', 'total_leads'
+        ));
     }
 
-    public function crear() {
-        $data['header'] = view('Layouts/header');
-        $data['footer'] = view('Layouts/footer');
-
-        if ($this->request->getMethod() === 'post') {
-            $this->campanaModel->save([
-                'nombre' => $this->request->getPost('nombre'),
-                'descripcion' => $this->request->getPost('descripcion'),
-                'fechainicio' => $this->request->getPost('fechainicio'),
-                'fechafin' => $this->request->getPost('fechafin'),
-                'inversion' => $this->request->getPost('inversion'),
-                'estado' => $this->request->getPost('estado')
-            ]);
-            return redirect()->to('/campanas');
+    // Formulario para crear o editar
+    public function form($id = null)
+    {
+        $data = [];
+        if ($id) {
+            $data['campana'] = $this->campanaModel->find($id);
         }
+        return view('campanas/form', $data);
+    }
 
-        return view('campanas/crear', $data);
+    // Guardar campaña
+    public function guardar()
+    {
+        $datos = $this->request->getPost();
+
+        if (!empty($datos['idcampania'])) {
+            $this->campanaModel->update($datos['idcampania'], $datos);
+            return redirect()->to(site_url('campanas'))->with('success', 'Campaña actualizada');
+        } else {
+            $this->campanaModel->insert($datos);
+            return redirect()->to(site_url('campanas'))->with('success', 'Campaña creada');
+        }
+    }
+
+    // Eliminar campaña
+    public function eliminar($id)
+    {
+        $this->campanaModel->delete($id);
+        return redirect()->to(site_url('campanas'))->with('success', 'Campaña eliminada');
+    }
+
+    // Cambiar estado (Activo/Inactivo)
+    public function cambiarEstado($id)
+    {
+        $campana = $this->campanaModel->find($id);
+        if ($campana) {
+            $nuevoEstado = $campana['estado'] === 'Activo' ? 'Inactivo' : 'Activo';
+            $this->campanaModel->update($id, ['estado' => $nuevoEstado]);
+        }
+        return redirect()->to(site_url('campanas'));
     }
 }

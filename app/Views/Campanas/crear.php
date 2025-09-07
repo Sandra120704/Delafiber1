@@ -1,80 +1,73 @@
-<link rel="stylesheet" href="<?= base_url('css/persona.css') ?>">
-<div class="card mt-4">
-    <div class="card-header d-flex justify-content-between">
-        <h5><?= isset($campania) ? 'Editar Campaña' : 'Nueva Campaña' ?></h5>
-        <button id="btnVolverLista" class="btn btn-secondary btn-sm">🔙 Volver</button>
+<?= $header ?>
+
+<div class="container mt-2">
+    <div class="my-2">
+        <h3><?= isset($campana) ? 'Editar Campaña' : 'Registrar Campaña' ?></h3>
+        <a href="<?= base_url('campanas');?>" class="btn btn-sm btn-secondary">Lista de Campañas</a>
     </div>
-    <div class="card-body">
-        <form id="formCampana" action="<?= site_url('campana/guardar') ?>" method="post">
-            <?php if(isset($campania)): ?>
-                <input type="hidden" name="idcampania" value="<?= $campania->idcampania ?>">
-            <?php endif; ?>
-                <label>Nombre</label>
-                <input type="text" name="nombre" class="form-control" required value="<?= $campania->nombre ?? '' ?>">
 
-            <div class="mb-3">
-                <label>Descripción</label>
-                <textarea name="descripcion" class="form-control"><?= $campania->descripcion ?? '' ?></textarea>
-            </div>
+    <form action="<?= base_url('campana/guardar') ?>" id="form-campana" method="POST" autocomplete="off">
+        <input type="hidden" name="idcampania" value="<?= $campana['idcampania'] ?? '' ?>">
+        <div class="card">
+            <div class="card-body">
 
-            <div class="row">
-            <div class="col-md-6 mb-3">
-                <label>Fecha Inicio</label>
-                <input type="date" name="fechainicio" class="form-control" required value="<?= $campania->fechainicio ?? '' ?>">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Fecha Fin</label>
-                <input type="date" name="fechafin" class="form-control" required value="<?= $campania->fechafin ?? '' ?>">
-            </div>
-            </div>
-
-            <div class="mb-3">
-                <label>Inversión</label>
-                <input type="number" step="0.01" name="inversion" class="form-control" value="<?= $campania->inversion ?? '' ?>">
-            </div>
-
-            <div class="mb-3">
-                <label>Medios de Difusión</label>
-                <div class="d-flex flex-wrap">
-                    <?php foreach($medios as $m): 
-                        $checked = (isset($difusiones_asociadas) && in_array($m->idmedio, $difusiones_asociadas)) ? 'checked' : '';
-                    ?>
-                        <div class="form-check me-3">
-                            <input class="form-check-input" 
-                                    type="radio" 
-                                    name="medio" 
-                                    value="<?= $m->idmedio ?>" 
-                                    id="medio<?= $m->idmedio ?>" 
-                                    <?= $checked ?>>
-                            <label class="form-check-label" for="medio<?= $m->idmedio ?>">
-                                <?= $m->medio ?> (<?= $m->tipo_medio ?>)
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
+                <div class="mb-2">
+                    <label for="nombre">Nombre de la Campaña</label>
+                    <input type="text" class="form-control" name="nombre" id="nombre" 
+                           value="<?= $campana['nombre'] ?? '' ?>" required>
                 </div>
-            </div>
 
+                <div class="mb-2">
+                    <label for="descripcion">Descripción</label>
+                    <textarea class="form-control" name="descripcion" id="descripcion"><?= $campana['descripcion'] ?? '' ?></textarea>
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label for="fecha_inicio">Fecha Inicio</label>
+                        <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio" 
+                               value="<?= $campana['fecha_inicio'] ?? '' ?>" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_fin">Fecha Fin</label>
+                        <input type="date" class="form-control" name="fecha_fin" id="fecha_fin" 
+                               value="<?= $campana['fecha_fin'] ?? '' ?>" required>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label for="presupuesto">Presupuesto</label>
+                        <input type="number" step="0.01" class="form-control" name="presupuesto" id="presupuesto" 
+                               value="<?= $campana['presupuesto'] ?? '' ?>">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="estado">Estado</label>
+                        <select name="estado" id="estado" class="form-control">
+                            <option value="Activo" <?= (isset($campana['estado']) && $campana['estado']=='Activo')?'selected':'' ?>>Activo</option>
+                            <option value="Inactivo" <?= (isset($campana['estado']) && $campana['estado']=='Inactivo')?'selected':'' ?>>Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label>Medios de Difusión</label>
+                   <?php foreach($medios as $m): ?>
+                    <div class="form-control">
+                        <input class="form-check-label" type="radio" name="medio" value="<?= $m['idmedio'] ?>"
+                            <?= (isset($difusiones[0]) && $difusiones[0]==$m['idmedio']) ? 'checked' : '' ?>>
+                        <label class="form-check-label"><?= $m['nombre'] ?></label>
+                    </div>
+                <?php endforeach; ?>
+                </div>
+
+            </div>
+            <div class="card-footer text-end">
+                <button class="btn btn-sm btn-outline-secondary" type="reset">Cancelar</button>
+                <button class="btn btn-sm btn-primary" type="submit"><?= isset($campana) ? 'Guardar Cambios' : 'Registrar Campaña' ?></button>
+            </div>
         </div>
-            <div>
-                <button type="submit" class="btn btn-success"><?= isset($campania) ? 'Guardar Cambios' : 'Registrar' ?></button>
-            </div>
-        </form>
-     </div>
-    </div>
+    </form>
 </div>
-<script>
-    window.base_url = "<?= site_url('') ?>"; // termina con /
-</script>
-<script src="<?= base_url('js/campana.js') ?>"></script>
 
-<script>
-$(function(){
-    // Volver a la lista
-    $("#btnVolverLista").on("click", function(){
-        $.get("<?= site_url('campanas') ?>", function(html){
-            $("#contenido-campanas").html(html);
-        });
-    });
-});
-</script>
-
+<?= $footer ?>

@@ -1,165 +1,95 @@
 <?php
 
 namespace App\Controllers;
-
 use App\Models\CampanaModel;
 use App\Models\MedioModel;
-use Config\Database;
 
 class CampanaController extends BaseController
 {
-    protected $db;
+    protected $campanaModel;
+    protected $medioModel;
 
     public function __construct()
     {
-        $this->db = Database::connect();
+        $this->campanaModel = new CampanaModel();
+        $this->medioModel = new MedioModel();
     }
 
-    // Listado de campañas con su medio
+    // Listado de campañas
     public function index()
     {
-        $model = new CampanaModel();
-        $campanas = $model->getCampanasConMedios(); // Asegúrate de que tu modelo haga join con difusiones + medio
+        $campanas = $this->campanaModel->findAll();
+        $campanas_activas = $this->campanaModel->where('estado', 'Activo')->countAllResults();
+        $presupuesto_total = $this->campanaModel->selectSum('presupuesto')->first()['presupuesto'] ?? 0;
+        $total_leads = 0; // luego conectas con tabla leads
 
-        $data['header'] = view('Layouts/header');
-        $data['footer'] = view('Layouts/footer');
-        $data['campanas'] = $campanas;
+        $datos = [
+            'header' => view('layouts/header'),
+            'footer' => view('layouts/footer'),
+            'campanas' => $campanas,
+            'campanas_activas' => $campanas_activas,
+            'presupuesto_total' => $presupuesto_total,
+            'total_leads' => $total_leads
+        ];
 
-        return view('Campanas/index', $data);
+        return view('campanas/index', $datos);
     }
 
-    // Formulario crear / editar
-    public function form($idcampania = null)
+    // Formulario Crear / Editar
+    public function crear($id = null)
     {
-        $campanaModel = new CampanaModel();
-        $medioModel   = new MedioModel();
-        $data = [];
+        $campana = null;
+        $difusiones = [];
 
-        // Obtener todos los medios como objetos
-        $medios = $medioModel->orderBy('medio')->findAll();
-        $data['medios'] = array_map(fn($m) => (object) $m, $medios);
-
-        if ($idcampania) {
-            // Cargar campaña existente
-            $campania = $campanaModel->find($idcampania);
-            if (is_array($campania)) $campania = (object) $campania;
-            $data['campania'] = $campania;
-
-            // Medios asociados
-            $difusiones = $this->db->table('difusiones')
-                                    ->select('idmedio')
-                                    ->where('idcampania', $idcampania)
-                                    ->get()
-                                    ->getResult();
-
-            $data['difusiones_asociadas'] = array_map(fn($d) => $d->idmedio, $difusiones);
-        } else {
-            $data['difusiones_asociadas'] = [];
+        if ($id) {
+            $campana = $this->campanaModel->find($id);
+            $difusiones = $this->campanaModel->getMedios($id); // array de idmedio
         }
 
-        return view('Campanas/crear', $data);
+        $medios = $this->medioModel->findAll();
+
+        $datos = [
+            'header' => view('layouts/header'),
+            'footer' => view('layouts/footer'),
+            'campana' => $campana,
+            'medios' => $medios,
+            'difusiones' => $difusiones
+        ];
+
+        return view('campanas/crear', $datos);
     }
 
-    // Guardar campaña (crear/editar)
+    // Guardar campaña
     public function guardar()
     {
-        $campanaModel = new CampanaModel();
-        $db = db_connect();
-
         $data = $this->request->getPost();
 
-        // Validar campos obligatorios
-        if (empty($data['nombre']) || empty($data['fechainicio']) || empty($data['fechafin'])) {
-            return $this->response->setJSON([
-                'success' => false,
-                'mensaje' => 'Por favor completa todos los campos obligatorios (Nombre, Fecha Inicio, Fecha Fin).'
-            ]);
+        $campanaData = [
+            'nombre' => $data['nombre'],
+            'descripcion' => $data['descripcion'],
+            'fecha_inicio' => $data['fecha_inicio'],
+            'fecha_fin' => $data['fecha_fin'],
+            'presupuesto' => $data['presupuesto'],
+            'estado' => $data['estado']
+        ];
+
+        if (!empty($data['idcampania'])) {
+            $this->campanaModel->update($data['idcampania'], $campanaData);
+            $idcampania = $data['idcampania'];
+        } else {
+            $idcampania = $this->campanaModel->insert($campanaData);
         }
 
-        // Obtener solo el medio seleccionado (radio)
-        $medio = $data['medio'] ?? null;
-        unset($data['medio']); // no se inserta directamente en la tabla campanias
+        // Guardar difusiones (medios)
+        $this->campanaModel->guardarDifusiones($idcampania, $data['medios'] ?? []);
 
-        $now = date('Y-m-d H:i:s');
-        $success = false;
-
-        try {
-            if (!empty($data['idcampania'])) {
-                // Actualizar campaña existente
-                $idcampania = $data['idcampania'];
-                $data['modificado'] = $now;
-                unset($data['idcampania']);
-                $success = $campanaModel->update($idcampania, $data);
-            } else {
-                // Crear nueva campaña
-                $data['creado'] = $now;
-                $idcampania = $campanaModel->insert($data);
-                $success = $idcampania ? true : false;
-            }
-
-            // Guardar el medio en difusiones si todo va bien
-            if ($success && $medio) {
-                $tablaDifusion = 'difusiones'; // Cambia si tu tabla se llama 'difusion'
-                
-                // Borrar medios previos asociados
-                $db->table($tablaDifusion)->where('idcampania', $idcampania)->delete();
-
-                // Insertar nuevo medio
-                $db->table($tablaDifusion)->insert([
-                    'idcampania' => $idcampania,
-                    'idmedio'    => $medio,
-                    'creado'     => $now
-                ]);
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'mensaje' => 'Campaña guardada correctamente',
-                'idcampania' => $idcampania
-            ]);
-
-        } catch (\Exception $e) {
-            // Captura cualquier error de DB y envía el mensaje al JS
-            return $this->response->setJSON([
-                'success' => false,
-                'mensaje' => 'Error al guardar la campaña: ' . $e->getMessage()
-            ]);
-        }
+        return redirect()->to(site_url('campanas'));
     }
 
     // Eliminar campaña
-    public function eliminar()
+    public function eliminar($id)
     {
-        $idcampania = $this->request->getPost('idcampania');
-        $model = new CampanaModel();
-
-        // Primero eliminamos los registros asociados en difusiones
-        $this->db->table('difusiones')->where('idcampania', $idcampania)->delete();
-
-        // Luego eliminamos la campaña
-        $success = $model->delete($idcampania);
-
-        return $this->response->setJSON([
-            'success' => $success ? true : false,
-            'mensaje' => $success ? 'Campaña eliminada' : 'Error al eliminar'
-        ]);
-    }
-
-    // Cambiar estado (activo / inactivo)
-    public function cambiarEstado()
-    {
-        $idcampania = $this->request->getPost('idcampania');
-        $estado = $this->request->getPost('estado');
-
-        $model = new CampanaModel();
-        $success = $model->update($idcampania, [
-            'estado' => $estado,
-            'modificado' => date('Y-m-d H:i:s')
-        ]);
-
-        return $this->response->setJSON([
-            'success' => $success ? true : false,
-            'mensaje' => $success ? 'Estado actualizado' : 'Error al actualizar'
-        ]);
+        $this->campanaModel->delete($id);
+        return redirect()->to(site_url('campanas'));
     }
 }
