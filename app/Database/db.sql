@@ -84,8 +84,14 @@ CREATE TABLE difusiones (
     modificado DATETIME,
     CONSTRAINT fk_difusion_campania FOREIGN KEY (idcampania) REFERENCES campanias(idcampania),
     CONSTRAINT fk_difusion_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio),
-    CONSTRAINT unq_difusion UNIQUE (idcampania, idmedio) -- 🔒 no repetir la misma combinación
+    CONSTRAINT unq_difusion UNIQUE (idcampania, idmedio) 
 );
+ALTER TABLE difusiones
+ADD COLUMN inversion DECIMAL(10,2) DEFAULT 0,
+ADD COLUMN leads INT DEFAULT 0;
+ALTER TABLE difusiones
+ADD COLUMN leads_generados INT DEFAULT 0 AFTER inversion;
+
 
 CREATE TABLE pipelines (
     idpipeline INT AUTO_INCREMENT PRIMARY KEY,

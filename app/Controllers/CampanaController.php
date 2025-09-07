@@ -85,11 +85,27 @@ class CampanaController extends BaseController
 
         return redirect()->to(site_url('campanas'));
     }
+    public function detalleMedios($idcampania)
+    {
+        $difusiones = $this->campanaModel->getMedios($idcampania); 
+        // $difusiones debe traer un array con ['nombre' => ..., 'inversion' => ..., 'leads' => ...]
+
+        return $this->response->setJSON($difusiones);
+    }
+    public function getMediosCampana($idcampania)
+    {
+        $medios = $this->campanaModel->getMedios($idcampania);
+        return $this->response->setJSON($medios);
+    }
+
+
 
     // Eliminar campaña
     public function eliminar($id)
     {
-        $this->campanaModel->delete($id);
+        if($id){
+            $this->campanaModel->eliminarCampana($id);
+        }
         return redirect()->to(site_url('campanas'));
     }
 }

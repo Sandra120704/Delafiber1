@@ -29,7 +29,13 @@ $routes->get('campanas', 'CampanaController::index');               // Listado
 $routes->get('campana/crear', 'CampanaController::crear');
 $routes->get('campana/form/(:num)', 'CampanaController::form/$1'); // para editar
 $routes->post('campana/guardar', 'CampanaController::guardar');
-  
+$routes->get('campana/detalleMedios/(:num)', 'CampanaController::detalleMedios/$1');
+$routes->get('campana/medios/(:num)', 'CampanaController::getMediosCampana/$1');
+$routes->get('campana/eliminar/(:num)', 'CampanaController::eliminar/$1'); // Eliminar campaña
+
+
+
+
 $routes->post('campanas/eliminar', 'CampanaController::eliminar');  
 $routes->post('campanas/cambiar-estado', 'CampanaController::cambiarEstado');
 

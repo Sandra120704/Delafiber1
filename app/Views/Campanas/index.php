@@ -8,7 +8,7 @@
     <a href="<?= site_url('campana/crear') ?>" class="btn btn-primary">+ Crear Campaña</a>
   </div>
 
-  <!-- Tarjetas de resumen -->
+    <!-- Tarjetas de resumen -->
   <div class="row mb-4">
     <div class="col-md-3">
       <div class="card text-white bg-primary">
@@ -59,39 +59,59 @@
           </tr>
         </thead>
         <tbody>
-          <?php if(!empty($campanas)): foreach($campanas as $c): ?>
+          <?php foreach($campanas as $c): ?>
           <tr>
             <td><?= $c['idcampania'] ?></td>
             <td><?= $c['nombre'] ?></td>
             <td><?= $c['fecha_inicio'] ?> - <?= $c['fecha_fin'] ?></td>
             <td>S/ <?= number_format($c['presupuesto'],2) ?></td>
             <td>
-              <span class="badge <?= $c['estado']=='Activo'?'bg-success':'bg-secondary' ?>">
+              <span class="badge <?= $c['estado'] == 'Activo' ? 'bg-success' : 'bg-secondary' ?>">
                 <?= $c['estado'] ?>
               </span>
             </td>
             <td>
-              <a href="<?= site_url('campana/editar/'.$c['idcampania']) ?>" class="btn btn-sm btn-outline-warning">Editar</a>
+              <a href="javascript:void(0)" class="btn btn-sm btn-info btn-detalle" data-id="<?= $c['idcampania'] ?>">Detalle</a>
+              <a href="<?= site_url('campana/form/'.$c['idcampania']) ?>" class="btn btn-sm btn-outline-warning">Editar</a>
               <a href="<?= site_url('campana/eliminar/'.$c['idcampania']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar campaña?')">Eliminar</a>
             </td>
           </tr>
-          <?php endforeach; else: ?>
-          <tr>
-            <td colspan="6" class="text-center">No hay campañas registradas.</td>
-          </tr>
-          <?php endif; ?>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
   </div>
 
+  <div class="modal fade" id="detalleCampanaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de Campaña</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Medio</th>
+              <th>Inversión</th>
+              <th>Leads Generados</th>
+            </tr>
+          </thead>
+          <tbody id="detalleMedios">
+            <tr><td colspan="3">Seleccione una campaña para ver los detalles</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <?= $footer ?>
 
-<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-<script>
-  $(document).ready(function() {
-    $('#campanasTable').DataTable();
-  });
-</script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script><script src="<?= base_url('js/campana.js') ?>"></script>
+<script src="<?= base_url('js/campana.js') ?>"></script>
