@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="<?= base_url('assets/datatables.net-bs4/dataTables.bootstrap4.css')?>">
   <link rel="stylesheet" href="<?= base_url('assets/ti-icons/css/themify-icons.css')?>">
   <link rel="stylesheet" type="<?= base_url('text/css" href="js/select.dataTables.min.css')?>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
   <!-- End plugin css for this page -->
   <!-- inject:css -->
   <link rel="stylesheet" href="<?= base_url('css/vertical-layout-light/style.css')?>">

@@ -7,4 +7,5 @@ class MedioModel extends Model {
     protected $primaryKey = 'idmedio';
     protected $allowedFields = ['nombre','descripcion'];
     protected $useTimestamps = true;
+    
 }

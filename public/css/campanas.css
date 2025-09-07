@@ -1,135 +1,16 @@
-/* Contenedor general */
-.container-fluid.mt-4 {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem;
-}
-
-/* Encabezado */
-.d-flex.justify-content-between h4 {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: #5b3e7a; /* morado corporativo suave */
-}
-
-/* Botón "Nueva Campaña" */
-#btnNuevaCampana {
-    background: linear-gradient(135deg, #8f6bb5, #eaa1c1); /* morado-rosado pastel más corporativo */
-    border: none;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: background 0.3s, transform 0.2s;
-}
-
-#btnNuevaCampana:hover {
-    background: linear-gradient(135deg, #7e589e, #e78fae);
-    transform: translateY(-2px);
-}
-
-/* Card general */
 .card {
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(91,62,122,0.08); /* sombra suave */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.card-header {
-    background-color: #d9c1e0; /* morado pastel corporativo suave */
-    font-weight: 600;
-    font-size: 1rem;
-    color: #4f2f7f;
-    border-radius: 10px 10px 0 0;
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.8rem 1.2rem rgba(0,0,0,0.25);
 }
-
-/* Tabla */
-.table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 0.5rem;
-    background-color: #fff;
-    border-radius: 8px;
+.card .card-body i {
+  font-size: 1.0rem;
+  margin-bottom: 10px;
+  display: block;
 }
-
-.table thead th {
-    font-weight: 600;
-    color: #4f2f7f;
-    background-color: #f3e5f5;
-    padding: 0.75rem 1rem;
-}
-
-.table tbody tr {
-    background-color: #fff;
-    border-radius: 6px;
-    transition: transform 0.15s, box-shadow 0.2s;
-}
-
-.table tbody tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(91,62,122,0.12);
-}
-
-.table tbody td {
-    padding: 0.75rem 1rem;
-    vertical-align: middle;
-}
-
-/* Botones de acción */
-.btn-edit {
-    background: linear-gradient(135deg, #a78ed1, #eaa1c1);
-    border: none;
-    color: #fff;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.85rem;
-    border-radius: 4px;
-    font-weight: 500;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.btn-edit:hover {
-    background: linear-gradient(135deg, #9067b5, #e78fae);
-    transform: translateY(-1px);
-}
-
-.btn-delete {
-    background: linear-gradient(135deg, #f2a1b0, #f7c2d1);
-    border: none;
-    color: #fff;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.85rem;
-    border-radius: 4px;
-    font-weight: 500;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.btn-delete:hover {
-    background: linear-gradient(135deg, #e78fae, #f5b5cb);
-    transform: translateY(-1px);
-}
-
-/* Botón de estado activo/inactivo */
-.btn-estado {
-    font-weight: 600;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.btn-estado.btn-success {
-    background-color: #b9d7ea; /* verde pastel suave */
-    color: #2f4f4f;
-}
-
-.btn-estado.btn-success:hover {
-    background-color: #9fc5db;
-}
-
-.btn-estado.btn-secondary {
-    background-color: #dcdcdc;
-    color: #555;
-}
-
-.btn-estado.btn-secondary:hover {
-    background-color: #c0c0c0;
+.card .card-title, 
+.card .card-text {
+  color: white !important; /* asegura blanco */
 }

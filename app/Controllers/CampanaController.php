@@ -97,8 +97,72 @@ class CampanaController extends BaseController
         $medios = $this->campanaModel->getMedios($idcampania);
         return $this->response->setJSON($medios);
     }
+    public function cambiarEstado($id)
+    {
+        $estado = $this->request->getPost('estado');
 
+        if (!in_array($estado, ['Activo', 'Inactivo'])) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Estado inválido'
+            ])->setStatusCode(400);
+        }
 
+        $this->campanaModel->update($id, ['estado' => $estado]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'estado' => $estado
+        ]);
+    }
+
+   public function detalle($idcampania)
+    {
+        $campana = $this->campanaModel->find($idcampania);
+
+        if (!$campana) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Campaña no encontrada'
+            ])->setStatusCode(404);
+        }
+
+        $medios = $this->campanaModel->getMedios($idcampania);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'campana' => $campana,
+            'medios' => $medios
+        ]);
+    }
+    public function resumen()
+    {
+        $campanaModel = new CampanaModel();
+        $activas = $campanaModel->contarActivas();
+
+        return $this->response->setJSON([
+            'success' => true,
+            'activas' => $activas
+        ]);
+    }
+
+    public function estado($id)
+    {
+        $estado = $this->request->getPost('estado');
+
+        $campanaModel = new CampanaModel();
+
+        $update = $campanaModel->update($id, ['estado' => $estado]);
+
+        if ($update) {
+            return $this->response->setJSON([
+                'success' => true,
+                'estado'  => $estado
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false]);
+        }
+    }
 
     // Eliminar campaña
     public function eliminar($id)

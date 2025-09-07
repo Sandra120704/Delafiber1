@@ -35,13 +35,29 @@ class CampanaModel extends Model
     // Obtener medios/difusiones de una campaña
     public function getMedios($idcampania)
     {
-        $builder = $this->db->table('difusiones as d');
-        $builder->select('m.nombre, d.inversion, d.leads_generados');
-        $builder->join('medios as m', 'm.idmedio = d.idmedio');
-        $builder->where('d.idcampania', $idcampania);
-        return $builder->get()->getResultArray();
+        return $this->db->table('difusiones as d')
+            ->select('m.nombre, d.inversion, d.leads_generados as leads')
+            ->join('medios as m', 'm.idmedio = d.idmedio')
+            ->where('d.idcampania', $idcampania)
+            ->get()
+            ->getResultArray();
     }
-    public function eliminarCampana($idcampania)
+
+     public function eliminarCampana($idcampania)
+    {
+        $this->db->table('difusiones')->where('idcampania', $idcampania)->delete();
+        $this->delete($idcampania);
+    }
+
+    // 🔎 Contar campañas activas
+    public function contarActivas()
+    {
+        return $this->db->table($this->table)
+            ->where('estado', 'Activo')
+            ->countAllResults(false); // reset builder
+    }
+
+    /* public function eliminarCampana($idcampania)
     {
         $builder = $this->db->table('difusiones');
         // Eliminar difusiones asociadas
@@ -49,6 +65,6 @@ class CampanaModel extends Model
 
         // Eliminar la campaña
         $this->delete($idcampania);
-    }
+    } */
 
 }

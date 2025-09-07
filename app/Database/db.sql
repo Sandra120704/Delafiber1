@@ -76,6 +76,10 @@ CREATE TABLE medios (
     descripcion TEXT,
     CONSTRAINT unq_medio_nombre UNIQUE (nombre)
 );
+ALTER TABLE medios
+ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
 CREATE TABLE difusiones (
     iddifusion INT AUTO_INCREMENT PRIMARY KEY,
     idcampania INT NOT NULL,
@@ -123,6 +127,10 @@ CREATE TABLE leads (
     CONSTRAINT fk_leads_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio),
     CONSTRAINT fk_leads_etapa FOREIGN KEY (idetapa) REFERENCES etapas(idetapa)
 );
+ALTER TABLE leads ADD COLUMN idusuario_registro INT;
+ALTER TABLE leads 
+ADD CONSTRAINT fk_leads_usuario FOREIGN KEY (idusuario_registro) REFERENCES usuarios(idusuario);
+
 
 CREATE TABLE modalidades (
     idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
@@ -229,3 +237,13 @@ INSERT INTO tareas (idusuario, idlead, descripcion, fecha_programada, estado) VA
 (3, 2, 'Enviar correo a Maria Lopez', '2025-09-05 12:00:00', 'pendiente'),
 (4, 3, 'Visita a Carlos Garcia', '2025-09-06 09:00:00', 'pendiente'),
 (1, 4, 'Revisar caso Ana Torres', '2025-09-06 15:00:00', 'pendiente');
+
+SELECT l.idlead, 
+       CONCAT(p.nombres, ' ', p.apellidos) AS persona,
+       u.usuario AS registrado_por,
+       e.nombre AS etapa,
+       l.estado, l.fecha_registro
+FROM leads l
+JOIN personas p ON p.idpersona = l.idpersona
+JOIN usuarios u ON u.idusuario = l.idusuario
+LEFT JOIN etapas e ON e.idetapa = l.idetapa;
