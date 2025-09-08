@@ -43,9 +43,17 @@ $routes->get('campana/resumen', 'Campana::resumen');
 // ============================
 // USUARIOS
 // ============================
-$routes->get('usuarios', 'UsuarioController::index');               // Listado
-$routes->get('usuarios/crear', 'UsuarioController::crear');         // Crear usuario
-$routes->post('usuarios/guardar', 'UsuarioController::guardar');   // Guardar usuario
+$routes->get('/login', 'LoginController::index');
+$routes->post('/login/auth', 'LoginController::auth');
+$routes->get('/logout', 'LoginController::logout');
+
+$routes->group('', ['filter' => 'auth'], function($routes){
+    $routes->get('campana', 'CampanaController::index');
+    $routes->get('persona', 'PersonaController::index');
+    // otras rutas protegidas
+});
+
+  // Guardar usuario
 
 // ============================
 // LEADS
