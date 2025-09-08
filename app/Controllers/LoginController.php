@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\UsuarioModel;
@@ -7,7 +8,7 @@ class LoginController extends BaseController
 {
     public function index()
     {
-        return view('login'); // Vista del formulario
+        return view('login/login'); // Asegúrate que la vista exista
     }
 
     public function auth()
@@ -15,28 +16,31 @@ class LoginController extends BaseController
         $usuario = $this->request->getPost('usuario');
         $clave   = $this->request->getPost('clave');
 
-        $usuarioModel = new UsuarioModel();
-        $user = $usuarioModel->getByUsuario($usuario);
+        $model = new UsuarioModel();
+        $user = $model->where('usuario', $usuario)
+                      ->where('clave', $clave) // temporal, luego usar hash
+                      ->first();
 
-        if ($user && $user['activo'] == 1) {
-            //si aún guardas la clave en texto plano, cámbiala a password_hash
-            if ($clave === $user['clave'] || password_verify($clave, $user['clave'])) {
-                session()->set([
-                    'idusuario' => $user['idusuario'],
-                    'usuario'   => $user['usuario'],
-                    'idrol'     => $user['idrol'],
-                    'logged_in' => true
-                ]);
-                return redirect()->to('/dashboard');
-            }
+        if($user) {
+            // Guardar sesión
+            $session = session();
+            $session->set([
+                'idusuario' => $user['idusuario'],
+                'usuario'   => $user['usuario'],
+                'rol'       => $user['idrol'],
+                'isLoggedIn'=> true
+            ]);
+
+            // Redirige a la página principal
+            return redirect()->to('/'); 
+        } else {
+            return redirect()->back()->with('error', 'Usuario o contraseña incorrectos.');
         }
-
-        return redirect()->back()->with('error', 'Usuario o clave incorrectos');
     }
 
     public function logout()
     {
-        session()->destroy();
-        return redirect()->to('/login');
+        session()->destroy();  // destruye la sesión del usuario
+        return redirect()->to('login');  // redirige al login
     }
 }

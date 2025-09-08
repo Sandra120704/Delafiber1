@@ -10,21 +10,19 @@
     <div class="row justify-content-center">
       <div class="col-md-4">
         <div class="card shadow-lg">
-          <div class="card-header bg-primary text-white">Iniciar Sesión</div>
+          <div class="card-header bg-primary text-white text-center">Iniciar Sesión</div>
           <div class="card-body">
             <?php if(session()->getFlashdata('error')): ?>
               <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
             <?php endif; ?>
-            <form method="post" action="<?= base_url('login/auth') ?>">
+            <form action="<?= site_url('login/auth') ?>" method="post">
               <div class="mb-3">
-                <label>Usuario</label>
-                <input type="text" name="usuario" class="form-control" required>
+                <input type="text" name="usuario" class="form-control" placeholder="Usuario" required>
               </div>
               <div class="mb-3">
-                <label>Contraseña</label>
-                <input type="password" name="clave" class="form-control" required>
+                <input type="password" name="clave" class="form-control" placeholder="Contraseña" required>
               </div>
-              <button type="submit" class="btn btn-primary w-100">Entrar</button>
+              <button type="submit" class="btn btn-primary w-100">Ingresar</button>
             </form>
           </div>
         </div>

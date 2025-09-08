@@ -191,6 +191,9 @@ INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('cgarcia', '123456', 2, 3),
 ('atorres', '123456', 2, 4);
 
+INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
+('prueba', '123456', 2, 1);
+
 INSERT INTO campanias (nombre, descripcion, fecha_inicio, fecha_fin, presupuesto, estado) VALUES 
 ('Campaña Facebook Chincha', 'Captación de clientes por redes sociales', '2025-01-01', '2025-03-31', 1500.00, 'activo');
 

@@ -71,7 +71,9 @@
               <a class="dropdown-item preview-item">
                 <div class="preview-thumbnail">
                   <div class="preview-icon bg-warning">
-                    <i class="ti-settings mx-0"></i>
+                    <i class="ti-settings mx-0">
+                      Cerrar Sesión
+                    </i>
                   </div>
                 </div>
                 <div class="preview-item-content">
@@ -193,8 +195,16 @@
               <span class="menu-title">Documentación</span>
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= site_url('logout') ?>">
+              <i class="ti-power-off text-primary"></i>
+              <span class="menu-title">Cerrar Sesión</span>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
+
+        

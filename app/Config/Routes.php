@@ -50,7 +50,6 @@ $routes->get('/logout', 'LoginController::logout');
 $routes->group('', ['filter' => 'auth'], function($routes){
     $routes->get('campana', 'CampanaController::index');
     $routes->get('persona', 'PersonaController::index');
-    // otras rutas protegidas
 });
 
   // Guardar usuario
