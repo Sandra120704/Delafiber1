@@ -1,4 +1,5 @@
 <?= $header ?>
+
 <link rel="stylesheet" href="<?= base_url('css/leads.css') ?>">
 
 <div class="kanban-container">
@@ -6,7 +7,7 @@
     <div class="kanban-header">
         <?php foreach ($etapas as $etapa): ?>
             <div class="kanban-stage">
-                <?= htmlspecialchars($etapa->nombreetapa) ?>
+                <?= htmlspecialchars($etapa['nombre']) ?>
             </div>
         <?php endforeach; ?>
     </div>
@@ -14,28 +15,32 @@
     <!-- Cuerpo con columnas y tarjetas -->
     <div class="kanban-body">
         <?php foreach ($etapas as $etapa): ?>
-            <div class="kanban-column" 
-                 id="kanban-column-<?= $etapa->idetapa ?>" 
-                 data-etapa="<?= $etapa->idetapa ?>">
+            <?php
+            // Si no hay leads para esta etapa, la saltamos
+            if (empty($leadsPorEtapa[$etapa['idetapa']])) continue;
 
-                <?php
-                $leadsEtapa = array_filter($leads, fn($l) => $l->idetapa == $etapa->idetapa);
-                foreach ($leadsEtapa as $lead):
-                ?>
-                    <div class="kanban-card" 
-                         id="kanban-card-<?= $lead->idlead ?>"
-                         data-id="<?= $lead->idlead ?>" 
-                         style="border-left: 5px solid <?= htmlspecialchars($lead->estatus_color) ?>;"
+            $leadsEtapa = $leadsPorEtapa[$etapa['idetapa']];
+            ?>
+            <div class="kanban-column"
+                 id="kanban-column-<?= $etapa['idetapa'] ?>"
+                 data-etapa="<?= $etapa['idetapa'] ?>">
+
+                <?php foreach ($leadsEtapa as $lead): ?>
+                    <div class="kanban-card"
+                         id="kanban-card-<?= $lead['idlead'] ?>"
+                         data-id="<?= $lead['idlead'] ?>"
+                         style="border-left: 5px solid <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;"
                          draggable="true">
 
                         <div class="card-title">
-                            <?= htmlspecialchars($lead->nombres . ' ' . $lead->apellidos) ?>
+                            <?= htmlspecialchars($lead['nombres'] . ' ' . $lead['apellidos']) ?>
                         </div>
                         <div class="card-info">
-                        <?= htmlspecialchars($lead->telefono) ?><br>
-                        <?= htmlspecialchars($lead->email) ?><br>
-                        <?= htmlspecialchars($lead->campaña) ?> - <?= htmlspecialchars($lead->medio) ?>
-                    </div>
+                            <?= htmlspecialchars($lead['telefono']) ?><br>
+                            <?= htmlspecialchars($lead['correo']) ?><br>
+                            <?= htmlspecialchars($lead['campana'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?><br>
+                            Usuario: <?= htmlspecialchars($lead['usuario']) ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
 

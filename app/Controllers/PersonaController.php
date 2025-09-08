@@ -47,8 +47,8 @@ class PersonaController extends BaseController
             'direccion' => $this->request->getPost('direccion'),
         ];
 
-        $persona->insert($data);
-        return $this->response->redirect(base_url('personas'));    
+        $idpersona = $persona->insert($data); // Guardamos persona y obtenemos el ID
+        return redirect()->to('leads/crear/' . $idpersona);   
     }
     public function BuscadorDni($dni = "")
     {

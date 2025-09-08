@@ -169,7 +169,6 @@
 
 </div>
 
-<?= $footer ?>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -178,3 +177,4 @@
   const BASE_URL = "<?= base_url() ?>";
 </script>
 <script src="<?= base_url('js/campana.js') ?>"></script>
+

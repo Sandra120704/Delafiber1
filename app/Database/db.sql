@@ -131,6 +131,12 @@ ALTER TABLE leads ADD COLUMN idusuario_registro INT;
 ALTER TABLE leads 
 ADD CONSTRAINT fk_leads_usuario FOREIGN KEY (idusuario_registro) REFERENCES usuarios(idusuario);
 
+ALTER TABLE leads 
+ADD COLUMN idusuario INT AFTER idetapa;
+
+ALTER TABLE leads
+ADD CONSTRAINT fk_leads_usuarios 
+FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario);
 
 CREATE TABLE modalidades (
     idmodalidad INT AUTO_INCREMENT PRIMARY KEY,

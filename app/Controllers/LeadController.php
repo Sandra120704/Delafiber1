@@ -1,138 +1,91 @@
 <?php
+
 namespace App\Controllers;
-use App\Models\PersonaModel;
+
+use App\Models\CampanaModel;
 use App\Models\LeadModel;
-use App\Models\SeguimientoModel;
-use App\Models\TareaModel;
+use App\Models\EtapaModel;
+use App\Models\MedioModel;
+use App\Models\PersonaModel;
 
 class LeadController extends BaseController
 {
-    public function crearPersona($personaData)
+    public function index()
     {
-        $model = new PersonaModel();
-        return $model->insert($personaData); // retorna ID de la persona creada
+        $leadModel = new LeadModel();
+        $etapaModel = new EtapaModel();
+
+        $data['etapas'] = $etapaModel->findAll();
+
+        $builder = $leadModel->builder();
+        $builder->select('
+            leads.idlead,
+            leads.idetapa,
+            personas.nombres,
+            personas.apellidos,
+            personas.telefono,
+            personas.correo,
+            campanias.nombre as campana,
+            medios.nombre as medio,
+            usuarios.usuario
+        ');
+        $builder->join('personas', 'personas.idpersona = leads.idpersona');
+        $builder->join('usuarios', 'usuarios.idusuario = leads.idusuario');
+        $builder->join('campanias', 'campanias.idcampania = leads.idcampania', 'left');
+        $builder->join('medios', 'medios.idmedio = leads.idmedio', 'left');
+
+        $leads = $builder->get()->getResultArray();
+
+        // Agrupar leads por etapa
+        $leadsPorEtapa = [];
+        foreach ($leads as $lead) {
+            $leadsPorEtapa[$lead['idetapa']][] = $lead;
+        }
+
+        $data['leadsPorEtapa'] = $leadsPorEtapa;
+
+        // Cargar header y footer en variables para pasarlas a la vista
+        $data['header'] = view('Layouts/header');
+        $data['footer'] = view('Layouts/footer');
+
+        // Cargar solo la vista principal, que imprimirá header y footer dentro
+        return view('leads/index', $data);
+    }
+    public function crear($idpersona)
+    {
+        $personaModel = new PersonaModel();
+        $etapaModel   = new EtapaModel();
+        $campaniaModel = new CampanaModel();
+        $medioModel    = new MedioModel();
+
+        $data['persona']  = $personaModel->find($idpersona); // Datos de la persona
+        $data['etapas']   = $etapaModel->findAll();
+        $data['campanas'] = $campaniaModel->findAll();
+        $data['medios']   = $medioModel->findAll();
+
+        $data['header'] = view('Layouts/header');
+        $data['footer'] = view('Layouts/footer');
+
+        return view('leads/crear', $data);
     }
 
-    // 2️⃣ Crear lead
-    public function crearLead($leadData)
+    public function guardar()
     {
-        $model = new LeadModel();
-        return $model->insert($leadData); // retorna ID del lead creado
+        $session = session();
+        $usuario_id = $session->get('idusuario');
+
+        $leadModel = new LeadModel();
+        $leadModel->insert([
+            'idpersona' => $this->request->getPost('idpersona'),
+            'idetapa'   => $this->request->getPost('idetapa'),
+            'idusuario' => $usuario_id,
+            'estado'    => 'Nuevo',
+            'idcampania'=> $this->request->getPost('idcampania'),
+            'idmedio'   => $this->request->getPost('idmedio'),
+        ]);
+
+        return redirect()->to('leads');
     }
 
-    // 3️⃣ Registrar seguimiento
-    public function registrarSeguimiento($seguimientoData)
-    {
-        $model = new SeguimientoModel();
-        return $model->insert($seguimientoData);
-    }
-
-    // 4️⃣ Crear tarea
-    public function crearTarea($tareaData)
-    {
-        $model = new TareaModel();
-        return $model->insert($tareaData);
-    }
-
-    // 🔹 Método completo para crear todo el flujo de un lead
-    public function crearLeadCompleto()
-    {
-        // 1️⃣ Crear persona
-        $personaData = [
-            'nombres' => 'Luis',
-            'apellidos' => 'Martinez',
-            'dni' => '55667788',
-            'correo' => 'luis.martinez@gmail.com',
-            'telefono' => '999555666',
-            'direccion' => 'Av. Ejemplo 123',
-            'iddistrito' => 1
-        ];
-        $personaID = $this->crearPersona($personaData);
-
-        // 2️⃣ Crear lead
-        $leadData = [
-            'idpersona' => $personaID,
-            'idcampania' => 1,
-            'idmedio' => 1,
-            'idetapa' => 1,
-            'estado' => 'nuevo'
-        ];
-        $leadID = $this->crearLead($leadData);
-
-        // 3️⃣ Registrar seguimiento
-        $seguimientoData = [
-            'idlead' => $leadID,
-            'idusuario' => 2,
-            'idmodalidad' => 1,
-            'comentario' => 'Llamada realizada, interesado'
-        ];
-        $this->registrarSeguimiento($seguimientoData);
-
-        // 4️⃣ Crear tarea
-        $tareaData = [
-            'idusuario' => 2,
-            'idlead' => $leadID,
-            'descripcion' => 'Seguir contacto con Luis Martinez',
-            'fecha_programada' => '2025-09-05 10:00:00',
-            'estado' => 'pendiente'
-        ];
-        $this->crearTarea($tareaData);
-
-        return "Flujo completo de lead creado correctamente.";
-    }
-    public function pruebaLeadCompleto()
-{
-    // 1️⃣ Crear persona
-    $personaData = [
-        'nombres' => 'Luis',
-        'apellidos' => 'Martinez',
-        'dni' => '55667788',
-        'correo' => 'luis.martinez@gmail.com',
-        'telefono' => '999555666',
-        'direccion' => 'Av. Ejemplo 123',
-        'iddistrito' => 1
-    ];
-    $personaID = $this->crearPersona($personaData);
-
-    // 2️⃣ Crear lead
-    $leadData = [
-        'idpersona' => $personaID,
-        'idcampania' => 1,
-        'idmedio' => 1,
-        'idetapa' => 1,
-        'estado' => 'nuevo'
-    ];
-    $leadID = $this->crearLead($leadData);
-
-    // 3️⃣ Registrar seguimiento
-    $seguimientoData = [
-        'idlead' => $leadID,
-        'idusuario' => 2,
-        'idmodalidad' => 1,
-        'comentario' => 'Llamada realizada, interesado'
-    ];
-    $this->registrarSeguimiento($seguimientoData);
-
-    // 4️⃣ Crear tarea
-    $tareaData = [
-        'idusuario' => 2,
-        'idlead' => $leadID,
-        'descripcion' => 'Seguir contacto con Luis Martinez',
-        'fecha_programada' => '2025-09-05 10:00:00',
-        'estado' => 'pendiente'
-    ];
-    $this->crearTarea($tareaData);
-
-    // 5️⃣ Mostrar información completa en pantalla
-    echo "✅ Lead completo creado:<br>";
-    echo "Persona ID: $personaID <br>";
-    echo "Lead ID: $leadID <br>";
-    echo "<pre>";
-    print_r($personaData);
-    print_r($leadData);
-    print_r($seguimientoData);
-    print_r($tareaData);
-    echo "</pre>";
-}
 
 }

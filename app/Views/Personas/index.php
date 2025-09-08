@@ -83,6 +83,8 @@
               <td>
                 <a href="<?= site_url('personas/edit/'.$p['idpersona']) ?>" class="btn btn-sm btn-outline-warning">Editar</a>
                 <a href="<?= site_url('personas/delete/'.$p['idpersona']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar persona?')">Eliminar</a>
+                <a href="<?= site_url('leads/crear/'.$p['idpersona']) ?>" class="btn btn-sm btn-success" title="Convertir a Lead">
+                  <i class="bi bi-arrow-right-circle"></i> Lead
               </td>
             </tr>
           <?php endforeach; else: ?>

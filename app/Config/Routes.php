@@ -57,13 +57,11 @@ $routes->group('', ['filter' => 'auth'], function($routes){
 // ============================
 // LEADS
 // ============================
-$routes->get('leads/kanban', 'LeadController::kanban');             // Vista Kanban
-$routes->get('leads/crear', 'LeadController::crear');               // Crear lead
-$routes->post('leads/guardar', 'LeadController::guardar');         // Guardar lead
-$routes->get('leads/detalle/(:num)', 'LeadController::detalle/$1'); // Detalle de lead
-$routes->post('leads/eliminar', 'LeadController::eliminar');       
-$routes->post('leads/avanzar-etapa', 'LeadController::avanzarEtapa'); 
-$routes->get('leads/prueba-completo', 'LeadController::pruebaLeadCompleto');
+// Leads
+    $routes->get('leads', 'LeadController::index');          // Vista Kanban
+    $routes->get('leads/crear/(:num)', 'LeadController::crear/$1'); // Crear lead a partir de persona
+    $routes->post('leads/guardar', 'LeadController::guardar');
+
 
 // ============================
 // UBICACION (Departamentos / Provincias / Distritos)

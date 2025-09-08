@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="<?= base_url('assets/datatables.net-bs4/dataTables.bootstrap4.css')?>">
   <link rel="stylesheet" href="<?= base_url('assets/ti-icons/css/themify-icons.css')?>">
   <link rel="stylesheet" type="<?= base_url('text/css" href="js/select.dataTables.min.css')?>">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="<?= base_url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css')?>" rel="stylesheet">
 
   <!-- End plugin css for this page -->
   <!-- inject:css -->
@@ -29,7 +29,7 @@
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
       <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
         <a class="navbar-brand brand-logo mr-5" href="index.html"><img src="<?= base_url('images/logo-delafiber.png')?>" class="mr-2" alt="logo"/></a>
-        <a class="navbar-brand brand-logo-mini" href="index.html"><img src="images/logo-mini.svg" alt="logo"/></a>
+        <a class="navbar-brand brand-logo-mini" href="index.html"><img src="<?= base_url('images/logo-mini.svg')?> alt="logo"/></a>
       </div>
       <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
         <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -144,65 +144,98 @@
       <!-- partial -->
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
-        <ul class="nav">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html">
-              <i class="icon-grid menu-icon"></i>
-              <span class="menu-title">Inicio</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-              <i class="icon-layout menu-icon"></i>
-              <span class="menu-title">Procesos</span>
-              <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="ui-basic">
-              <ul class="nav flex-column sub-menu">
-                <li class="nav-item"> <a class="nav-link" href="<?= base_url('campanas')?>">Campañas</a></li>
-                <li class="nav-item"> <a class="nav-link" href="<?= base_url('leads')?>">Flujo de trabajo</a></li>
-              </ul>
-            </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
-              <i class="icon-columns menu-icon"></i>
-              <span class="menu-title">Módulos</span>
-              <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="form-elements">
-              <ul class="nav flex-column sub-menu">
-                <li class="nav-item"><a class="nav-link" href="<?= base_url('personas') ?>">Personas</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= base_url('usuarios') ?>">Usuarios</a></li> 
-              </ul>
-            </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
-              <i class="icon-bar-graph menu-icon"></i>
-              <span class="menu-title">Reportes</span>
-              <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="charts">
-              <ul class="nav flex-column sub-menu">
-                <li class="nav-item"> <a class="nav-link" href="#">ChartJs</a></li>
-              </ul>
-            </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="icon-paper menu-icon"></i>
-              <span class="menu-title">Documentación</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<?= site_url('logout') ?>">
-              <i class="ti-power-off text-primary"></i>
-              <span class="menu-title">Cerrar Sesión</span>
-            </a>
-          </li>
+  <ul class="nav">
+    <!-- Inicio -->
+    <li class="nav-item">
+      <a class="nav-link" href="<?= base_url('inicio') ?>">
+        <i class="icon-grid menu-icon"></i>
+        <span class="menu-title">Inicio</span>
+      </a>
+    </li>
+
+    <!-- Procesos -->
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#procesos" aria-expanded="false" aria-controls="procesos">
+        <i class="icon-layout menu-icon"></i>
+        <span class="menu-title">Procesos</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="procesos">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('campanas') ?>">Campañas</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('leads') ?>">Flujo de trabajo</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('oportunidades') ?>">Oportunidades</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('tareas') ?>">Tareas</a></li>
         </ul>
-      </nav>
+      </div>
+    </li>
+
+    <!-- Módulos -->
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#modulos" aria-expanded="false" aria-controls="modulos">
+        <i class="icon-columns menu-icon"></i>
+        <span class="menu-title">Módulos</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="modulos">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('personas') ?>">Personas</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('usuarios') ?>">Usuarios</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('clientes') ?>">Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('mensajes') ?>">Mensajes</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Reportes -->
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#reportes" aria-expanded="false" aria-controls="reportes">
+        <i class="icon-bar-graph menu-icon"></i>
+        <span class="menu-title">Reportes</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="reportes">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('dashboard') ?>">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('estadisticas') ?>">Estadísticas</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Configuración -->
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#configuracion" aria-expanded="false" aria-controls="configuracion">
+        <i class="icon-settings menu-icon"></i>
+        <span class="menu-title">Configuración</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="configuracion">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('roles') ?>">Roles & Permisos</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('integraciones') ?>">Integraciones</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('preferencias') ?>">Preferencias</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Documentación -->
+    <li class="nav-item">
+      <a class="nav-link" href="<?= base_url('documentacion') ?>">
+        <i class="icon-paper menu-icon"></i>
+        <span class="menu-title">Documentación</span>
+      </a>
+    </li>
+
+    <!-- Cerrar sesión -->
+    <li class="nav-item">
+      <a class="nav-link" href="<?= site_url('logout') ?>">
+        <i class="ti-power-off text-primary"></i>
+        <span class="menu-title">Cerrar Sesión</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+
       <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
