@@ -8,7 +8,7 @@ class LeadModel extends Model
     protected $table      = 'leads';
     protected $primaryKey = 'idlead';
     protected $allowedFields = ['idpersona', 'idcampania', 'idmedio', 'idetapa', 'idusuario', 'estado'];
-
+    public $timestamps = false;
     public function getLeadsConUsuarioYPersona()
     {
         return $this->db->table('leads')
@@ -18,4 +18,24 @@ class LeadModel extends Model
             ->get()
             ->getResult();
     }
+    public function getLeadsConTodo()
+    {
+        return $this->select('
+                leads.idlead,
+                leads.idetapa,
+                personas.nombres,
+                personas.apellidos,
+                personas.telefono,
+                personas.correo,
+                campanias.nombre as campana,
+                medios.nombre as medio,
+                usuarios.usuario
+            ')
+            ->join('personas', 'personas.idpersona = leads.idpersona')
+            ->join('usuarios', 'usuarios.idusuario = leads.idusuario')
+            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left')
+            ->join('medios', 'medios.idmedio = leads.idmedio', 'left')
+            ->findAll();
+    }
+
 }

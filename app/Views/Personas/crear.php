@@ -4,7 +4,6 @@
     <div class="my-2">
         <h3>Registro De Personas</h3>
         <a href="<?= base_url('personas');?>">Lista de personas</a>
-
     </div>
 
     <form action="<?= base_url('personas/guardar') ?>" id="form-persona" method="POST" autocomplete="off">
@@ -18,94 +17,56 @@
                     </div>
                 </div>
 
-                <!-- Apellidos Registro -->
-                 <div class=" row g-2">
+                <div class="row g-2">
                     <div class="col-md-6 mb-2">
-                        <label for="apellidos">Apellidos </label>
+                        <label for="apellidos">Apellidos</label>
                         <input type="text" class="form-control" name="apellidos" id="apellidos" required>
                     </div>
-                    <!-- Nombres Registros -->
                     <div class="col-md-6 mb-2">
                         <label for="nombres">Nombres</label>
                         <input type="text" class="form-control" name="nombres" id="nombres" required>
                     </div>
-                 </div>
-                 <div class="row g-2">
+                </div>
+
+                <div class="row g-2">
                     <div class="col-md-8 mb-2">
-                        <label for="Correo">Correo Electronico</label>
+                        <label for="correo">Correo Electronico</label>
                         <input type="text" class="form-control" name="correo" id="correo">
                     </div>
                     <div class="col-md-4 mb-2">
                         <label for="telefono">Telefono</label>
                         <input type="text" class="form-control" name="telefono" id="telefono" maxlength="9" pattern="[0-9]*" title="Solo se permiten números" required>
                     </div>
-                 </div>
-                 <div class="row g-2">
+                </div>
+
+                <div class="row g-2">
                     <div class="col-md-8 mb-2">
                         <label for="direccion">Direccion</label>
                         <input type="text" class="form-control" name="direccion" id="direccion">
                     </div>
                     <div class="col-md-4 mb-2">
-                    <label for="iddistrito">Distrito</label>
-                    <select class="form-control" name="iddistrito" id="iddistrito" required>
-                        <option value="">Seleccione...</option>
-                        <?php foreach ($distritos as $d): ?>
-                            <option value="<?= $d['iddistrito'] ?>">
-                                <?= $d['nombre'] ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                        <label for="iddistrito">Distrito</label>
+                        <select class="form-control" name="iddistrito" id="iddistrito" required>
+                            <option value="">Seleccione...</option>
+                            <?php foreach ($distritos as $d): ?>
+                                <option value="<?= $d['iddistrito'] ?>"><?= $d['nombre'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
-                 </div>
             </div>
             <div class="card-footer text-end">
                 <button class="btn btn-sm btn-outline-secondary" type="reset">Cancelar</button>
                 <button class="btn btn-sm btn-primary" type="submit">Guardar</button>
             </div>
         </div>
-
     </form>
-
 </div>
 
-<?= $footer ?>
+<!-- Definir base_url para el JS externo -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const dniInput = document.getElementById('dni');
-    const btnBuscar = document.getElementById('buscar-dni');
-    const apellidosInput = document.getElementById('apellidos');
-    const nombresInput = document.getElementById('nombres');
-    const buscando = document.getElementById('searching');
-
-    btnBuscar.addEventListener('click', async () => {
-        if(!dniInput.value){
-            alert('Ingrese un DNI');
-            return;
-        }
-
-        buscando.classList.remove('d-none');
-
-        try {
-            const res = await fetch(`<?= base_url() ?>api/personas/buscardni/${dniInput.value}`);
-            if(!res.ok) throw new Error('Error en la solicitud');
-
-            const data = await res.json();
-            buscando.classList.add('d-none');
-
-            if(data.success){
-                apellidosInput.value = `${data.apepaterno} ${data.apematerno}`;
-                nombresInput.value = data.nombres;
-            } else {
-                apellidosInput.value = '';
-                nombresInput.value = '';
-                alert(data.message || 'No se encontró la persona');
-            }
-        } catch(err){
-            buscando.classList.add('d-none');
-            console.error(err);
-            alert('Error al consultar el DNI');
-        }
-    });
-});
+    const base_url = "<?= base_url(); ?>";
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="<?= base_url('js/personas.js') ?>"></script>
+<?= $footer ?>

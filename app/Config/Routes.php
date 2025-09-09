@@ -14,13 +14,26 @@ $routes->get('/', 'Home::index');
 // ============================
 $routes->get('personas', 'PersonaController::index');               // Listado
 $routes->get('personas/crear', 'PersonaController::crear');         // Crear persona
-$routes->get('personas/editar/(:num)', 'PersonaController::form/$1'); // Editar persona
+$routes->get('personas/editar/(:num)', 'PersonaController::crear/$1'); // Editar persona
 $routes->post('personas/guardar', 'PersonaController::guardar');   // Guardar persona
-$routes->post('personas/eliminar', 'PersonaController::eliminar'); // Eliminar persona
+$routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1'); // Eliminar persona
 $routes->get('persona/convertir-a-lead/(:num)', 'PersonaController::convertirALead/$1'); // Convertir persona a lead
+$routes->get('leads/registrar/(:num)', 'LeadController::registrar/$1');
+$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
+$routes->post('personas/guardar', 'PersonaController::guardar');
+// app/Config/Routes.php
+// Lead modal
+$routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
+
+
+
+$routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
+$routes->post('leads/guardar', 'LeadController::guardar');
 
 // API para búsqueda DNI
 $routes->get('api/personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
+
+
 
 // ============================
 // CAMPANAS
@@ -60,7 +73,11 @@ $routes->group('', ['filter' => 'auth'], function($routes){
 // Leads
     $routes->get('leads', 'LeadController::index');          // Vista Kanban
     $routes->get('leads/crear/(:num)', 'LeadController::crear/$1'); // Crear lead a partir de persona
-    $routes->post('leads/guardar', 'LeadController::guardar');
+$routes->post('lead/guardar', 'LeadController::guardar');  // alias en singular
+$routes->post('leads/guardar', 'LeadController::guardar'); // oficial en plural
+
+
+
 
 
 // ============================

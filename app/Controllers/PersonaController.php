@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\DepartamentoModel;
 use App\Models\DistritoModel;
+use App\Models\LeadModel;
 use App\Models\PersonaModel;
 
 class PersonaController extends BaseController
@@ -22,34 +23,67 @@ class PersonaController extends BaseController
         $datos['footer'] = view('Layouts/footer');
         return view('personas/index', $datos);
     }
-    public function crear(){
+    public function crear()
+{
+    $departamento = new DepartamentoModel();
+    $distrito = new DistritoModel();
 
-        $departamento = new DepartamentoModel();
-        $distrito = new DistritoModel();
+    $datos['departamentos'] = $departamento->findAll();
+    $datos['distritos'] = $distrito->findAll();
+    $datos['header'] = view('Layouts/header');
+    $datos['footer'] = view('Layouts/footer');
 
-        $datos['departamentos'] = $departamento->findAll();
-        $datos['distritos'] = $distrito->findAll();
-        $datos['header'] = view('Layouts/header');
-        $datos['footer'] = view('Layouts/footer');
+    return view('personas/crear', $datos);
+}
 
-        return view('Personas/crear', $datos);
+public function editar($id)
+{
+    $persona = $this->personaModel->find($id);
+
+    if (!$persona) {
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Persona no encontrada");
     }
-    public function guardar(){
 
-        $persona = new PersonaModel();
-        $data = [
-            'dni'       => $this->request->getPost('dni'),
-            'apellidos' => $this->request->getPost('apellidos'),
-            'nombres'   => $this->request->getPost('nombres'),
-            'telefono'  => $this->request->getPost('telefono'),
-            'correo'    => $this->request->getPost('correo'),
-            'iddistrito'=> $this->request->getPost('iddistrito'),
-            'direccion' => $this->request->getPost('direccion'),
-        ];
+    $departamento = new DepartamentoModel();
+    $distrito = new DistritoModel();
 
-        $idpersona = $persona->insert($data); // Guardamos persona y obtenemos el ID
-        return redirect()->to('leads/crear/' . $idpersona);   
+    $datos['persona'] = $persona;
+    $datos['departamentos'] = $departamento->findAll();
+    $datos['distritos'] = $distrito->findAll();
+    $datos['header'] = view('Layouts/header');
+    $datos['footer'] = view('Layouts/footer');
+
+    return view('personas/crear', $datos); // reutiliza la misma vista
+}
+
+public function guardar()
+{
+    $personaModel = new PersonaModel();
+    $data = [
+        'dni' => $this->request->getPost('dni'),
+        'apellidos' => $this->request->getPost('apellidos'),
+        'nombres' => $this->request->getPost('nombres'),
+        'correo' => $this->request->getPost('correo'),
+        'telefono' => $this->request->getPost('telefono'),
+        'direccion' => $this->request->getPost('direccion'),
+        'iddistrito' => $this->request->getPost('iddistrito'),
+    ];
+
+    $id = $personaModel->insert($data);
+
+    if ($id) {
+        return $this->response->setJSON([
+            'success' => true,
+            'idpersona' => $id
+        ]);
+    } else {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'No se pudo registrar la persona'
+        ]);
     }
+}
+
     public function BuscadorDni($dni = "")
     {
         $api_endpoint = "https://api.decolecta.com/v1/reniec/dni?numero=" . $dni;
@@ -89,4 +123,18 @@ class PersonaController extends BaseController
             'nombres'     => $decoded_response['first_name'] ?? ''
         ]);
     }
+    public function eliminar($id)
+    {
+        $leadModel = new LeadModel();
+
+        $tieneLeads = $leadModel->where('idpersona', $id)->countAllResults();
+
+        if ($tieneLeads > 0) {
+            return redirect()->to('personas')->with('error', 'No se puede eliminar la persona porque tiene leads asociados.');
+        }
+
+        $this->personaModel->delete($id);
+        return redirect()->to('personas')->with('success', 'Persona eliminada correctamente.');
+    }
+
 }

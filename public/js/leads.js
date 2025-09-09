@@ -1,120 +1,100 @@
 $(function () {
 
     // ==========================
-    // Función auxiliar para URLs
+    // Helper para armar URL
     // ==========================
     function u(path) {
         return (base_url.endsWith('/') ? base_url : base_url + '/') + path.replace(/^\/+/, '');
     }
 
     // ==========================
-    // Inicializar eventos de tarjetas
+    // Buscar persona por DNI
+    // ==========================
+    $("#btnBuscarDni").on("click", function () {
+        let dni = $("#dni").val().trim();
+        if (dni.length < 8) {
+            alert("Ingrese un DNI válido (8 dígitos)");
+            return;
+        }
+
+        $.get(u("api/personas/buscardni/" + dni), function (data) {
+            if (data.success) {
+                $("#nombres").val(data.nombres);
+                $("#apellidos").val(data.apepaterno + " " + data.apematerno);
+                $("#telefono").val(data.telefono || "");
+                $("#correo").val(data.correo || "");
+            } else {
+                alert("No se encontró persona, complete los datos manualmente.");
+            }
+        }, "json");
+    });
+
+    // ==========================
+    // Guardar Lead
+    // ==========================
+    $(document).on("submit", "#leadForm", function (e) {
+        e.preventDefault();
+
+        $.post($(this).attr("action"), $(this).serialize(), function (res) {
+            if (res.success) {
+                alert("✅ Lead registrado correctamente");
+                $("#leadModal").modal("hide");
+
+                // Agregar tarjeta al Kanban (sin recargar toda la página)
+                const leadCard = `
+                    <div class="kanban-card"
+                         id="kanban-card-${res.idlead}"
+                         data-id="${res.idlead}"
+                         draggable="true"
+                         style="border-left: 5px solid #007bff;">
+                        <div class="card-title">
+                            ${res.persona.nombres} ${res.persona.apellidos}
+                        </div>
+                        <div class="card-info">
+                            ${res.persona.telefono ?? ""}<br>
+                            ${res.persona.correo ?? ""}
+                        </div>
+                    </div>`;
+
+                // Insertar en la columna de la etapa inicial
+                $("#kanban-column-" + res.idetapa).append(leadCard);
+
+                // Re-inicializar eventos
+                initKanbanCards();
+
+            } else {
+                alert(res.message || "Error al registrar Lead");
+            }
+        }, "json");
+    });
+
+    // ==========================
+    // Inicializar eventos de tarjetas (detalle / drag)
     // ==========================
     function initKanbanCards() {
-
         // Abrir modal detalle
-        $(document).off('click', '.kanban-card').on('click', '.kanban-card', function() {
-            const idlead = $(this).data('id');
-            if(!idlead) return;
+        $(document).off("click", ".kanban-card").on("click", ".kanban-card", function () {
+            const idlead = $(this).data("id");
+            if (!idlead) return;
 
-            $.get(u('lead/detalle/' + idlead))
-                .done(function(html) {
-                    $('#modalContainer').html(html);
-                    const modalEl = document.getElementById('modalLeadDetalle');
-                    if(modalEl){
+            $.get(u("lead/detalle/" + idlead))
+                .done(function (html) {
+                    $("#modalContainer").html(html);
+                    const modalEl = document.getElementById("modalLeadDetalle");
+                    if (modalEl) {
                         const modal = new bootstrap.Modal(modalEl);
                         modal.show();
                     }
                 })
-                .fail(function(xhr) {
-                    console.error('Error AJAX al cargar detalle:', xhr.status, xhr.statusText);
-                    alert('No se pudo cargar el detalle del Lead');
+                .fail(function () {
+                    alert("Error al cargar detalle del Lead");
                 });
         });
 
-        // Hacer tarjetas arrastrables
-        $('.kanban-card').attr('draggable', true);
+        // Hacer arrastrables
+        $(".kanban-card").attr("draggable", true);
     }
 
+    // Llamar al iniciar
     initKanbanCards();
-
-    // ==========================
-    // Drag & Drop Kanban
-    // ==========================
-    let draggedCard = null;
-
-    $(document).on('dragstart', '.kanban-card', function() {
-        draggedCard = this;
-        $(this).addClass('dragging');
-    });
-
-    $(document).on('dragend', '.kanban-card', function() {
-        $(this).removeClass('dragging');
-        draggedCard = null;
-    });
-
-    $(document).on('dragover', '.kanban-column', function(e) {
-        e.preventDefault();
-        $(this).addClass('dragover');
-    });
-
-    $(document).on('dragleave', '.kanban-column', function() {
-        $(this).removeClass('dragover');
-    });
-
-    $(document).on('drop', '.kanban-column', function() {
-        $(this).removeClass('dragover');
-        if (!draggedCard) return;
-
-        const newEtapa = $(this).data('etapa');
-        const idlead = $(draggedCard).data('id');
-
-        $(this).append(draggedCard);
-
-        $.post(u('lead/avanzarEtapa'), { idlead, idetapa: newEtapa }, function(res) {
-            if(!res.success){
-                alert('Error al mover Lead');
-            }
-        }, 'json');
-    });
-
-    // ==========================
-    // Convertir persona a Lead
-    // ==========================
-    $(document).on('click', '.btn-convertir-lead', function() {
-        const idpersona = $(this).data('idpersona');
-        if(!idpersona) return;
-
-        // Redirigir directamente al controller para evitar CSRF
-        window.location.href = u('persona/convertirALead/' + idpersona);
-    });
-
-    // ==========================
-    // Desistir / Eliminar Lead
-    // ==========================
-        
-    $(document).on('click', '.btn-desistir', function() {
-        const idlead = $(this).data('idlead');
-        if(!idlead) return;
-
-        if(!confirm('¿Desea desistir / eliminar este Lead?')) return;
-
-        $.post(u('lead/eliminar'), { idlead }, function(res) {
-            if(res.success){
-                // Elimina visualmente la tarjeta del Kanban
-                $('#kanban-card-' + idlead).fadeOut(400, function(){
-                    $(this).remove();
-                });
-                // Cierra el modal si estaba abierto
-                const modalEl = document.getElementById('modalLeadDetalle');
-                if(modalEl){
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
-                }
-            } else {
-                alert('Error al desistir Lead');
-            }
-        }, 'json');
-    });
-
 });
