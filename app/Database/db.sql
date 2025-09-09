@@ -135,6 +135,9 @@ ALTER TABLE leads
 ADD COLUMN idusuario INT AFTER idetapa;
 
 ALTER TABLE leads
+ADD COLUMN referido_por VARCHAR(255) NULL AFTER idmedio;
+
+ALTER TABLE leads
 ADD CONSTRAINT fk_leads_usuarios 
 FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario);
 
@@ -207,6 +210,7 @@ INSERT INTO campanias (nombre, descripcion, fecha_inicio, fecha_fin, presupuesto
 INSERT INTO medios (nombre, descripcion) VALUES
 ('Facebook Ads', 'Publicidad en Facebook'),
 ('Volanteo en Chincha', 'Distribución de volantes en la ciudad');
+INSERT INTO medios (nombre, descripcion) VALUES ('Referido', 'Lead por recomendación');
 
 
 INSERT INTO difusiones (idcampania, idmedio) VALUES

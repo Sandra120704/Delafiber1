@@ -12,25 +12,25 @@ class LeadController extends BaseController
 {
     protected $leadModel;
     protected $personaModel;
+    protected $campanaModel;
+    protected $medioModel;
+    protected $etapaModel;
 
     public function __construct()
     {
-        $this->leadModel = new LeadModel();
+        $this->leadModel    = new LeadModel();
         $this->personaModel = new PersonaModel();
+        $this->campanaModel = new CampanaModel();
+        $this->medioModel   = new MedioModel();
+        $this->etapaModel   = new EtapaModel();
     }
 
     public function index()
     {
-        $etapaModel    = new EtapaModel();
-        $campaniaModel = new CampanaModel();
-        $medioModel    = new MedioModel();
+        $data['etapas']    = $this->etapaModel->findAll();
+        $data['campanias'] = $this->campanaModel->findAll();
+        $data['medios']    = $this->medioModel->findAll();
 
-        // Datos para selects
-        $data['etapas']    = $etapaModel->findAll();
-        $data['campanias'] = $campaniaModel->findAll();
-        $data['medios']    = $medioModel->findAll();
-
-        // Leads con joins
         $builder = $this->leadModel->builder();
         $builder->select('
             leads.idlead,
@@ -52,81 +52,58 @@ class LeadController extends BaseController
 
         $leads = $builder->get()->getResultArray();
 
-        // Agrupar por etapa
         $leadsPorEtapa = [];
         foreach ($leads as $lead) {
             $leadsPorEtapa[$lead['idetapa']][] = $lead;
         }
         $data['leadsPorEtapa'] = $leadsPorEtapa;
 
-        // Header/footer
         $data['header'] = view('Layouts/header');
         $data['footer'] = view('Layouts/footer');
 
         return view('leads/index', $data);
     }
 
-    public function crear($idpersona)
-    {
-        $personaModel = new PersonaModel();
-        $etapaModel   = new EtapaModel();
-        $campaniaModel = new CampanaModel();
-        $medioModel    = new MedioModel();
-
-        $data['persona']  = $personaModel->find($idpersona);
-        $data['etapas']   = $etapaModel->findAll();
-        $data['campanas'] = $campaniaModel->findAll();
-        $data['medios']   = $medioModel->findAll();
-
-        return view('leads/modals', $data); // 👈 nueva vista SOLO con el form
-    }
-
-
-   public function guardar()
-{
-    $idpersona  = $this->request->getPost('idpersona');
-    $idcampania = $this->request->getPost('idcampania');
-    $idmedio    = $this->request->getPost('idmedio');
-
-    // Obtener la etapa inicial del pipeline principal
-    $etapaModel = new \App\Models\EtapaModel();
-    $etapaInicial = $etapaModel->where('orden', 1)->first(); // primera etapa del pipeline
-    $idetapa = $etapaInicial['idetapa'] ?? null;
-
-    if(!$idetapa){
-        return redirect()->back()->with('error', 'No se encontró etapa inicial.');
-    }
-
-    $data = [
-        'idpersona'  => $idpersona,
-        'idcampania' => $idcampania,
-        'idmedio'    => $idmedio,
-        'idetapa'    => $idetapa,
-        'fecha_registro' => date('Y-m-d H:i:s'),
-        'estado'     => 'nuevo',
-        'idusuario'  => session()->get('idusuario') ?? null,
-    ];
-
-    $this->leadModel->insert($data);
-
-    return redirect()->to('personas')->with('success', 'Lead registrado correctamente.');
-}
-
-// LeadController.php
+    // Función única para abrir el modal
     public function modalCrear($idpersona)
     {
-        $personaModel = new PersonaModel();
-        $campanaModel = new CampanaModel();
-        $medioModel   = new MedioModel();
-        $etapaModel   = new EtapaModel();
+        $data['persona']  = $this->personaModel->find($idpersona) ?? [];
+        $data['campanas'] = $this->campanaModel->findAll();
+        $data['medios']   = $this->medioModel->findAll();
+        $data['etapas']   = $this->etapaModel->findAll();
 
-        $data['persona'] = $personaModel->find($idpersona);
-        $data['campanas'] = $campanaModel->findAll();
-        $data['medios'] = $medioModel->findAll();
-        $data['etapas'] = $etapaModel->findAll();
-
-        return view('leads/modals', $data); // solo el contenido del modal
+        return view('leads/modals', $data);
     }
 
+    public function guardar()
+    {
+        $idpersona    = $this->request->getPost('idpersona');
+        $idcampania   = $this->request->getPost('idcampana') ?? null;
+        $idmedio      = $this->request->getPost('idmedio') ?? null;
+        $referido_por = $this->request->getPost('referido_por');
+        $origen       = $this->request->getPost('origen');
 
+        $etapaInicial = $this->etapaModel->where('orden', 1)->first();
+        $idetapa = $etapaInicial['idetapa'] ?? null;
+
+        if(!$idetapa){
+            return redirect()->back()->with('error', 'No se encontró etapa inicial.');
+        }
+
+        $data = [
+            'idpersona'        => $idpersona,
+            'idcampania'       => ($origen === 'campania') ? $idcampania : null,
+            'idmedio'          => ($origen === 'referido') ? 3 : $idmedio,
+            'idetapa'          => $idetapa,
+            'referido_por'     => ($origen === 'referido') ? $referido_por : null,
+            'fecha_registro'   => date('Y-m-d H:i:s'),
+            'estado'           => 'nuevo',
+            'idusuario'        => null,
+            'idusuario_registro'=> session()->get('idusuario'),
+        ];
+
+        $this->leadModel->insert($data);
+
+        return redirect()->to('personas')->with('success', 'Lead registrado correctamente.');
+    }
 }

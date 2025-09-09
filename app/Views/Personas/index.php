@@ -26,6 +26,7 @@
 .table-hover tbody tr:hover { background:#f8f9fa; }
 .small-muted { font-size:.85rem; color:#6c757d; }
 </style>
+
 <div class="d-flex justify-content-center py-5">
   <div class="main-card p-4">
 
@@ -87,11 +88,10 @@
               <td class="d-flex gap-1">
                 <a href="<?= site_url('personas/editar/'.$p['idpersona']) ?>" class="btn btn-sm btn-outline-warning">Editar</a>
                 <a href="<?= site_url('personas/eliminar/'.$p['idpersona']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar persona?')">Eliminar</a>
-                <a href="javascript:void(0)" 
-                   class="btn btn-sm btn-success btn-convertir-lead" 
-                   data-id="<?= $p['idpersona'] ?>">
-                   <i class="bi bi-arrow-right-circle"></i> Lead
-                </a>
+                <button type="button" class="btn btn-sm btn-success btn-convertir-lead" 
+                        data-id="<?= $p['idpersona'] ?>" title="Convertir en Lead">
+                  <i class="bi bi-arrow-right-circle"></i> Lead
+                </button>
               </td>
             </tr>
           <?php endforeach; else: ?>
@@ -106,29 +106,30 @@
   </div>
 </div>
 
-<!-- Modal para Lead -->
-<div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <link rel="stylesheet" href="<?= base_url('css/.css') ?>">
-    <div class="modal-content" id="leadModalContent">
-      <!-- Se carga dinámicamente -->
-    </div>
-  </div>
-</div>
+<!-- Contenedor del modal -->
+<div id="modalContainer"></div>
 
 <script>
+// Evento para abrir modal de convertir Lead
 document.querySelectorAll('.btn-convertir-lead').forEach(btn => {
-    btn.addEventListener('click', function(){
-        const idpersona = this.dataset.id;
-        fetch(`<?= site_url('leads/modals/') ?>${idpersona}`)
-            .then(res => res.text())
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        fetch(`<?= base_url('leads/modals') ?>/${id}`)
+            .then(response => response.text())
             .then(html => {
-                document.getElementById('leadModalContent').innerHTML = html;
-                new bootstrap.Modal(document.getElementById('leadModal')).show();
+                document.getElementById('modalContainer').innerHTML = html;
+                const modalEl = document.getElementById('leadModal');
+                if(modalEl){
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                } else {
+                    console.error('No se encontró el modal en el HTML');
+                }
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error('Error al cargar modal:', err));
     });
 });
+
 </script>
 
 <?= $footer ?>

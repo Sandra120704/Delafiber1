@@ -7,7 +7,18 @@ class LeadModel extends Model
 {
     protected $table      = 'leads';
     protected $primaryKey = 'idlead';
-    protected $allowedFields = ['idpersona', 'idcampania', 'idmedio', 'idetapa', 'idusuario', 'estado'];
+    protected $allowedFields = [
+    'idpersona',
+    'idcampania',
+    'idmedio',
+    'idetapa',
+    'referido_por',
+    'fecha_registro',
+    'estado',
+    'idusuario',
+    'idusuario_registro'
+];
+
     public $timestamps = false;
     public function getLeadsConUsuarioYPersona()
     {
