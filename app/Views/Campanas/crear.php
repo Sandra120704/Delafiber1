@@ -110,8 +110,79 @@
     </div>
   </div>
 </div>
-
-
 <?= $footer ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Agregar Medio - clona un nuevo medio-row dentro de mediosContainer
+  const agregarMedioBtn = document.getElementById('agregarMedioBtn');
+  const mediosContainer = document.getElementById('mediosContainer');
+
+  agregarMedioBtn.addEventListener('click', function() {
+    const nuevoMedioRow = document.querySelector('.medio-row').cloneNode(true);
+    // Limpiar valores del nuevo row
+    nuevoMedioRow.querySelector('select').value = '';
+    nuevoMedioRow.querySelector('input').value = '';
+    mediosContainer.appendChild(nuevoMedioRow);
+    agregarEliminarEvent(nuevoMedioRow);
+  });
+
+  // Función para añadir evento eliminar a los botones eliminar
+  function agregarEliminarEvent(medioRow) {
+    const btnEliminar = medioRow.querySelector('.eliminarMedio');
+    btnEliminar.addEventListener('click', function() {
+      if(document.querySelectorAll('.medio-row').length > 1) {
+        medioRow.remove();
+      } else {
+        alert('Debe haber al menos un medio');
+      }
+    });
+  }
+
+  // Añadir evento eliminar al medio original
+  document.querySelectorAll('.medio-row').forEach(row => {
+    agregarEliminarEvent(row);
+  });
+
+  // Abrir modal para Nuevo Medio
+  const nuevoMedioBtn = document.getElementById('nuevoMedioBtn');
+  const modalNuevoMedio = new bootstrap.Modal(document.getElementById('modalNuevoMedio'));
+
+  nuevoMedioBtn.addEventListener('click', function() {
+    modalNuevoMedio.show();
+  });
+
+  // Guardar Nuevo Medio (debes implementar la lógica AJAX o formulario para guardar realmente)
+  const guardarMedioBtn = document.getElementById('guardarMedioBtn');
+  guardarMedioBtn.addEventListener('click', function() {
+    const nombre = document.getElementById('nombreMedio').value.trim();
+    const descripcion = document.getElementById('descMedio').value.trim();
+
+    if(nombre === '') {
+      alert('El nombre del medio es obligatorio');
+      return;
+    }
+
+    // Aquí deberías hacer un AJAX para guardar el medio en la base de datos
+    // Por ahora solo cierro el modal y agrego el medio nuevo a los select
+
+    // Agregar nuevo medio a todos los selects de medios
+    const nuevosSelects = document.querySelectorAll('select[name="medios[]"]');
+    nuevosSelects.forEach(select => {
+      const option = document.createElement('option');
+      option.value = 'nuevo'; // Cambiar al ID real que devuelva la DB
+      option.textContent = nombre;
+      select.appendChild(option);
+    });
+
+    // Limpiar y cerrar modal
+    document.getElementById('nombreMedio').value = '';
+    document.getElementById('descMedio').value = '';
+    modalNuevoMedio.hide();
+
+    alert('Medio agregado (simulado). Implementa el guardado en backend.');
+  });
+});
+</script>
+
 
 

@@ -14,7 +14,7 @@
 
 /* Botón "Nueva Persona" */
 #btnNuevaPersona {
-    background: linear-gradient(135deg, #8f6bb5, #eaa1c1); /* morado-rosado pastel corporativo */
+    background: linear-gradient(135deg, #8f6bb5, #ffffff); /* morado-rosado pastel corporativo */
     border: none;
     color: #fff;
     padding: 0.5rem 1rem;
@@ -25,7 +25,7 @@
 }
 
 #btnNuevaPersona:hover {
-    background: linear-gradient(135deg, #7e589e, #e78fae);
+    background: linear-gradient(135deg, #7e589e, #ffffff);
     transform: translateY(-2px);
 }
 
@@ -78,7 +78,7 @@
 
 /* Botones de acción */
 .btn-edit {
-    background: linear-gradient(135deg, #a78ed1, #eaa1c1);
+    background: linear-gradient(135deg, #a78ed1, #ffffff);
     border: none;
     color: #fff;
     padding: 0.3rem 0.7rem;
@@ -89,7 +89,7 @@
 }
 
 .btn-edit:hover {
-    background: linear-gradient(135deg, #9067b5, #e78fae);
+    background: linear-gradient(135deg, #9067b5, #ffffff);
     transform: translateY(-1px);
 }
 

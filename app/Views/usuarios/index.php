@@ -1,5 +1,5 @@
 <?= $header ?>
-<link rel="stylesheet" href="<?= base_url('css/usuarios.css') ?>">
+<!-- <link rel="stylesheet" href="<?= base_url('css/usuarios.css') ?>"> -->
 
 <div class="container mt-4">
     <h2>Usuarios</h2>

@@ -1,7 +1,7 @@
 <div class="card mt-4">
     <div class="card-header d-flex justify-content-between">
         <h5>Nuevo Usuario</h5>
-        <button id="btnVolverLista" class="btn btn-secondary btn-sm">🔙 Volver</button>
+        <button id="btnVolverLista" class="btn btn-secondary btn-sm">Volver</button>
     </div>
     <div class="card-body">
         <form id="formUsuario" action="<?= base_url('usuarios/guardar') ?>" method="POST">

@@ -15,7 +15,7 @@
 
 /* Botón "Nuevo Usuario" */
 #btnNuevoUsuario {
-    background: linear-gradient(135deg, #a8c0ff, #f6c1c1); /* degradado pastel morado-rosado */
+    background: linear-gradient(135deg, #a8c0ff, #ffffff); /* degradado pastel morado-rosado */
     border: none;
     color: #fff;
     padding: 0.5rem 1.2rem;
@@ -26,7 +26,7 @@
 }
 
 #btnNuevoUsuario:hover {
-    background: linear-gradient(135deg, #8fa3e0, #f2a5a5);
+    background: linear-gradient(135deg, #8fa3e0, #ffffff);
     transform: translateY(-2px);
 }
 

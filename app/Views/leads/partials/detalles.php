@@ -1,42 +1,67 @@
-<div class="modal fade" id="modalLeadDetalle" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-md"> 
+<div class="modal fade" id="modalLeadDetalle" tabindex="-1">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
+
       <div class="modal-header">
-        <h5 class="modal-title"><?= htmlspecialchars($lead['nombres'] . ' ' . $lead['apellidos']) ?></h5>
+        <h5 class="modal-title">
+          <?= esc($lead['nombres'] ?? '-') ?> <?= esc($lead['apellidos'] ?? '-') ?>
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
-        <p><strong>Teléfono:</strong> <?= htmlspecialchars($lead['telefono'] ?? '') ?></p>
-        <p><strong>Email:</strong> <?= htmlspecialchars($lead['correo'] ?? '') ?></p>
-        <p><strong>Campaña:</strong> <?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></p>
 
-        <hr>
-        <h6>Seguimientos:</h6>
-        <?php if (!empty($seguimientos)): ?>
-            <ul>
-                <?php foreach ($seguimientos as $s): ?>
-                    <li><?= htmlspecialchars($s['comentario'] ?? '') ?> (<?= $s['fecha'] ?? '' ?>)</li>
-                <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p>No hay seguimientos.</p>
-        <?php endif; ?>
+        <div class="mb-3">
+          <strong>Teléfono:</strong> <?= esc($lead['telefono'] ?? '-') ?><br>
+          <strong>Correo:</strong> <?= esc($lead['correo'] ?? '-') ?><br>
+          <strong>Campaña:</strong> <?= esc($lead['campania'] ?? '-') ?><br>
+          <strong>Medio:</strong> <?= esc($lead['medio'] ?? '-') ?><br>
+          <strong>Usuario asignado:</strong> <?= esc($lead['usuario'] ?? '-') ?>
+        </div>
 
-        <hr>
-        <h6>Tareas:</h6>
-        <?php if (!empty($tareas)): ?>
-            <ul>
-                <?php foreach ($tareas as $t): ?>
-                    <li><?= htmlspecialchars($t['descripcion'] ?? '') ?> - <?= htmlspecialchars($t['nombre_usuario'] ?? '') ?> (<?= $t['fecha_vencimiento'] ?? '' ?>)</li>
-                <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p>No hay tareas.</p>
-        <?php endif; ?>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-danger btn-desistir" data-idlead="<?= $lead['idlead'] ?>">Desistir</button>
+        <h6>Tareas</h6>
+        <ul id="listaTareas">
+          <?php if (!empty($tareas)): ?>
+            <?php foreach ($tareas as $t): ?>
+              <li><?= esc($t['descripcion']) ?> - <?= date('d/m/Y H:i', strtotime($t['fecha_registro'])) ?></li>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <li class="text-muted">No hay tareas registradas</li>
+          <?php endif; ?>
+        </ul>
+
+        <form id="tareaForm">
+          <input type="hidden" id="tareaIdLead" value="<?= $lead['idlead'] ?>">
+          <input type="text" name="descripcion" placeholder="Nueva tarea" class="form-control mb-2" required>
+          <button type="submit" class="btn btn-primary btn-sm">Agregar tarea</button>
+        </form>
+
+        <h6 class="mt-3">Seguimientos</h6>
+        <ul id="listaSeguimientos">
+          <?php if (!empty($seguimientos)): ?>
+            <?php foreach ($seguimientos as $s): ?>
+              <li><?= esc($s['comentario']) ?> - <?= date('d/m/Y H:i', strtotime($s['fecha'])) ?></li>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <li class="text-muted">No hay seguimientos registrados</li>
+          <?php endif; ?>
+        </ul>
+
+        <form id="seguimientoForm" class="mt-2">
+          <div class="mb-2">
+            <select name="idmodalidad" class="form-select" required>
+              <option value="">Seleccione modalidad</option>
+              <?php foreach($modalidades as $m): ?>
+                <option value="<?= $m['idmodalidad'] ?>"><?= esc($m['nombre']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <textarea name="comentario" class="form-control mb-2" placeholder="Nuevo seguimiento" required></textarea>
+          <button type="submit" class="btn btn-success btn-sm">Agregar seguimiento</button>
+        </form>
+
+        <button id="btnDesistirLead" class="btn btn-danger mt-3">Desistir Lead</button>
+
       </div>
     </div>
   </div>

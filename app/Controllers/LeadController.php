@@ -6,6 +6,8 @@ use App\Models\CampanaModel;
 use App\Models\LeadModel;
 use App\Models\EtapaModel;
 use App\Models\MedioModel;
+use App\Models\ModalidadesModel;
+use App\Models\Origen;
 use App\Models\PersonaModel;
 use App\Models\SeguimientoModel;
 use App\Models\TareaModel;
@@ -17,14 +19,20 @@ class LeadController extends BaseController
     protected $campanaModel;
     protected $medioModel;
     protected $etapaModel;
+    protected $tareaModel;
+    protected $seguimientoModel;
+    protected $modalidadesModel;
 
     public function __construct()
     {
-        $this->leadModel    = new LeadModel();
-        $this->personaModel = new PersonaModel();
-        $this->campanaModel = new CampanaModel();
-        $this->medioModel   = new MedioModel();
-        $this->etapaModel   = new EtapaModel();
+        $this->leadModel       = new LeadModel();
+        $this->personaModel    = new PersonaModel();
+        $this->campanaModel    = new CampanaModel();
+        $this->medioModel      = new MedioModel();
+        $this->etapaModel      = new EtapaModel();
+        $this->tareaModel      = new TareaModel();
+        $this->seguimientoModel = new SeguimientoModel();
+        $this->modalidadesModel = new ModalidadesModel();
     }
 
     public function index()
@@ -37,6 +45,7 @@ class LeadController extends BaseController
         $builder->select('
             leads.idlead,
             leads.idetapa,
+            leads.estado,
             etapas.nombre as etapa,
             personas.nombres,
             personas.apellidos,
@@ -51,11 +60,13 @@ class LeadController extends BaseController
         $builder->join('campanias', 'campanias.idcampania = leads.idcampania', 'left');
         $builder->join('medios', 'medios.idmedio = leads.idmedio', 'left');
         $builder->join('etapas', 'etapas.idetapa = leads.idetapa', 'left');
+        $builder->where('leads.estado !=', 'desistido'); // SOLO activos
 
         $leads = $builder->get()->getResultArray();
 
         $leadsPorEtapa = [];
         foreach ($leads as $lead) {
+            $lead['estatus_color'] = '#007bff'; // color por defecto
             $leadsPorEtapa[$lead['idetapa']][] = $lead;
         }
         $data['leadsPorEtapa'] = $leadsPorEtapa;
@@ -66,76 +77,95 @@ class LeadController extends BaseController
         return view('leads/index', $data);
     }
 
-    // Función única para abrir el modal
     public function modalCrear($idpersona)
     {
-        $data['persona']  = $this->personaModel->find($idpersona) ?? [];
-        $data['campanas'] = $this->campanaModel->findAll();
-        $data['medios']   = $this->medioModel->findAll();
-        $data['etapas']   = $this->etapaModel->findAll();
+        $personaModel     = new PersonaModel();
+        $campaniaModel    = new CampanaModel();
+        $medioModel       = new MedioModel();
+        $modalidadModel   = new ModalidadesModel();
+        $origenModel      = new Origen();
 
-        return view('leads/modals', $data);
+        $persona      = $personaModel->find($idpersona);
+        $campanas     = $campaniaModel->findAll();
+        $medios       = $medioModel->findAll();
+        $modalidades  = $modalidadModel->findAll();
+        $origenes     = $origenModel->findAll();
+
+        return view('leads/modals', [
+            'persona'      => $persona,
+            'campanas'     => $campanas,
+            'medios'       => $medios,
+            'modalidades'  => $modalidades,
+            'origenes'     => $origenes
+        ]);
     }
 
     public function guardar()
     {
-        $idpersona    = $this->request->getPost('idpersona');
-        $idcampania   = $this->request->getPost('idcampana') ?? null;
-        $idmedio      = $this->request->getPost('idmedio') ?? null;
-        $referido_por = $this->request->getPost('referido_por');
-        $origen       = $this->request->getPost('origen');
-
-        $etapaInicial = $this->etapaModel->where('orden', 1)->first();
-        $idetapa = $etapaInicial['idetapa'] ?? null;
-
-        if(!$idetapa){
-            return redirect()->back()->with('error', 'No se encontró etapa inicial.');
-        }
-
         $data = [
-            'idpersona'        => $idpersona,
-            'idcampania'       => ($origen === 'campania') ? $idcampania : null,
-            'idmedio'          => ($origen === 'referido') ? 3 : $idmedio,
-            'idetapa'          => $idetapa,
-            'referido_por'     => ($origen === 'referido') ? $referido_por : null,
-            'fecha_registro'   => date('Y-m-d H:i:s'),
+            'idpersona'        => $this->request->getPost('idpersona'),
+            'idorigen'         => $this->request->getPost('idorigen'),
+            'idmedio'          => $this->request->getPost('idmedio'),
+            'idcampania'       => $this->request->getPost('idcampania') ?: null,
+            'referido_por'     => $this->request->getPost('referido_por') ?: null,
             'estado'           => 'nuevo',
-            'idusuario'        => null,
-            'idusuario_registro'=> session()->get('idusuario'),
+            'idusuario_registro'=> session('idusuario'),
+            'idusuario'        => session('idusuario'),
+            'idetapa'          => 1 // etapa inicial
         ];
 
-        $this->leadModel->insert($data);
+        $idlead = $this->leadModel->insert($data);
+        $persona = $this->personaModel->find($data['idpersona']);
 
-        return redirect()->to('personas')->with('success', 'Lead registrado correctamente.');
-    }
-    public function detalle($idlead)
-    {
-        $builder = $this->leadModel->builder();
-        $builder->select('leads.*, personas.nombres, personas.apellidos, personas.telefono, personas.correo, campanias.nombre as campania, medios.nombre as medio');
-        $builder->join('personas', 'personas.idpersona = leads.idpersona');
-        $builder->join('campanias', 'campanias.idcampania = leads.idcampania', 'left');
-        $builder->join('medios', 'medios.idmedio = leads.idmedio', 'left');
-        $builder->where('leads.idlead', $idlead);
-
-        $lead = $builder->get()->getRowArray(); // obtienes un array con todos los campos necesarios
-
-        if (!$lead) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Lead no encontrado: $idlead");
-        }
-
-        $seguimientoModel = new SeguimientoModel();
-        $tareaModel       = new TareaModel();
-
-        $seguimientos = $seguimientoModel->where('idlead', $idlead)->findAll();
-        $tareas       = $tareaModel->where('idlead', $idlead)->findAll();
-
-        return view('leads/partials/detalles', [
-            'lead'         => $lead,
-            'seguimientos' => $seguimientos,
-            'tareas'       => $tareas
+        return $this->response->setJSON([
+            'success' => true,
+            'idlead'  => $idlead,
+            'idetapa' => $data['idetapa'],
+            'persona' => $persona
         ]);
     }
 
+    public function detalle($idlead)
+    {
+        // Traer lead con datos de la persona
+        $lead = $this->leadModel
+            ->select('leads.*, personas.nombres, personas.apellidos, personas.telefono, personas.correo, usuarios.usuario as usuario')
+            ->join('personas', 'personas.idpersona = leads.idpersona', 'left')
+            ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
+            ->where('leads.idlead', $idlead)
+            ->first();
+
+        if (!$lead) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Lead no encontrado'
+            ]);
+        }
+
+        // Tareas y seguimientos
+        $tareas = $this->tareaModel->where('idlead', $idlead)->orderBy('fecha_programada','ASC')->findAll();
+        $seguimientos = $this->seguimientoModel->where('idlead', $idlead)->orderBy('fecha','ASC')->findAll();
+
+        // Modalidades
+        $modalidades = $this->modalidadesModel->findAll();
+
+        // Render parcial
+        $html = view('leads/partials/detalles', [
+            'lead' => $lead,
+            'tareas' => $tareas,
+            'seguimientos' => $seguimientos,
+            'modalidades' => $modalidades
+        ]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'lead' => $lead,
+            'tareas' => $tareas,
+            'seguimientos' => $seguimientos,
+            'modalidades' => $modalidades,
+            'html' => $html
+        ]);
+    }
 
     public function actualizarEtapa()
     {
@@ -154,21 +184,10 @@ class LeadController extends BaseController
         $this->leadModel->update($idlead, ['idetapa' => $idetapa]);
         return $this->response->setJSON(['success' => true, 'message' => 'Etapa actualizada']);
     }
-    public function verificarDuplicado($idpersona)
-    {
-        $leadExistente = $this->leadModel->where('idpersona', $idpersona)
-                                        ->where('estado !=', 'desistido') // opcional: solo leads activos
-                                        ->first();
-
-        return $this->response->setJSON([
-            'exists' => $leadExistente ? true : false
-        ]);
-    }
 
     public function eliminar()
     {
         $idlead = $this->request->getPost('idlead');
-
         if (!$idlead) {
             return $this->response->setJSON(['success' => false, 'message' => 'ID de Lead no proporcionado']);
         }
@@ -178,36 +197,63 @@ class LeadController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Lead no encontrado']);
         }
 
-        // Actualizar estado a "desistido"
         $this->leadModel->update($idlead, ['estado' => 'desistido']);
-
         return $this->response->setJSON(['success' => true, 'message' => 'Lead desistido correctamente']);
     }
+
     public function guardarTarea()
-{
-    $idlead = $this->request->getPost('idlead');
-    $descripcion = $this->request->getPost('descripcion');
+    {
+        $idlead = $this->request->getPost('idlead');
+        $descripcion = $this->request->getPost('descripcion');
 
-    if (!$idlead || !$descripcion) {
-        return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
+        if (!$idlead || !$descripcion) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
+        }
+
+        $id = $this->tareaModel->insert([
+            'idlead'        => $idlead,
+            'descripcion'   => $descripcion,
+            'fecha'         => date('Y-m-d H:i:s') // CORRECCIÓN
+        ]);
+
+        if ($id) {
+            return $this->response->setJSON([
+                'success' => true,
+                'tarea'   => ['descripcion' => $descripcion, 'fecha_registro' => date('d/m/Y H:i')]
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar tarea']);
+        }
     }
 
-    $tareaModel = new TareaModel();
-    $id = $tareaModel->insert([
-        'idlead' => $idlead,
-        'descripcion' => $descripcion,
-        'fecha_registro' => date('Y-m-d H:i:s')
-    ]);
+    public function guardarSeguimiento()
+    {
+        $idlead = $this->request->getPost('idlead');
+        $idmodalidad = $this->request->getPost('idmodalidad');
+        $comentario = $this->request->getPost('comentario');
 
-    if ($id) {
-        return $this->response->setJSON(['success' => true, 'message' => 'Tarea registrada', 'tarea' => ['descripcion' => $descripcion, 'fecha_registro' => date('Y-m-d H:i:s')] ]);
-    } else {
-        return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar tarea']);
+        if (!$idlead || !$idmodalidad || !$comentario) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
+        }
+
+        $id = $this->seguimientoModel->insert([
+            'idlead'      => $idlead,
+            'idusuario'   => session()->get('idusuario'),
+            'idmodalidad' => $idmodalidad,
+            'comentario'  => $comentario,
+            'echa_programada'       => date('Y-m-d H:i:s') // CORRECCIÓN
+        ]);
+
+        if ($id) {
+            return $this->response->setJSON([
+                'success'     => true,
+                'seguimiento' => [
+                    'comentario' => $comentario,
+                    'echa_programada'      => date('Y-m-d H:i:s')
+                ]
+            ]);
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar seguimiento']);
     }
-}
-
-
-
-
-
 }

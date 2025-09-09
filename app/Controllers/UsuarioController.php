@@ -22,7 +22,7 @@ class UsuarioController extends BaseController
       $data = [
       'header' => view('Layouts/header'),
       'footer' => view('Layouts/footer'),
-      'usuarios' => $this->usuarioModel->getUsuarios()
+      'usuarios' => $this->usuarioModel->getUsuariosConDetalle()
   ];
 
     return view('usuarios/index', $data);

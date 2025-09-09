@@ -11,25 +11,25 @@ class CampanaModel extends Model
 
     // Guardar medios/difusiones de una campaña
     public function guardarDifusiones($idcampania, $medios)
-{
-    $builder = $this->db->table('difusiones');
+    {
+        $builder = $this->db->table('difusiones');
 
-    // Eliminar registros previos
-    $builder->where('idcampania', $idcampania)->delete();
+        // Eliminar registros previos
+        $builder->where('idcampania', $idcampania)->delete();
 
-    // Insertar nuevos
-    foreach($medios as $medio){
-        if(!isset($medio['idmedio']) || empty($medio['idmedio'])) continue; // 🔒 evita error
+        // Insertar nuevos
+        foreach($medios as $medio){
+            if(!isset($medio['idmedio']) || empty($medio['idmedio'])) continue; 
 
-        $builder->insert([
-            'idcampania' => $idcampania,
-            'idmedio' => $medio['idmedio'],
-            'inversion' => $medio['inversion'] ?? 0,
-            'leads_generados' => $medio['leads_generados'] ?? 0,
-            'creado' => date('Y-m-d H:i:s')
-        ]);
+            $builder->insert([
+                'idcampania' => $idcampania,
+                'idmedio' => $medio['idmedio'],
+                'inversion' => $medio['inversion'] ?? 0,
+                'leads_generados' => $medio['leads_generados'] ?? 0,
+                'creado' => date('Y-m-d H:i:s')
+            ]);
+        }
     }
-}
 
 
     // Obtener medios/difusiones de una campaña
@@ -49,7 +49,7 @@ class CampanaModel extends Model
         $this->delete($idcampania);
     }
 
-    // 🔎 Contar campañas activas
+    //  Contar campañas activas
     public function contarActivas()
     {
         return $this->db->table($this->table)

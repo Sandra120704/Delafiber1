@@ -120,7 +120,7 @@ a.btn-back:hover { background: #5a6268; }
             </select>
         </div>
 
-        <button type="submit" class="btn-submit">💾 Guardar Lead</button>
+        <button type="submit" class="btn-submit">Guardar Lead</button>
     </form>
 </div>
 

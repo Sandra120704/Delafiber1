@@ -18,9 +18,9 @@
     text-align: center;
     font-weight: 600;
     padding: 8px 0;
-    background-color: #fcefee; /* color pastel suave */
+    background-color: #ffffff; /* color pastel suave */
     border-radius: 6px;
-    border: 1px solid #f7c1c1;
+    border: 1px solid #ffffff;
     color: #6f4a8e;
     transition: transform 0.2s;
 }
@@ -41,13 +41,13 @@
     min-height: 220px;
     border-radius: 8px;
     padding: 8px;
-    border: 1px solid #f0d9e0;
+    border: 1px solid #ffffff;
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .kanban-column.dragover {
-    background-color: #ffe3ec;
-    box-shadow: 0 4px 12px rgba(255, 192, 203, 0.2);
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgb(255, 255, 255);
 }
 
 /* ===== Tarjetas ===== */
@@ -88,15 +88,15 @@
 .modal-content {
     border-radius: 12px;
     padding: 12px;
-    background: linear-gradient(145deg, #fff7fa, #ffeef6);
+    background: linear-gradient(145deg, #ffffff, #ffffff);
     box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .modal-header {
-    background-color: #f7c1e0;
+    background-color: #ffffff;
     color: #4a2a56;
-    border-bottom: 2px solid #e69edb;
+    border-bottom: 2px solid #ffffff;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
     padding: 10px 15px;
@@ -122,7 +122,7 @@
 .modal-footer .btn-secondary {
     background-color: #b88abf;
     border: none;
-    color: white;
+    color: rgb(255, 255, 255);
     font-size: 0.9em;
     transition: background-color 0.3s;
 }

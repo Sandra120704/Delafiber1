@@ -17,6 +17,7 @@
   color: white !important; /* asegura blanco */
 }
 </style>
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" /> -->
 <div class="container mt-4">
 
   <!-- Cabecera -->
@@ -132,7 +133,7 @@
 
   <!-- Modal Detalle -->
   <div class="modal fade" id="detalleCampanaModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Detalle de Campaña</h5>
@@ -168,8 +169,8 @@
   </div>
 
 </div>
-
-
+<!-- Bootstrap JS bundle (incluye Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>

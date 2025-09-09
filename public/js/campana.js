@@ -4,13 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 
   // Inicializar DataTables
-  $('#campanasTable').DataTable({
+/*   $('#campanasTable').DataTable({
     pageLength: 10,
     order: [[0, 'desc']],
     language: {
       url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
     }
-  });
+  }); */
 
   const modalBody = document.getElementById('detalleMedios');
   const detalleModal = new bootstrap.Modal(document.getElementById('detalleCampanaModal'));
