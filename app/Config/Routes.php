@@ -12,7 +12,7 @@ $routes->get('/', 'Home::index');
 // PERSONAS
 $routes->get('personas', 'PersonaController::index');               // Listado
 $routes->get('personas/crear', 'PersonaController::crear');         // Crear persona
-$routes->get('personas/editar/(:num)', 'PersonaController::crear/$1'); // Editar persona
+$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1'); // Editar persona
 $routes->post('personas/guardar', 'PersonaController::guardar');   // Guardar persona
 $routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1'); // Eliminar persona
 $routes->get('persona/convertir-a-lead/(:num)', 'PersonaController::convertirALead/$1'); // Convertir persona a lead
@@ -28,6 +28,8 @@ $routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
 $routes->post('leads/guardar', 'LeadController::guardar');
 // API para búsqueda DNI
 $routes->get('api/personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
+$routes->get('personas/buscadordni/(:num)', 'PersonaController::BuscadorDni/$1');
+
 // CAMPANAS
 $routes->get('campanas', 'CampanaController::index');               // Listado
 $routes->get('campana/crear', 'CampanaController::crear');

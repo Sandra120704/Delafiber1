@@ -1,4 +1,4 @@
--- Active: 1746815365287@@127.0.0.1@3306
+-- Active: 1755358617783@@127.0.0.1@3306@delafiber
 DROP DATABASE IF EXISTS delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
@@ -30,6 +30,7 @@ CREATE TABLE personas (
     correo VARCHAR(100) NOT NULL,
     telefono VARCHAR(15) NOT NULL,
     direccion VARCHAR(200),
+    referencias TEXT,
     iddistrito INT NOT NULL,
     CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito) ON DELETE CASCADE,
     CONSTRAINT unq_persona_dni UNIQUE (dni),

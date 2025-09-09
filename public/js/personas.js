@@ -23,25 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        buscando.classList.remove('d-none'); // Mostrar loader/spinner
+        buscando.classList.remove('d-none'); // Mostrar spinner
 
         try {
-            const res = await fetch(`${base_url}api/personas/buscardni/${dni}`);
-            if (!res.ok) throw new Error('Error en la solicitud');
-
+            const res = await fetch(`${base_url}personas/buscadordni/${dni}`);
             const data = await res.json();
-            buscando.classList.add('d-none'); // Ocultar loader
+            buscando.classList.add('d-none');
 
             if (data.success) {
-                // Llenar los campos con los datos
                 apellidosInput.value = `${data.apepaterno} ${data.apematerno}`;
                 nombresInput.value = data.nombres;
             } else {
-                // Limpiar campos si no se encuentra
                 apellidosInput.value = '';
                 nombresInput.value = '';
-
-                // Mostrar el toast personalizado
                 Swal.fire({
                     text: data.message || 'No se encontró la persona',
                     showConfirmButton: false,
@@ -57,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             buscando.classList.add('d-none');
-            console.error(err);
             Swal.fire({
                 icon: 'error',
                 title: 'Error al consultar el DNI',
@@ -69,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Guardar Persona y preguntar si convertir a lead ---
+    // --- Guardar Persona ---
     formPersona.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(formPersona);
@@ -84,12 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 Swal.fire({
-                    title: '¿Estás seguro?',
-                    text: 'No podrás revertir esto.',
-                    icon: 'question',
+                    title: 'Persona registrada',
+                    text: '¿Deseas convertirla en lead?',
+                    icon: 'success',
                     showCancelButton: true,
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar'
+                    confirmButtonText: 'Sí, convertir',
+                    cancelButtonText: 'No por ahora'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        window.location.href = `${base_url}leads/crear/${data.idpersona}`;
+                    }
                 });
             } else {
                 const mensaje = typeof data.message === 'object'
@@ -108,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Abrir modal para convertir a lead ---
+    // --- Convertir a lead desde la lista ---
     document.querySelectorAll(".btn-convertir-lead").forEach(btn => {
         btn.addEventListener("click", function () {
             const idpersona = this.getAttribute("data-id");
@@ -117,8 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(res => res.text())
                 .then(html => {
                     modalContainer.innerHTML = html;
-
-                    // Inicializar modal de Bootstrap
                     const modal = new bootstrap.Modal(document.getElementById("leadModal"));
                     modal.show();
                 })

@@ -18,71 +18,126 @@ class PersonaController extends BaseController
 
     public function index()
     {
-        $datos['personas'] = $this->personaModel->orderBy('idpersona','ACD')->findAll();
+        $perPage = 10; // Cantidad de registros por página
+        $q = $this->request->getGet('q'); // Parámetro de búsqueda
+
+        $model = $this->personaModel;
+
+        if ($q) {
+            $model = $model->groupStart()
+                ->like('nombres', $q)
+                ->orLike('dni', $q)
+                ->orLike('telefono', $q)
+                ->orLike('correo', $q)
+                ->groupEnd();
+        }
+
+        $data = [
+            'personas' => $model->orderBy('idpersona', 'DESC')->paginate($perPage),
+            'pager' => $model->pager,
+            'q' => $q
+        ];
+
+        $data['header'] = view('Layouts/header');
+        $data['footer'] = view('Layouts/footer');
+
+        return view('personas/index', $data);
+}
+
+    public function crear()
+    {
+        $departamento = new DepartamentoModel();
+        $distrito = new DistritoModel();
+
+        $datos['departamentos'] = $departamento->findAll();
+        $datos['distritos'] = $distrito->findAll();
         $datos['header'] = view('Layouts/header');
         $datos['footer'] = view('Layouts/footer');
-        return view('personas/index', $datos);
-    }
-    public function crear()
-{
-    $departamento = new DepartamentoModel();
-    $distrito = new DistritoModel();
 
-    $datos['departamentos'] = $departamento->findAll();
-    $datos['distritos'] = $distrito->findAll();
-    $datos['header'] = view('Layouts/header');
-    $datos['footer'] = view('Layouts/footer');
-
-    return view('personas/crear', $datos);
-}
-
-public function editar($id)
-{
-    $persona = $this->personaModel->find($id);
-
-    if (!$persona) {
-        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Persona no encontrada");
+        return view('personas/crear', $datos);
     }
 
-    $departamento = new DepartamentoModel();
-    $distrito = new DistritoModel();
+    public function editar($id)
+    {
+        $persona = $this->personaModel->find($id);
 
-    $datos['persona'] = $persona;
-    $datos['departamentos'] = $departamento->findAll();
-    $datos['distritos'] = $distrito->findAll();
-    $datos['header'] = view('Layouts/header');
-    $datos['footer'] = view('Layouts/footer');
+        if (!$persona) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Persona no encontrada");
+        }
 
-    return view('personas/crear', $datos); // reutiliza la misma vista
-}
+        $departamento = new DepartamentoModel();
+        $distrito = new DistritoModel();
+
+        $datos['persona'] = $persona;
+        $datos['departamentos'] = $departamento->findAll();
+        $datos['distritos'] = $distrito->findAll();
+
+        if ($this->request->isAJAX()) {
+            return view('personas/modal_editar', $datos);
+        }
+
+        $datos['header'] = view('Layouts/header');
+        $datos['footer'] = view('Layouts/footer');
+        return view('personas/editar', $datos);
+    }
 
     public function guardar()
     {
         try {
+            $idpersona = $this->request->getPost('idpersona');
+
             $data = [
-                'dni' => $this->request->getPost('dni'),
-                'apellidos' => $this->request->getPost('apellidos'),
-                'nombres' => $this->request->getPost('nombres'),
-                'correo' => $this->request->getPost('correo'),
-                'telefono' => $this->request->getPost('telefono'),
-                'direccion' => $this->request->getPost('direccion'),
+                'dni'        => $this->request->getPost('dni'),
+                'apellidos'  => $this->request->getPost('apellidos'),
+                'nombres'    => $this->request->getPost('nombres'),
+                'correo'     => $this->request->getPost('correo'),
+                'telefono'   => $this->request->getPost('telefono'),
+                'direccion'  => $this->request->getPost('direccion'),
+                'referencias'=> $this->request->getPost('referencias'),
                 'iddistrito' => $this->request->getPost('iddistrito'),
             ];
 
-            $id = $this->personaModel->insert($data);
+            $dni = $data['dni'];
 
+            // Verificar si el DNI está duplicado en otra persona
+            $existeDni = $this->personaModel
+                ->where('dni', $dni)
+                ->where('idpersona !=', $idpersona)
+                ->first();
+
+            if ($existeDni) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'El DNI ya está registrado.'
+                ]);
+            }
+
+            // Si se está editando
+            if ($idpersona) {
+                $this->personaModel->update($idpersona, $data);
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Persona actualizada correctamente.',
+                    'idpersona' => $idpersona
+                ]);
+            }
+
+            // Si es nuevo registro
+            $id = $this->personaModel->insert($data);
             if ($id) {
                 return $this->response->setJSON([
                     'success' => true,
+                    'message' => 'Persona registrada correctamente.',
                     'idpersona' => $id
                 ]);
             } else {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'No se pudo registrar la persona',
+                    'message' => 'No se pudo registrar la persona.',
                     'errors' => $this->personaModel->errors()
                 ]);
             }
+
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false,
@@ -90,7 +145,6 @@ public function editar($id)
             ]);
         }
     }
-
 
     public function BuscadorDni($dni = "")
     {
@@ -108,21 +162,15 @@ public function editar($id)
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($api_response === false) {
+        if ($api_response === false || $http_code !== 200) {
+            $decoded = json_decode($api_response, true);
             return $this->response->setJSON([
                 'success' => false,
-                'message' => ''
+                'message' => $decoded['message'] ?? 'No encontramos a la persona'
             ]);
         }
 
         $decoded_response = json_decode($api_response, true);
-
-        if ($http_code !== 200) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'No encontramos a la persona'
-            ]);
-        }
 
         return $this->response->setJSON([
             'success'     => true,
@@ -131,6 +179,7 @@ public function editar($id)
             'nombres'     => $decoded_response['first_name'] ?? ''
         ]);
     }
+
     public function eliminar($id)
     {
         $leadModel = new LeadModel();
@@ -144,5 +193,4 @@ public function editar($id)
         $this->personaModel->delete($id);
         return redirect()->to('personas')->with('success', 'Persona eliminada correctamente.');
     }
-
 }
