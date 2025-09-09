@@ -75,6 +75,16 @@ $routes->group('', ['filter' => 'auth'], function($routes){
     $routes->get('leads/crear/(:num)', 'LeadController::crear/$1'); // Crear lead a partir de persona
 $routes->post('lead/guardar', 'LeadController::guardar');  // alias en singular
 $routes->post('leads/guardar', 'LeadController::guardar'); // oficial en plural
+$routes->get('lead/detalle/(:num)', 'LeadController::detalle/$1');
+$routes->post('lead/eliminar', 'LeadController::eliminar');
+$routes->get('lead/verificar-duplicado/(:num)', 'LeadController::verificarDuplicado/$1');
+$routes->post('lead/guardarTarea', 'LeadController::guardarTarea');
+
+
+
+
+
+
 
 
 

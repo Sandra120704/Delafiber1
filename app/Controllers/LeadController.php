@@ -7,6 +7,8 @@ use App\Models\LeadModel;
 use App\Models\EtapaModel;
 use App\Models\MedioModel;
 use App\Models\PersonaModel;
+use App\Models\SeguimientoModel;
+use App\Models\TareaModel;
 
 class LeadController extends BaseController
 {
@@ -106,4 +108,106 @@ class LeadController extends BaseController
 
         return redirect()->to('personas')->with('success', 'Lead registrado correctamente.');
     }
+    public function detalle($idlead)
+    {
+        $builder = $this->leadModel->builder();
+        $builder->select('leads.*, personas.nombres, personas.apellidos, personas.telefono, personas.correo, campanias.nombre as campania, medios.nombre as medio');
+        $builder->join('personas', 'personas.idpersona = leads.idpersona');
+        $builder->join('campanias', 'campanias.idcampania = leads.idcampania', 'left');
+        $builder->join('medios', 'medios.idmedio = leads.idmedio', 'left');
+        $builder->where('leads.idlead', $idlead);
+
+        $lead = $builder->get()->getRowArray(); // obtienes un array con todos los campos necesarios
+
+        if (!$lead) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Lead no encontrado: $idlead");
+        }
+
+        $seguimientoModel = new SeguimientoModel();
+        $tareaModel       = new TareaModel();
+
+        $seguimientos = $seguimientoModel->where('idlead', $idlead)->findAll();
+        $tareas       = $tareaModel->where('idlead', $idlead)->findAll();
+
+        return view('leads/partials/detalles', [
+            'lead'         => $lead,
+            'seguimientos' => $seguimientos,
+            'tareas'       => $tareas
+        ]);
+    }
+
+
+    public function actualizarEtapa()
+    {
+        $idlead = $this->request->getPost('idlead');
+        $idetapa = $this->request->getPost('idetapa');
+
+        if (!$idlead || !$idetapa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
+        }
+
+        $lead = $this->leadModel->find($idlead);
+        if (!$lead) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Lead no encontrado']);
+        }
+
+        $this->leadModel->update($idlead, ['idetapa' => $idetapa]);
+        return $this->response->setJSON(['success' => true, 'message' => 'Etapa actualizada']);
+    }
+    public function verificarDuplicado($idpersona)
+    {
+        $leadExistente = $this->leadModel->where('idpersona', $idpersona)
+                                        ->where('estado !=', 'desistido') // opcional: solo leads activos
+                                        ->first();
+
+        return $this->response->setJSON([
+            'exists' => $leadExistente ? true : false
+        ]);
+    }
+
+    public function eliminar()
+    {
+        $idlead = $this->request->getPost('idlead');
+
+        if (!$idlead) {
+            return $this->response->setJSON(['success' => false, 'message' => 'ID de Lead no proporcionado']);
+        }
+
+        $lead = $this->leadModel->find($idlead);
+        if (!$lead) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Lead no encontrado']);
+        }
+
+        // Actualizar estado a "desistido"
+        $this->leadModel->update($idlead, ['estado' => 'desistido']);
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Lead desistido correctamente']);
+    }
+    public function guardarTarea()
+{
+    $idlead = $this->request->getPost('idlead');
+    $descripcion = $this->request->getPost('descripcion');
+
+    if (!$idlead || !$descripcion) {
+        return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
+    }
+
+    $tareaModel = new TareaModel();
+    $id = $tareaModel->insert([
+        'idlead' => $idlead,
+        'descripcion' => $descripcion,
+        'fecha_registro' => date('Y-m-d H:i:s')
+    ]);
+
+    if ($id) {
+        return $this->response->setJSON(['success' => true, 'message' => 'Tarea registrada', 'tarea' => ['descripcion' => $descripcion, 'fecha_registro' => date('Y-m-d H:i:s')] ]);
+    } else {
+        return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar tarea']);
+    }
+}
+
+
+
+
+
 }
