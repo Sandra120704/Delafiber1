@@ -25,6 +25,7 @@
 
 .table-hover tbody tr:hover { background:#f8f9fa; }
 .small-muted { font-size:.85rem; color:#6c757d; }
+
 </style>
 
 <div class="d-flex justify-content-center py-5">

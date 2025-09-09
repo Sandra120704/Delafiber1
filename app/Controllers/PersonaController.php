@@ -56,33 +56,41 @@ public function editar($id)
     return view('personas/crear', $datos); // reutiliza la misma vista
 }
 
-public function guardar()
-{
-    $personaModel = new PersonaModel();
-    $data = [
-        'dni' => $this->request->getPost('dni'),
-        'apellidos' => $this->request->getPost('apellidos'),
-        'nombres' => $this->request->getPost('nombres'),
-        'correo' => $this->request->getPost('correo'),
-        'telefono' => $this->request->getPost('telefono'),
-        'direccion' => $this->request->getPost('direccion'),
-        'iddistrito' => $this->request->getPost('iddistrito'),
-    ];
+    public function guardar()
+    {
+        try {
+            $data = [
+                'dni' => $this->request->getPost('dni'),
+                'apellidos' => $this->request->getPost('apellidos'),
+                'nombres' => $this->request->getPost('nombres'),
+                'correo' => $this->request->getPost('correo'),
+                'telefono' => $this->request->getPost('telefono'),
+                'direccion' => $this->request->getPost('direccion'),
+                'iddistrito' => $this->request->getPost('iddistrito'),
+            ];
 
-    $id = $personaModel->insert($data);
+            $id = $this->personaModel->insert($data);
 
-    if ($id) {
-        return $this->response->setJSON([
-            'success' => true,
-            'idpersona' => $id
-        ]);
-    } else {
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => 'No se pudo registrar la persona'
-        ]);
+            if ($id) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'idpersona' => $id
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'No se pudo registrar la persona',
+                    'errors' => $this->personaModel->errors()
+                ]);
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error del servidor: ' . $e->getMessage()
+            ]);
+        }
     }
-}
+
 
     public function BuscadorDni($dni = "")
     {
@@ -103,7 +111,7 @@ public function guardar()
         if ($api_response === false) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'No se pudo realizar la consulta'
+                'message' => ''
             ]);
         }
 

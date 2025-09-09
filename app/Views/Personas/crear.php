@@ -1,5 +1,13 @@
 <?= $header ?>
 
+<style>
+.swal2-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+</style>
+
 <div class="container mt-2">
     <div class="my-2">
         <h3>Registro De Personas</h3>
@@ -62,11 +70,9 @@
         </div>
     </form>
 </div>
-
-<!-- Definir base_url para el JS externo -->
 <script>
-    const base_url = "<?= base_url(); ?>";
+  const base_url = "<?= base_url(); ?>";
 </script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="<?= base_url('js/personas.js') ?>"></script>
-<?= $footer ?>
+ <!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
