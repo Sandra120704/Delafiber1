@@ -140,39 +140,49 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = btn.dataset.id;
 
       fetch(`<?= base_url('leads/modals') ?>/${id}`)
-        .then(res => res.text())
+        .then(res => res.text())  // CAMBIO AQUÍ, recibes HTML como texto
         .then(html => {
-          document.getElementById('modalContainer').innerHTML = html;
+          // Insertar el HTML en un contenedor
+          const modalContainer = document.getElementById('modalContainer');
+          modalContainer.innerHTML = html;
+
+          // Inicializar y mostrar modal
           const modalEl = document.getElementById('leadModal');
           if (modalEl) {
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
           }
         })
-        .catch(console.error);
+        .catch(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo conectar con el servidor',
+          });
+        });
     });
   });
-  document.querySelectorAll('.btn-editar').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const id = btn.dataset.id;
-    fetch(`<?= site_url('personas/editar/') ?>${id}`)
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('modalContainer').innerHTML = html;
 
-        const modalEl = document.getElementById('editModal'); // Debes poner id="editModal" en el modal de editar
-        if (modalEl) {
-          const modal = new bootstrap.Modal(modalEl);
-          modal.show();
-        }
-      })
-      .catch(err => {
-        console.error('Error cargando el formulario de edición:', err);
-      });
+    document.querySelectorAll('.btn-editar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      fetch(`<?= site_url('personas/editar/') ?>${id}`)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('modalContainer').innerHTML = html;
+
+          const modalEl = document.getElementById('editModal'); // Debes poner id="editModal" en el modal de editar
+          if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+          }
+        })
+        .catch(err => {
+          console.error('Error cargando el formulario de edición:', err);
+        });
+    });
   });
 });
-});
-
 </script>
 
 <?= $footer ?>

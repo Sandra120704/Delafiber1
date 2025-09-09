@@ -256,4 +256,50 @@ class LeadController extends BaseController
 
         return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar seguimiento']);
     }
+    public function convertirALead($idpersona)
+    {
+        // Verificar que la persona exista
+        $persona = $this->personaModel->find($idpersona);
+        if (!$persona) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Persona no encontrada.'
+            ]);
+        }
+
+        // Verificar si ya existe un lead para esta persona
+        $existeLead = $this->leadModel->where('idpersona', $idpersona)->first();
+        if ($existeLead) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'El lead para esta persona ya existe.'
+            ]);
+        }
+
+        // Insertar lead con datos básicos
+        $dataLead = [
+            'idpersona'         => $idpersona,
+            'estado'            => 'nuevo',
+            'idetapa'           => 1, // etapa inicial
+            'idusuario_registro'=> session('idusuario'),
+            'idusuario'         => session('idusuario')
+            // Puedes agregar más campos si quieres
+        ];
+
+        $idlead = $this->leadModel->insert($dataLead);
+
+        if ($idlead) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Lead creado correctamente.',
+                'idlead'  => $idlead
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Error al crear lead.'
+        ]);
+    }
+
 }

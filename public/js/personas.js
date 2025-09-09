@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     position: 'top-end',
                     timer: 3000,
                     timerProgressBar: true,
-                    background: '#2ecc71',
+                    background: '#9621ccff',
                     iconColor: '#ecf0f1',
                     color: '#fff'
                 });

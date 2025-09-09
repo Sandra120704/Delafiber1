@@ -15,7 +15,7 @@ $routes->get('personas/crear', 'PersonaController::crear');         // Crear per
 $routes->get('personas/editar/(:num)', 'PersonaController::editar/$1'); // Editar persona
 $routes->post('personas/guardar', 'PersonaController::guardar');   // Guardar persona
 $routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1'); // Eliminar persona
-$routes->get('persona/convertir-a-lead/(:num)', 'PersonaController::convertirALead/$1'); // Convertir persona a lead
+$routes->get('persona/modals/(:num)', 'LeadController::convertirALead/$1');
 $routes->get('leads/registrar/(:num)', 'LeadController::registrar/$1');
 $routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
 $routes->post('personas/guardar', 'PersonaController::guardar');
@@ -24,7 +24,7 @@ $routes->get('ubicacion/provincias/(:num)', 'UbicacionController::getProvincias/
 $routes->get('ubicacion/distritos/(:num)', 'UbicacionController::getDistritos/$1');
 // Lead modal
 $routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
-$routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
+$routes->get('leads/modals/(:num)', 'LeadController::convertirALead/$1');
 $routes->post('leads/guardar', 'LeadController::guardar');
 // API para búsqueda DNI
 $routes->get('api/personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
