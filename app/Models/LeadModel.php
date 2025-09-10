@@ -12,11 +12,13 @@ class LeadModel extends Model
     'idcampania',
     'idmedio',
     'idetapa',
+    'idorigen',
     'referido_por',
+    'idmodalidad',
     'fecha_registro',
-    'estado',
     'idusuario',
-    'idusuario_registro'
+    'idusuario_registro',
+    'estado',
 ];
 
     public $timestamps = false;

@@ -66,5 +66,35 @@ class CampanaModel extends Model
         // Eliminar la campaña
         $this->delete($idcampania);
     } */
+    // Sumar presupuesto total
+    public function presupuestoTotal()
+    {
+        return $this->selectSum('presupuesto')->get()->getRow()->presupuesto ?? 0;
+    }
 
+    // Total leads generados (suma en difusiones)
+    public function totalLeads()
+    {
+        return $this->db->table('difusiones')
+            ->selectSum('leads_generados')
+            ->get()
+            ->getRow()
+            ->leads_generados ?? 0;
+    }
+
+    // Obtener detalle de una campaña
+    public function getDetalle($idcampania)
+    {
+        $campania = $this->find($idcampania);
+        if ($campania) {
+            $campania['medios'] = $this->getMedios($idcampania);
+        }
+        return $campania;
+    }
+
+    // Cambiar estado (Activo/Inactivo)
+    public function cambiarEstado($idcampania, $estado)
+    {
+        return $this->update($idcampania, ['estado' => $estado]);
+    }
 }

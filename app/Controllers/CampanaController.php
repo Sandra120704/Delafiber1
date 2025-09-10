@@ -15,13 +15,13 @@ class CampanaController extends BaseController
         $this->medioModel = new MedioModel();
     }
 
-    // Listado de campañas
+    // Listado de campañas con métricas
     public function index()
     {
         $campanas = $this->campanaModel->findAll();
-        $campanas_activas = $this->campanaModel->where('estado', 'Activo')->countAllResults();
+        $campanas_activas = $this->campanaModel->contarActivas();
         $presupuesto_total = $this->campanaModel->selectSum('presupuesto')->first()['presupuesto'] ?? 0;
-        $total_leads = 0; // luego conectas con tabla leads
+        $total_leads = $this->campanaModel->totalLeads();
 
         $datos = [
             'header' => view('layouts/header'),
@@ -43,7 +43,7 @@ class CampanaController extends BaseController
 
         if ($id) {
             $campana = $this->campanaModel->find($id);
-            $difusiones = $this->campanaModel->getMedios($id); // array de idmedio
+            $difusiones = $this->campanaModel->getMedios($id);
         }
 
         $medios = $this->medioModel->findAll();
@@ -80,23 +80,34 @@ class CampanaController extends BaseController
             $idcampania = $this->campanaModel->insert($campanaData);
         }
 
-        // Guardar difusiones (medios)
+        // Guardar difusiones
         $this->campanaModel->guardarDifusiones($idcampania, $data['medios'] ?? []);
 
         return redirect()->to(site_url('campanas'));
     }
-    public function detalleMedios($idcampania)
-    {
-        $difusiones = $this->campanaModel->getMedios($idcampania); 
-        // $difusiones debe traer un array con ['nombre' => ..., 'inversion' => ..., 'leads' => ...]
 
-        return $this->response->setJSON($difusiones);
-    }
-    public function getMediosCampana($idcampania)
+    // Detalle de campaña con medios
+    public function detalle($idcampania)
     {
+        $campana = $this->campanaModel->find($idcampania);
+
+        if (!$campana) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Campaña no encontrada'
+            ])->setStatusCode(404);
+        }
+
         $medios = $this->campanaModel->getMedios($idcampania);
-        return $this->response->setJSON($medios);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'campana' => $campana,
+            'medios' => $medios
+        ]);
     }
+
+    // Cambiar estado (Activo/Inactivo)
     public function cambiarEstado($id)
     {
         $estado = $this->request->getPost('estado');
@@ -116,58 +127,21 @@ class CampanaController extends BaseController
         ]);
     }
 
-   public function detalle($idcampania)
-    {
-        $campana = $this->campanaModel->find($idcampania);
-
-        if (!$campana) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Campaña no encontrada'
-            ])->setStatusCode(404);
-        }
-
-        $medios = $this->campanaModel->getMedios($idcampania);
-
-        return $this->response->setJSON([
-            'success' => true,
-            'campana' => $campana,
-            'medios' => $medios
-        ]);
-    }
+    // Resumen general para dashboard
     public function resumen()
     {
-        $campanaModel = new CampanaModel();
-        $activas = $campanaModel->contarActivas();
-
         return $this->response->setJSON([
             'success' => true,
-            'activas' => $activas
+            'activas' => $this->campanaModel->contarActivas(),
+            'presupuesto_total' => $this->campanaModel->presupuestoTotal(),
+            'total_leads' => $this->campanaModel->totalLeads()
         ]);
-    }
-
-    public function estado($id)
-    {
-        $estado = $this->request->getPost('estado');
-
-        $campanaModel = new CampanaModel();
-
-        $update = $campanaModel->update($id, ['estado' => $estado]);
-
-        if ($update) {
-            return $this->response->setJSON([
-                'success' => true,
-                'estado'  => $estado
-            ]);
-        } else {
-            return $this->response->setJSON(['success' => false]);
-        }
     }
 
     // Eliminar campaña
     public function eliminar($id)
     {
-        if($id){
+        if ($id) {
             $this->campanaModel->eliminarCampana($id);
         }
         return redirect()->to(site_url('campanas'));

@@ -1,124 +1,130 @@
-<!-- Modal Lead Profesional -->
+<!-- Modal Crear Lead -->
 <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-md modal-dialog-centered">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
-
+      
       <!-- Header -->
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title mb-0">
-          <?= isset($persona) ? '' . esc($persona['nombres']) : 'Nuevo Lead' ?>
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title">➕ Registrar Lead</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
 
       <!-- Body -->
       <div class="modal-body">
-        <?php if(isset($persona) && !empty($persona)): ?>
-          <!-- Información del Cliente -->
-          <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-              <div class="row g-2">
-                <div class="col-md-6"><strong>Nombre:</strong><br><?= esc($persona['nombres'] . ' ' . $persona['apellidos']) ?></div>
-                <div class="col-md-6"><strong>DNI:</strong><br><?= esc($persona['dni'] ?? '-') ?></div>
-                <div class="col-md-6"><strong>Teléfono:</strong><br><?= esc($persona['telefono'] ?? '-') ?></div>
-                <div class="col-md-6"><strong>Correo:</strong><br><?= esc($persona['correo'] ?? '-') ?></div>
-                <div class="col-12"><strong>Dirección:</strong><br><?= esc($persona['direccion'] ?? '-') ?></div>
-              </div>
+        <form id="leadForm" action="<?= base_url('lead/guardar') ?>" method="POST">
+
+          <!-- Persona -->
+          <input type="hidden" name="idpersona" value="<?= $persona['idpersona'] ?? '' ?>">
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">DNI:</label>
+              <input type="text" class="form-control" value="<?= $persona['dni'] ?? '' ?>" readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Nombres:</label>
+              <input type="text" class="form-control" value="<?= $persona['nombres'] ?? '' ?>" readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Apellidos:</label>
+              <input type="text" class="form-control" value="<?= $persona['apellidos'] ?? '' ?>" readonly>
             </div>
           </div>
 
-          <!-- Formulario Lead -->
-          <form id="formLead" action="<?= site_url('leads/guardar') ?>" method="post">
-            <input type="hidden" name="idpersona" value="<?= esc($persona['idpersona']) ?>">
-
-            <div class="row g-3">
-              <!-- Origen -->
-              <div class="col-md-6">
-                <label for="origenSelect" class="form-label">Origen</label>
-                <select name="idorigen" id="origenSelect" class="form-control" required>
-                  <option value="">Seleccione origen</option>
-                  <?php foreach($origenes as $origen): ?>
-                    <option value="<?= $origen['idorigen'] ?>" data-tipo="<?= esc($origen['tipo'] ?? '') ?>">
-                      <?= esc($origen['nombre']) ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-
-              <!-- Medio -->
-              <div class="col-md-6">
-                <label for="medioSelect" class="form-label">Medio</label>
-                <select name="idmedio" id="medioSelect" class="form-control" required>
-                  <option value="">Seleccione medio</option>
-                  <?php foreach($medios as $m): ?>
-                    <option value="<?= $m['idmedio'] ?>"><?= esc($m['nombre']) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-
-              <!-- Campaña -->
-              <div class="col-md-6" id="campaniaDiv" style="display:none;">
-                <label for="campaniaSelect" class="form-label">Campaña</label>
-                <select name="idcampania" id="campaniaSelect" class="form-control">
-                  <option value="">Seleccione campaña</option>
-                  <?php foreach($campanas as $c): ?>
-                    <option value="<?= $c['idcampania'] ?>"><?= esc($c['nombre']) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-
-              <!-- Referido -->
-              <div class="col-md-6" id="referenteDiv" style="display:none;">
-                <label for="referido_por" class="form-label">Referido por</label>
-                <input type="text" name="referido_por" id="referido_por" class="form-control">
-              </div>
-
-              <!-- Modalidad -->
-              <div class="col-md-6">
-                <label for="modalidadSelect" class="form-label">Modalidad</label>
-                <select name="idmodalidad" id="modalidadSelect" class="form-control" required>
-                  <option value="">Seleccione modalidad</option>
-                  <?php foreach($modalidades as $m): ?>
-                    <option value="<?= $m['idmodalidad'] ?>"><?= esc($m['nombre']) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Teléfono:</label>
+              <input type="text" class="form-control" value="<?= $persona['telefono'] ?? '' ?>" readonly>
             </div>
-          </form>
+            <div class="col-md-6">
+              <label class="form-label">Correo:</label>
+              <input type="email" class="form-control" value="<?= $persona['correo'] ?? '' ?>" readonly>
+            </div>
+          </div>
 
-        <?php else: ?>
-          <div class="text-center py-3 text-muted small">No se encontró información del cliente.</div>
-        <?php endif; ?>
-      </div>
+          <hr>
 
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <?php if(isset($persona) && !empty($persona)): ?>
-          <button type="submit" class="btn btn-primary" form="formLead">Guardar Lead</button>
-        <?php endif; ?>
+          <!-- Origen -->
+          <div class="mb-3">
+            <label class="form-label">Origen:</label>
+            <select name="idorigen" id="origenSelect" class="form-control">
+              <option value="">-- Seleccionar --</option>
+              <?php foreach ($origenes as $o): ?>
+                <option value="<?= $o['idorigen'] ?>" data-tipo="<?= strtolower($o['nombre']) ?>">
+                  <?= $o['nombre'] ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Campaña -->
+          <div class="mb-3" id="campaniaDiv" style="display:none;">
+            <label class="form-label">Campaña:</label>
+            <select name="idcampania" id="campaniaSelect" class="form-control">
+              <option value="">-- Seleccionar campaña --</option>
+              <?php foreach ($campanias as $c): ?>
+                <option value="<?= $c['idcampania'] ?>"><?= $c['nombre'] ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Referido -->
+          <div class="mb-3" id="referenteDiv" style="display:none;">
+            <label class="form-label">Referido por:</label>
+            <input type="text" id="referido_por" name="referido_por" class="form-control" placeholder="Nombre de la persona que refiere">
+          </div>
+
+          <!-- Modalidad y Medio -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Modalidad:</label>
+              <select name="idmodalidad" class="form-control" required>
+                <option value="">-- Seleccionar --</option>
+                <?php foreach ($modalidades as $mo): ?>
+                  <option value="<?= $mo['idmodalidad'] ?>"><?= $mo['nombre'] ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Medio:</label>
+              <select name="idmedio" class="form-control">
+                <option value="">-- Seleccionar --</option>
+                <?php foreach ($medios as $m): ?>
+                  <option value="<?= $m['idmedio'] ?>"><?= $m['nombre'] ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+
+          <!-- Botón -->
+          <div class="text-end mt-3">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-save"></i> Guardar Lead
+            </button>
+          </div>
+        </form>
       </div>
 
     </div>
   </div>
 </div>
 
-<!-- Script para mostrar/ocultar campos según origen -->
+<!-- Script cascada -->
 <script>
 document.addEventListener('DOMContentLoaded', function(){
     const origenSelect = document.getElementById('origenSelect');
     const campaniaDiv = document.getElementById('campaniaDiv');
     const referenteDiv = document.getElementById('referenteDiv');
+    const campSelect = document.getElementById('campaniaSelect');
+    const referidoInput = document.getElementById('referido_por');
 
     function actualizarDivs() {
         if (!origenSelect) return;
         const selectedOption = origenSelect.options[origenSelect.selectedIndex];
         const tipo = selectedOption.getAttribute('data-tipo') || '';
-        const campSelect = document.getElementById('campaniaSelect');
-        const referidoInput = document.getElementById('referido_por');
 
-        if (tipo === 'campania') {
+        if (tipo === 'campaña') {
             campaniaDiv.style.display = 'block';
             referenteDiv.style.display = 'none';
             campSelect.required = true;
@@ -142,8 +148,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <style>
-#leadModal .modal-content { border-radius: 12px; overflow: hidden; }
-#leadModal .card { border-radius: 10px; padding: 12px; }
-#leadModal .form-label { font-weight: 500; }
-#leadModal .modal-footer .btn-primary { background-color: #c43030ff; border: none; }
+#leadModal .modal-content { border-radius: 12px; }
+#leadModal .modal-header { border-bottom: 1px solid #ddd; }
+#leadModal .form-label { font-weight: 600; }
 </style>

@@ -60,7 +60,7 @@ class LeadController extends BaseController
         $builder->join('campanias', 'campanias.idcampania = leads.idcampania', 'left');
         $builder->join('medios', 'medios.idmedio = leads.idmedio', 'left');
         $builder->join('etapas', 'etapas.idetapa = leads.idetapa', 'left');
-        $builder->where('leads.estado !=', 'desistido'); // SOLO activos
+        $builder->where('leads.estado !=', 'Descartado');// SOLO activos
 
         $leads = $builder->get()->getResultArray();
 
@@ -93,7 +93,7 @@ class LeadController extends BaseController
 
         return view('leads/modals', [
             'persona'      => $persona,
-            'campanas'     => $campanas,
+            'campanias'     => $campanas,
             'medios'       => $medios,
             'modalidades'  => $modalidades,
             'origenes'     => $origenes
@@ -102,27 +102,47 @@ class LeadController extends BaseController
 
     public function guardar()
     {
-        $data = [
-            'idpersona'        => $this->request->getPost('idpersona'),
-            'idorigen'         => $this->request->getPost('idorigen'),
-            'idmedio'          => $this->request->getPost('idmedio'),
-            'idcampania'       => $this->request->getPost('idcampania') ?: null,
-            'referido_por'     => $this->request->getPost('referido_por') ?: null,
-            'estado'           => 'nuevo',
-            'idusuario_registro'=> session('idusuario'),
-            'idusuario'        => session('idusuario'),
-            'idetapa'          => 1 // etapa inicial
+        $idpersona = $this->request->getPost('idpersona');
+
+        // Si no existe persona, la creamos
+        if (!$idpersona) {
+            $idpersona = $this->personaModel->insert([
+                'dni'       => $this->request->getPost('dni'),
+                'nombres'   => $this->request->getPost('nombres'),
+                'apellidos' => $this->request->getPost('apellidos'),
+                'telefono'  => $this->request->getPost('telefono'),
+                'correo'    => $this->request->getPost('correo'),
+            ]);
+        }
+
+        $dataLead = [
+            'idpersona'          => $idpersona,
+            'idcampania'         => $this->request->getPost('idcampania') ?: null,
+            'idmedio'            => $this->request->getPost('idmedio') ?: null,
+            'idorigen'           => $this->request->getPost('idorigen') ?: null,
+            'idmodalidad'        => $this->request->getPost('idmodalidad'),
+            'referido_por'       => $this->request->getPost('referido_por') ?: null,
+            'estado'             => 'Nuevo',
+            'idetapa'            => 1,
+            'idusuario_registro' => session('idusuario'),
+            'idusuario'          => session('idusuario')
         ];
 
-        $idlead = $this->leadModel->insert($data);
-        $persona = $this->personaModel->find($data['idpersona']);
+        $idlead = $this->leadModel->insert($dataLead);
 
-        return $this->response->setJSON([
-            'success' => true,
-            'idlead'  => $idlead,
-            'idetapa' => $data['idetapa'],
-            'persona' => $persona
-        ]);
+        if ($idlead) {
+            return $this->response->setJSON([
+                'status'   => 'success',
+                'message'  => 'Lead registrado correctamente',
+                'idlead'   => $idlead,
+                'idpersona'=> $idpersona
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'No se pudo registrar el lead'
+            ]);
+        }
     }
 
     public function detalle($idlead)
@@ -197,7 +217,7 @@ class LeadController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Lead no encontrado']);
         }
 
-        $this->leadModel->update($idlead, ['estado' => 'desistido']);
+        $this->leadModel->update($idlead, ['estado' => 'Descartado']);
         return $this->response->setJSON(['success' => true, 'message' => 'Lead desistido correctamente']);
     }
 
@@ -241,7 +261,7 @@ class LeadController extends BaseController
             'idusuario'   => session()->get('idusuario'),
             'idmodalidad' => $idmodalidad,
             'comentario'  => $comentario,
-            'echa_programada'       => date('Y-m-d H:i:s') // CORRECCIÓN
+            'fecha_programada'       => date('Y-m-d H:i:s') // CORRECCIÓN
         ]);
 
         if ($id) {
@@ -279,7 +299,7 @@ class LeadController extends BaseController
         // Insertar lead con datos básicos
         $dataLead = [
             'idpersona'         => $idpersona,
-            'estado'            => 'nuevo',
+            'estado'            => 'Nuevo',
             'idetapa'           => 1, // etapa inicial
             'idusuario_registro'=> session('idusuario'),
             'idusuario'         => session('idusuario')

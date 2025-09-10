@@ -124,16 +124,18 @@ CREATE TABLE leads (
     idusuario INT,
     idusuario_registro INT,
     idorigen INT,
+    idmodalidad INT NOT NULL,
     referido_por VARCHAR(255) NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado VARCHAR(50),
+    estado ENUM('Nuevo','En proceso','Convertido','Descartado') DEFAULT 'Nuevo',
     CONSTRAINT fk_leads_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona) ON DELETE CASCADE,
     CONSTRAINT fk_leads_campania FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE SET NULL,
     CONSTRAINT fk_leads_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio) ON DELETE SET NULL,
     CONSTRAINT fk_leads_etapa FOREIGN KEY (idetapa) REFERENCES etapas(idetapa) ON DELETE SET NULL,
     CONSTRAINT fk_leads_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
     CONSTRAINT fk_leads_usuario_registro FOREIGN KEY (idusuario_registro) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
-    CONSTRAINT fk_leads_origenes FOREIGN KEY (idorigen) REFERENCES origenes(idorigen)
+    CONSTRAINT fk_leads_origenes FOREIGN KEY (idorigen) REFERENCES origenes(idorigen),
+    CONSTRAINT fk_leads_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad)
 );
 
 CREATE TABLE modalidades (
