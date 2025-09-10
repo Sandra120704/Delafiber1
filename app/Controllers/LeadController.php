@@ -100,50 +100,35 @@ class LeadController extends BaseController
         ]);
     }
 
-    public function guardar()
-    {
-        $idpersona = $this->request->getPost('idpersona');
+public function guardar()
+{
+    $idpersona = $this->request->getPost('idpersona');
 
-        // Si no existe persona, la creamos
-        if (!$idpersona) {
-            $idpersona = $this->personaModel->insert([
-                'dni'       => $this->request->getPost('dni'),
-                'nombres'   => $this->request->getPost('nombres'),
-                'apellidos' => $this->request->getPost('apellidos'),
-                'telefono'  => $this->request->getPost('telefono'),
-                'correo'    => $this->request->getPost('correo'),
-            ]);
-        }
-
-        $dataLead = [
-            'idpersona'          => $idpersona,
-            'idcampania'         => $this->request->getPost('idcampania') ?: null,
-            'idmedio'            => $this->request->getPost('idmedio') ?: null,
-            'idorigen'           => $this->request->getPost('idorigen') ?: null,
-            'idmodalidad'        => $this->request->getPost('idmodalidad'),
-            'referido_por'       => $this->request->getPost('referido_por') ?: null,
-            'estado'             => 'Nuevo',
-            'idetapa'            => 1,
-            'idusuario_registro' => session('idusuario'),
-            'idusuario'          => session('idusuario')
-        ];
-
-        $idlead = $this->leadModel->insert($dataLead);
-
-        if ($idlead) {
-            return $this->response->setJSON([
-                'status'   => 'success',
-                'message'  => 'Lead registrado correctamente',
-                'idlead'   => $idlead,
-                'idpersona'=> $idpersona
-            ]);
-        } else {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'No se pudo registrar el lead'
-            ]);
-        }
+    if ($this->leadModel->where('idpersona', $idpersona)->first()) {
+        return redirect()->back()->with('error', 'Esta persona ya está registrada como Lead.');
     }
+
+    $dataLead = [
+        'idpersona' => $idpersona,
+        'idcampania' => $this->request->getPost('idcampania') ?: null,
+        'idmedio' => $this->request->getPost('idmedio') ?: null,
+        'idorigen' => $this->request->getPost('idorigen') ?: null,
+        'idmodalidad' => $this->request->getPost('idmodalidad'),
+        'referido_por' => $this->request->getPost('referido_por') ?: null,
+        'estado' => 'Nuevo',
+        'idetapa' => 1,
+        'idusuario_registro' => session('idusuario'),
+        'idusuario' => session('idusuario')
+    ];
+
+    $idlead = $this->leadModel->insert($dataLead);
+
+    if ($idlead) {
+        return redirect()->to(base_url('/leads'))->with('success', 'Lead registrado correctamente');
+    } else {
+        return redirect()->back()->with('error', 'No se pudo registrar el lead');
+    }
+}
 
     public function detalle($idlead)
     {
@@ -321,5 +306,11 @@ class LeadController extends BaseController
             'message' => 'Error al crear lead.'
         ]);
     }
+    public function validar($idpersona)
+    {
+        $existe = $this->leadModel->where('idpersona', $idpersona)->first() ? true : false;
+        return $this->response->setJSON(['exists' => $existe]);
+    }
+
 
 }

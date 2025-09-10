@@ -137,6 +137,15 @@ CREATE TABLE leads (
     CONSTRAINT fk_leads_origenes FOREIGN KEY (idorigen) REFERENCES origenes(idorigen),
     CONSTRAINT fk_leads_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad)
 );
+ALTER TABLE leads
+ADD CONSTRAINT uq_leads_persona UNIQUE (idpersona);
+
+DELETE l1 
+FROM leads l1
+JOIN leads l2 
+  ON l1.idpersona = l2.idpersona 
+ AND l1.idlead > l2.idlead;
+
 
 CREATE TABLE modalidades (
     idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
