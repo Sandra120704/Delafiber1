@@ -15,22 +15,14 @@ $routes->get('personas/crear', 'PersonaController::crear');         // Crear per
 $routes->get('personas/editar/(:num)', 'PersonaController::editar/$1'); // Editar persona
 $routes->post('personas/guardar', 'PersonaController::guardar');   // Guardar persona
 $routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1'); // Eliminar persona
-$routes->get('leads/modalCrear/(:num)', 'LeadController::modalCrear/$1');
-$routes->get('leads/registrar/(:num)', 'LeadController::registrar/$1');
 $routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
 $routes->post('personas/guardar', 'PersonaController::guardar');
 // UBICACION (Departamentos / Provincias / Distritos)
 $routes->get('ubicacion/provincias/(:num)', 'UbicacionController::getProvincias/$1');
 $routes->get('ubicacion/distritos/(:num)', 'UbicacionController::getDistritos/$1');
-// Lead modal
-$routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
-$routes->get('leads/modals/(:num)', 'LeadController::convertirALead/$1');
-$routes->post('leads/guardar', 'LeadController::guardar');
-$routes->get('leads/index', 'LeadController::index');
 // API para búsqueda DNI
 $routes->get('api/personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
 $routes->get('personas/buscadordni/(:num)', 'PersonaController::BuscadorDni/$1');
-
 // CAMPANAS
 $routes->get('campanas', 'CampanaController::index');               // Listado
 $routes->get('campana/crear', 'CampanaController::crear');
@@ -54,13 +46,19 @@ $routes->group('', ['filter' => 'auth'], function($routes){
     $routes->get('campana', 'CampanaController::index');
     $routes->get('persona', 'PersonaController::index');
 });
-// LEADS
+// Lead modal
 $routes->get('leads', 'LeadController::index');          // Vista Kanban
+$routes->get('lead/detalles/(:num)', 'LeadController::detalle/$1');
+$routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
+$routes->get('leads/modals/(:num)', 'LeadController::convertirALead/$1');
+$routes->post('lead/actualizarEtapa', 'LeadController::actualizarEtapa');
+$routes->get('leads/modalCrear/(:num)', 'LeadController::modalCrear/$1'); //Modals cre crear Persona
+$routes->get('leads/registrar/(:num)', 'LeadController::registrar/$1');
+$routes->post('leads/guardar', 'LeadController::guardar');
+$routes->get('leads/index', 'LeadController::index');
 $routes->get('leads/crear/(:num)', 'LeadController::crear/$1'); // Crear lead a partir de persona
-$routes->post('lead/guardar', 'LeadController::guardar');  // alias en singular
 $routes->post('leads/guardar', 'LeadController::guardar'); // oficial en plural
 $routes->get('lead/detalle/(:num)', 'LeadController::detalle/$1');
-
 $routes->get('lead/verificar-duplicado/(:num)', 'LeadController::verificarDuplicado/$1');
 $routes->post('lead/guardarTarea', 'LeadController::guardarTarea');
 $routes->post('lead/eliminar', 'LeadController::eliminar'); 

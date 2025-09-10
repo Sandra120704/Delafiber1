@@ -4,7 +4,7 @@
 <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css" rel="stylesheet">
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>📋 Flujo de Leads</h3>
+    <h3>Flujo de Leads</h3>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leadModal">Nuevo Lead</button>
 </div>
 
@@ -29,6 +29,13 @@
         <button class="btn btn-sm btn-outline-primary mt-2" onclick="abrirModalAgregarLead(<?= $etapa['idetapa'] ?>)">+ Agregar Lead</button>
     </div>
   <?php endforeach; ?>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="modalLeadDetalle" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" id="modalLeadDetalleContent"></div>
+  </div>
 </div>
 
 <!-- Modal Crear Lead -->
@@ -59,149 +66,23 @@
 
 <?= $footer ?>
 
+<script>
+    const base_url = "<?= rtrim(base_url(), '/') ?>";
+</script>
 <!-- JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-const base_url = "<?= base_url() ?>";
-
-// Abrir modal y definir etapa
-function abrirModalAgregarLead(idetapa){
-    $('#idetapa').val(idetapa);
-    const modal = new bootstrap.Modal(document.getElementById('leadModal'));
-    modal.show();
-}
-
-// Drag & Drop funcional
-function enableDragAndDrop(){
-    document.querySelectorAll('.kanban-card').forEach(card => {
-        card.addEventListener('dragstart', e => {
-            e.dataTransfer.setData('text/plain', card.dataset.id);
-        });
-    });
-
-    document.querySelectorAll('.kanban-column').forEach(col => {
-        col.addEventListener('dragover', e => e.preventDefault());
-        col.addEventListener('drop', e => {
-            const id = e.dataTransfer.getData('text/plain');
-            const card = document.getElementById(`kanban-card-${id}`);
-            col.appendChild(card);
-
-            // Actualizar etapa vía AJAX
-            $.post(`${base_url}/lead/mover`, { idlead: id, idetapa: col.dataset.etapa }, function(res){
-                Swal.fire({
-                    icon: res.status === 'success' ? 'success' : 'error',
-                    title: res.message,
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true
-                });
-            }, "json");
-        });
-    });
-}
-
-// Inicializar drag & drop al cargar
-enableDragAndDrop();
-
-// Registrar lead vía AJAX
-$('#leadForm').on('submit', function(e){
-    e.preventDefault();
-    $.post(`${base_url}/lead/guardar`, $(this).serialize(), function(res){
-        if(res.status === 'success'){
-            const column = $('#kanban-column-' + $('#idetapa').val());
-            const leadCard = $(`
-                <div class="kanban-card" id="kanban-card-${res.idlead}" data-id="${res.idlead}" draggable="true" style="border-left:5px solid #007bff;">
-                    <div class="card-title">${$('#nombres').val()} ${$('#apellidos').val()}</div>
-                    <div class="card-info">
-                        <small>${$('#telefono').val()} | ${$('#correo').val()}</small>
-                    </div>
-                </div>
-            `);
-            column.append(leadCard);
-
-            // Habilitar drag & drop en la nueva tarjeta
-            enableDragAndDrop();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Lead registrado',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true
-            });
-
-            $('#leadForm')[0].reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('leadModal'));
-            modal.hide();
-        } else {
-            Swal.fire({
-                icon: 'warning',
-                title: res.message,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
-        }
-    }, "json");
-});
-</script>
-
+<script src="<?= base_url('js/leadsJS/kanbas.js') ?>"></script>
+<script src="<?= base_url('js/leadsJS/editar.js') ?>"></script>
+<script src="<?= base_url('js/leadsJS/detalle.js') ?>"></script>
 <style>
-/* Kanban container: columnas paralelas */
-.kanban-container {
-  display: flex !important;      /* columnas en fila */
-  flex-wrap: nowrap !important;  /* no se envuelvan */
-  gap: 16px;
-  overflow-x: auto;              /* scroll horizontal si hay muchas columnas */
-  width: 100%;                   /* ocupar todo el ancho */
-  padding: 10px;
-}
-
-.kanban-column {
-  flex: 0 0 300px;               /* ancho fijo para cada columna */
-  background: #f4f5f7;
-  border-radius: 8px;
-  max-height: 80vh;              /* altura máxima de columna */
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-  overflow-y: auto;              /* scroll vertical si hay muchas tarjetas */
-}
-/* Nombre de etapa */
-.kanban-stage { 
-  font-weight:bold; 
-  text-align:center; 
-  margin-bottom:8px; 
-}
-
-/* Tarjetas */
-.kanban-card {
-  background:#fff; 
-  border-radius:6px; 
-  padding:10px; 
-  margin-bottom:10px; 
-  box-shadow:0 2px 5px rgba(0,0,0,0.1); 
-  cursor:grab; 
-  transition:transform .2s;
-}
+/* Kanban Container */
+.kanban-container { display:flex; flex-wrap:nowrap; gap:16px; overflow-x:auto; width:100%; padding:10px; }
+.kanban-column { flex:0 0 300px; background:#f4f5f7; border-radius:8px; max-height:80vh; display:flex; flex-direction:column; padding:8px; overflow-y:auto; }
+.kanban-stage { font-weight:bold; text-align:center; margin-bottom:8px; }
+.kanban-card { background:#fff; border-radius:6px; padding:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:grab; transition:transform .2s; }
 .kanban-card:hover { transform: scale(1.02); }
-
-/* Info dentro de la tarjeta */
-.kanban-card .card-title {
-  font-weight:600;
-  margin-bottom:4px;
-}
-.kanban-card .card-info small {
-  color:#555;
-  display:block;
-}
+.kanban-card .card-title { font-weight:600; margin-bottom:4px; }
+.kanban-card .card-info small { color:#555; display:block; }
 </style>

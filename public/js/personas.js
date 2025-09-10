@@ -101,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Delegación para convertir a lead desde lista ---
     document.addEventListener('click', function(e){
         if(e.target.matches('.btn-converti')){
             const idpersona = e.target.dataset.id;

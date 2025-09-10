@@ -1,81 +1,69 @@
-$(function () {
-  const base_url = "http://delafiber.test/";
+// detalle.js
+$(document).ready(function() {
 
-  function u(path) {
-    return (base_url.endsWith('/') ? base_url : base_url + '/') + path.replace(/^\/+/, '');
-  }
+    // Click en tarjeta del Kanban
+    $(document).on('click', '.kanban-card', function() {
+        const idlead = $(this).data('id');
 
-  $(document).on("click", ".kanban-card", function () {
-    const idlead = $(this).data("id");
-    if (!idlead) return;
+        $.ajax({
+            url: `${base_url}/lead/detalles/${idlead}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+              
+                    $('#modalLeadDetalleContent').html(res.html);
 
-    $.get(u("lead/detalle/" + idlead))
-      .done(function(res) {
-        $("#modalContainer").html(res.html);
-        const modalEl = document.getElementById("modalLeadDetalle");
-        if(modalEl){
-          const modal = new bootstrap.Modal(modalEl);
-          modal.show();
+                    const modal = new bootstrap.Modal(document.getElementById('modalLeadDetalle'));
+                    modal.show();
+ 
+                    $('#btnDesistirLead').off('click').on('click', function() {
+                        $.post(`${base_url}/lead/eliminar`, { idlead: idlead }, function(res) {
+                            if (res.success) {
+                                Swal.fire('¡Listo!', res.message, 'success');
+                                modal.hide();
+                                $(`#kanban-card-${idlead}`).remove();
+                            } else {
+                                Swal.fire('Error', res.message, 'error');
+                            }
+                        }, 'json');
+                    });
 
-          // Tareas
-          $("#tareaForm").off("submit").on("submit", function(e){
-            e.preventDefault();
-            const descripcion = $(this).find('input[name="descripcion"]').val().trim();
-            if(!descripcion) return;
+                    // Agregar Tareas
+                    $('#tareaForm').off('submit').on('submit', function(e) {
+                        e.preventDefault();
+                        $.post(`${base_url}/lead/guardarTarea`, $(this).serialize(), function(res) {
+                            if (res.success) {
+                                $('#listaTareas').append(`<li>${res.tarea.descripcion} <small class="text-muted">${res.tarea.fecha_registro}</small></li>`);
+                                $('#tareaForm')[0].reset();
+                            } else {
+                                Swal.fire('Error', res.message, 'error');
+                            }
+                        }, 'json');
+                    });
 
-            $.post(u("lead/guardarTarea"), { idlead, descripcion })
-              .done(function(res){
-                if(res.success){
-                  $("#listaTareas").append(`<li>${res.tarea.descripcion} - ${res.tarea.fecha_registro}</li>`);
-                  $("#tareaForm")[0].reset();
+                    // Agregar Seguimientos
+                    $('#seguimientoForm').off('submit').on('submit', function(e) {
+                        e.preventDefault();
+                        $.post(`${base_url}/lead/guardarSeguimiento`, $(this).serialize(), function(res) {
+                            if (res.success) {
+                                $('#listaSeguimientos').append(`<li>${res.seguimiento.comentario} <small class="text-muted">${res.seguimiento.fecha_programada}</small></li>`);
+                                $('#seguimientoForm')[0].reset();
+                            } else {
+                                Swal.fire('Error', res.message, 'error');
+                            }
+                        }, 'json');
+                    });
+
                 } else {
-                  Swal.fire('Error', res.message, 'error');
+                    Swal.fire('Error', res.message, 'error');
                 }
-              });
-          });
+            },
+            error: function(xhr) {
+                console.error(xhr);
+                Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
+            }
+        });
+    });
 
-          // Seguimientos
-          $("#seguimientoForm").off("submit").on("submit", function(e){
-            e.preventDefault();
-            const comentario = $(this).find('textarea[name="comentario"]').val().trim();
-            const idmodalidad = $(this).find('select[name="idmodalidad"]').val();
-            if(!comentario) return;
-
-            $.post(u("lead/guardarSeguimiento"), { idlead, idmodalidad, comentario })
-              .done(function(res){
-                if(res.success){
-                  $("#listaSeguimientos").append(`<li>${res.seguimiento.comentario} - ${res.seguimiento.fecha_registro}</li>`);
-                  $("#seguimientoForm")[0].reset();
-                } else {
-                  Swal.fire('Error', res.message, 'error');
-                }
-              });
-          });
-
-          // Desistir
-          $("#btnDesistirLead").off("click").on("click", function(){
-            Swal.fire({
-              title:'¿Desea desistir este lead?',
-              icon:'warning',
-              showCancelButton:true,
-              confirmButtonText:'Sí, desistir',
-              cancelButtonText:'Cancelar'
-            }).then(result=>{
-              if(result.isConfirmed){
-                $.post(u("lead/eliminar"), { idlead })
-                  .done(res=>{
-                    if(res.success){
-                      Swal.fire('Desistido!', res.message, 'success');
-                      modal.hide();
-                      $("#kanban-card-" + idlead).remove();
-                    } else {
-                      Swal.fire('Error', res.message, 'error');
-                    }
-                  });
-              }
-            });
-          });
-        }
-      });
-  });
 });
