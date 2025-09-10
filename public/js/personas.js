@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Buscar DNI ---
     btnBuscar.addEventListener('click', async () => {
         const dni = dniInput.value.trim();
-
         if (!dni) {
             Swal.fire({
                 icon: 'warning',
@@ -22,9 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return;
         }
-
-        buscando.classList.remove('d-none'); // Mostrar spinner
-
+        buscando.classList.remove('d-none');
         try {
             const res = await fetch(`${base_url}personas/buscadordni/${dni}`);
             const data = await res.json();
@@ -72,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData
             });
-
             const data = await res.json();
 
             if (data.success) {
@@ -85,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cancelButtonText: 'No por ahora'
                 }).then(result => {
                     if (result.isConfirmed) {
-                        window.location.href = `${base_url}leads/crear/${data.idpersona}`;
+                        abrirModalLead(data.idpersona);
                     }
                 });
             } else {
@@ -105,20 +101,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Convertir a lead desde la lista ---
-    document.querySelectorAll(".btn-convertir-lead").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const idpersona = this.getAttribute("data-id");
-
-            fetch(`${base_url}leads/crear/${idpersona}`)
-                .then(res => res.text())
-                .then(html => {
-                    modalContainer.innerHTML = html;
-                    const modal = new bootstrap.Modal(document.getElementById("leadModal"));
-                    modal.show();
-                })
-                .catch(err => console.error("Error al cargar modal:", err));
-        });
+    // --- Delegación para convertir a lead desde lista ---
+    document.addEventListener('click', function(e){
+        if(e.target.matches('.btn-converti')){
+            const idpersona = e.target.dataset.id;
+            abrirModalLead(idpersona);
+        }
     });
-});
+    async function abrirModalLead(idpersona){
+        try {
+            const res = await fetch(`${base_url}leads/modals/${idpersona}`);
+            const html = await res.text();
+            modalContainer.innerHTML = html;
+            const modalEl = document.getElementById("leadModal");
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
 
+            const leadForm = modalEl.querySelector("#leadForm");
+            if(!leadForm) throw new Error("No se encontró el formulario del modal");
+
+         leadForm.addEventListener('submit', async function(e){
+            e.preventDefault();
+            const formData = new FormData(leadForm);
+
+            try {
+                const res = await fetch(leadForm.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if(data.success){
+                    Swal.fire('¡Éxito!', 'Lead registrado correctamente', 'success');
+                    modal.hide();
+                } else {
+                    Swal.fire('Error', data.message || 'No se pudo registrar el lead', 'error');
+                }
+            } catch(err){
+                Swal.fire('Error', 'Error al registrar el lead', 'error');
+            }
+        });
+
+    } catch (err) {
+        console.error("Error al cargar modal:", err);
+        Swal.fire('Error', 'No se pudo abrir el modal de Lead', 'error');
+    }
+}
+});

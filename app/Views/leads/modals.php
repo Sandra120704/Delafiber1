@@ -7,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="leadForm" action="<?= base_url('lead/guardar') ?>" method="POST">
+        <form id="leadForm" action="<?= base_url('leads/guardar') ?>" method="POST">
           <!-- Persona -->
           <input type="hidden" name="idpersona" id="idpersona" value="<?= $persona['idpersona'] ?? '' ?>">
 

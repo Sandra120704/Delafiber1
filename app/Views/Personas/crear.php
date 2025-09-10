@@ -116,7 +116,7 @@
     </div>
   </div>
 </div>
-
+<div id="modalContainer"></div>
 <script>
   const base_url = "<?= base_url(); ?>";
 </script>

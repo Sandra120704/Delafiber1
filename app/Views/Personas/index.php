@@ -94,7 +94,7 @@
                 <div class="btn-group btn-group-actions" role="group" aria-label="Acciones">
                   <button type="button" class="btn btn-sm btn-outline-warning btn-editar" data-id="<?= $p['idpersona'] ?>">Editar</button>
                   <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="<?= $p['idpersona'] ?>">Eliminar</button>
-                  <button type="button" class="btn btn-sm btn-success btn-convertir-lead" data-id="<?= $p['idpersona'] ?>" title="Convertir en Lead">
+                  <button type="button" class="btn btn-sm btn-success btn-converti" data-id="<?= $p['idpersona'] ?>" title="Convertir en Lead">
                     <i class="bi bi-arrow-right-circle"></i> Lead
                   </button>
                 </div>

@@ -105,7 +105,10 @@ public function guardar()
     $idpersona = $this->request->getPost('idpersona');
 
     if ($this->leadModel->where('idpersona', $idpersona)->first()) {
-        return redirect()->back()->with('error', 'Esta persona ya está registrada como Lead.');
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Esta persona ya está registrada como Lead.'
+        ]);
     }
 
     $dataLead = [
@@ -124,9 +127,16 @@ public function guardar()
     $idlead = $this->leadModel->insert($dataLead);
 
     if ($idlead) {
-        return redirect()->to(base_url('/leads'))->with('success', 'Lead registrado correctamente');
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Lead registrado correctamente',
+            'idlead' => $idlead
+        ]);
     } else {
-        return redirect()->back()->with('error', 'No se pudo registrar el lead');
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'No se pudo registrar el lead'
+        ]);
     }
 }
 

@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="<?= base_url('assets/datatables.net-bs4/dataTables.bootstrap4.css')?>">
   <link rel="stylesheet" href="<?= base_url('assets/ti-icons/css/themify-icons.css')?>">
   <link rel="stylesheet" type="<?= base_url('text/css" href="js/select.dataTables.min.css')?>">
-  <link href="<?= base_url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css')?>" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
 
   <!-- End plugin css for this page -->
   <!-- inject:css -->
@@ -99,8 +100,8 @@
             </div>
           </li>
           <li class="nav-item nav-profile dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-              <img src="images/faces/face28.jpg" alt="profile"/>
+            <a class="nav-link dropdown-toggle" href="<? base_url()?>" data-toggle="dropdown" id="profileDropdown">
+              <img src="<?= base_url("/faces/face28.jpg")?>" alt="profile"/>
             </a>
             <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
               <a class="dropdown-item">
