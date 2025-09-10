@@ -1,4 +1,4 @@
--- Active: 1743133057434@@127.0.0.1@3306@delafiber
+-- Active: 1757456393932@@127.0.0.1@3306@delafiber
 DROP DATABASE IF EXISTS delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
@@ -68,6 +68,9 @@ CREATE TABLE campanias (
     presupuesto DECIMAL(10,2),
     estado VARCHAR(50)
 );
+ALTER TABLE campanias
+ADD fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
 
 CREATE TABLE medios (
     idmedio INT AUTO_INCREMENT PRIMARY KEY,

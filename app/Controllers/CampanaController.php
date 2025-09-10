@@ -3,19 +3,21 @@
 namespace App\Controllers;
 use App\Models\CampanaModel;
 use App\Models\MedioModel;
+use App\Models\UsuarioModel;
 
 class CampanaController extends BaseController
 {
     protected $campanaModel;
     protected $medioModel;
+    protected $usuarioModel;
 
     public function __construct()
     {
         $this->campanaModel = new CampanaModel();
         $this->medioModel = new MedioModel();
+        $this->usuarioModel = new UsuarioModel();
     }
 
-    // Listado de campañas con métricas
     public function index()
     {
         $campanas = $this->campanaModel->findAll();
@@ -35,7 +37,6 @@ class CampanaController extends BaseController
         return view('campanas/index', $datos);
     }
 
-    // Formulario Crear / Editar
     public function crear($id = null)
     {
         $campana = null;
@@ -48,18 +49,21 @@ class CampanaController extends BaseController
 
         $medios = $this->medioModel->findAll();
 
+        $usuarioModel = new UsuarioModel(); 
+        $usuarios = $usuarioModel->findAll();
+
         $datos = [
             'header' => view('layouts/header'),
             'footer' => view('layouts/footer'),
             'campana' => $campana,
             'medios' => $medios,
-            'difusiones' => $difusiones
+            'difusiones' => $difusiones,
+            'usuarios' => $usuarios 
         ];
 
         return view('campanas/crear', $datos);
     }
 
-    // Guardar campaña
     public function guardar()
     {
         $data = $this->request->getPost();
@@ -70,44 +74,48 @@ class CampanaController extends BaseController
             'fecha_inicio' => $data['fecha_inicio'],
             'fecha_fin' => $data['fecha_fin'],
             'presupuesto' => $data['presupuesto'],
-            'estado' => $data['estado']
+            'estado' => 'Activo', // siempre activo al crear
+            'segmento' => $data['segmento'] ?? null,
+            'responsable' => session()->get('idusuario'),
+            'objetivos' => $data['objetivos'] ?? null,
+            'notas' => $data['notas'] ?? null
         ];
 
         if (!empty($data['idcampania'])) {
+            // Al editar, no cambiamos fecha_creacion
+            unset($campanaData['fecha_creacion']);
             $this->campanaModel->update($data['idcampania'], $campanaData);
             $idcampania = $data['idcampania'];
         } else {
+            $campanaData['fecha_creacion'] = date('Y-m-d H:i:s');
             $idcampania = $this->campanaModel->insert($campanaData);
         }
-
-        // Guardar difusiones
         $this->campanaModel->guardarDifusiones($idcampania, $data['medios'] ?? []);
 
         return redirect()->to(site_url('campanas'));
     }
 
-    // Detalle de campaña con medios
-    public function detalle($idcampania)
+    public function detalle($id)
     {
-        $campana = $this->campanaModel->find($idcampania);
-
+        $campana = $this->campanaModel->find($id);
         if (!$campana) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Campaña no encontrada'
-            ])->setStatusCode(404);
+            return $this->response->setJSON(['error' => 'Campaña no encontrada']);
+        }
+        if (!empty($campana['responsable'])) {
+            $usuario = $this->usuarioModel->find($campana['responsable']);
+            $campana['responsable_nombre'] = $usuario['nombre'] ?? 'No asignado';
+        } else {
+            $campana['responsable_nombre'] = 'No asignado';
         }
 
-        $medios = $this->campanaModel->getMedios($idcampania);
+        $medios = $this->campanaModel->getMedios($id); 
 
         return $this->response->setJSON([
-            'success' => true,
             'campana' => $campana,
-            'medios' => $medios
+            'medios'  => $medios
         ]);
     }
 
-    // Cambiar estado (Activo/Inactivo)
     public function cambiarEstado($id)
     {
         $estado = $this->request->getPost('estado');
@@ -127,7 +135,6 @@ class CampanaController extends BaseController
         ]);
     }
 
-    // Resumen general para dashboard
     public function resumen()
     {
         return $this->response->setJSON([
@@ -138,7 +145,6 @@ class CampanaController extends BaseController
         ]);
     }
 
-    // Eliminar campaña
     public function eliminar($id)
     {
         if ($id) {

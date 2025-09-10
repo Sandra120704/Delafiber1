@@ -7,9 +7,8 @@ class CampanaModel extends Model
 {
     protected $table = 'campanias';
     protected $primaryKey = 'idcampania';
-    protected $allowedFields = ['nombre','descripcion','fecha_inicio','fecha_fin','presupuesto','estado'];
+    protected $allowedFields = ['nombre','descripcion','fecha_inicio','fecha_fin','presupuesto','estado','fecha_creacion'];
 
-    // Guardar medios/difusiones de una campaña
     public function guardarDifusiones($idcampania, $medios)
     {
         $builder = $this->db->table('difusiones');
@@ -31,8 +30,6 @@ class CampanaModel extends Model
         }
     }
 
-
-    // Obtener medios/difusiones de una campaña
     public function getMedios($idcampania)
     {
         return $this->db->table('difusiones as d')
@@ -49,14 +46,12 @@ class CampanaModel extends Model
         $this->delete($idcampania);
     }
 
-    //  Contar campañas activas
     public function contarActivas()
     {
         return $this->db->table($this->table)
             ->where('estado', 'Activo')
-            ->countAllResults(false); // reset builder
+            ->countAllResults(false); 
     }
-
     /* public function eliminarCampana($idcampania)
     {
         $builder = $this->db->table('difusiones');
@@ -66,13 +61,11 @@ class CampanaModel extends Model
         // Eliminar la campaña
         $this->delete($idcampania);
     } */
-    // Sumar presupuesto total
     public function presupuestoTotal()
     {
         return $this->selectSum('presupuesto')->get()->getRow()->presupuesto ?? 0;
     }
 
-    // Total leads generados (suma en difusiones)
     public function totalLeads()
     {
         return $this->db->table('difusiones')
@@ -82,7 +75,6 @@ class CampanaModel extends Model
             ->leads_generados ?? 0;
     }
 
-    // Obtener detalle de una campaña
     public function getDetalle($idcampania)
     {
         $campania = $this->find($idcampania);
@@ -92,7 +84,6 @@ class CampanaModel extends Model
         return $campania;
     }
 
-    // Cambiar estado (Activo/Inactivo)
     public function cambiarEstado($idcampania, $estado)
     {
         return $this->update($idcampania, ['estado' => $estado]);

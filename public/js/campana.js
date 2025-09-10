@@ -1,33 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Inicializar tooltips
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
-
-  // Inicializar DataTables
-/*   $('#campanasTable').DataTable({
-    pageLength: 10,
-    order: [[0, 'desc']],
-    language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-    }
-  }); */
 
   const modalBody = document.getElementById('detalleMedios');
   const detalleModal = new bootstrap.Modal(document.getElementById('detalleCampanaModal'));
 
-  // Botón detalle campaña
   document.querySelectorAll('.btn-detalle').forEach(btn => {
     btn.addEventListener('click', async () => {
       const idcampania = btn.dataset.id;
 
-      // Placeholder antes de cargar
-      document.getElementById('detalleNombre').textContent = 'Cargando...';
-      document.getElementById('detalleDescripcion').textContent = '';
-      document.getElementById('detalleFechas').textContent = '';
-      document.getElementById('detallePresupuesto').textContent = '';
-      document.getElementById('detalleEstado').textContent = '';
-      modalBody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
+      const placeholders = {
+        detalleNombre: 'Cargando...',
+        detalleDescripcion: '',
+        detalleFechas: '',
+        detallePresupuesto: '',
+        detalleEstado: '',
+        detalleResponsable: 'Cargando...',
+        detalleFechaCreacion: 'Cargando...'
+      };
 
+      for (const id in placeholders) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = placeholders[id];
+      }
+
+      modalBody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
       detalleModal.show();
 
       try {
@@ -36,14 +33,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const data = await res.json();
 
-        // Llenar info general
-        document.getElementById('detalleNombre').textContent = data.campana.nombre;
-        document.getElementById('detalleDescripcion').textContent = data.campana.descripcion;
-        document.getElementById('detalleFechas').textContent = `${data.campana.fecha_inicio} - ${data.campana.fecha_fin}`;
-        document.getElementById('detallePresupuesto').textContent = parseFloat(data.campana.presupuesto).toFixed(2);
-        document.getElementById('detalleEstado').textContent = data.campana.estado;
+        if (!data || !data.campana) {
+          modalBody.innerHTML = '<tr><td colspan="3">No se encontraron datos de la campaña</td></tr>';
+          return;
+        }
+        const campana = data.campana;
+        const mapIds = {
+          detalleNombre: campana.nombre,
+          detalleDescripcion: campana.descripcion,
+          detalleFechas: `${campana.fecha_inicio} - ${campana.fecha_fin}`,
+          detallePresupuesto: parseFloat(campana.presupuesto).toFixed(2),
+          detalleEstado: campana.estado,
+          detalleResponsable: campana.responsable_nombre ?? 'No asignado',
+          detalleFechaCreacion: campana.fecha_creacion
+        };
 
-        // Llenar tabla de medios
+        for (const id in mapIds) {
+          const el = document.getElementById(id);
+          if (el) el.textContent = mapIds[id];
+        }
+
         if (!data.medios || data.medios.length === 0) {
           modalBody.innerHTML = '<tr><td colspan="3">No hay medios registrados</td></tr>';
         } else {
@@ -57,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </tr>`;
           });
         }
+
       } catch (err) {
         console.error(err);
         modalBody.innerHTML = '<tr><td colspan="3">Error al cargar los datos</td></tr>';
@@ -64,14 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Botón activar/inactivar campaña
   document.querySelectorAll('.toggle-estado').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.id;
       const nuevoEstado = btn.dataset.estado;
 
       try {
-        const res = await fetch(`${BASE_URL}campana/estado/${id}`, {
+        const res = await fetch(`${BASE_URL}campana/cambiarEstado/${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `estado=${nuevoEstado}`
@@ -80,13 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
 
         if (data.success) {
-          // Cambiar texto y color del botón
           btn.textContent = data.estado;
           btn.dataset.estado = data.estado === 'Activo' ? 'Inactivo' : 'Activo';
           btn.classList.toggle('btn-success', data.estado === 'Activo');
           btn.classList.toggle('btn-secondary', data.estado === 'Inactivo');
-
-          actualizarDashboard(); // refresca resumen/grafico
+          actualizarDashboard();
         } else {
           alert('No se pudo cambiar el estado');
         }
@@ -97,16 +104,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Función para refrescar resumen/grafico
   function actualizarDashboard() {
     fetch(`${BASE_URL}campana/resumen`)
-        .then(res => res.json())
-        .then(data => {
-        document.querySelector('#cardCampanasActivas').textContent = data.activas ?? 0;
-        })
-        .catch(err => {
+      .then(res => res.json())
+      .then(data => {
+        const card = document.querySelector('#cardCampanasActivas');
+        if (card) card.textContent = data.activas ?? 0;
+      })
+      .catch(err => {
         console.error('Error al actualizar resumen:', err);
-        document.querySelector('#cardCampanasActivas').textContent = '0';
-        });
-    }
+        const card = document.querySelector('#cardCampanasActivas');
+        if (card) card.textContent = '0';
+      });
+  }
 });

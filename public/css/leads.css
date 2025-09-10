@@ -1,141 +1,33 @@
-/* ===== Contenedor Kanban ===== */
 .kanban-container {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 10px;
 }
-
-/* ===== Cabecera de etapas ===== */
-.kanban-header {
+.kanban-column {
+    background: #f4f5f7;
+    border-radius: 8px;
+    min-width: 280px;
+    max-height: 80vh;
     display: flex;
-    gap: 12px;
-    margin-bottom: 5px;
+    flex-direction: column;
+    padding: 8px;
+    overflow-y: auto;
 }
-
 .kanban-stage {
-    flex: 1;
+    font-weight: bold;
     text-align: center;
-    font-weight: 600;
-    padding: 8px 0;
-    background-color: #ffffff; /* color pastel suave */
+    margin-bottom: 8px;
+}
+.kanban-card {
+    background: #fff;
     border-radius: 6px;
-    border: 1px solid #ffffff;
-    color: #6f4a8e;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: grab;
     transition: transform 0.2s;
 }
-
-.kanban-stage:hover {
-    transform: scale(1.05);
-}
-
-/* ===== Columnas ===== */
-.kanban-body {
-    display: flex;
-    gap: 12px;
-}
-
-.kanban-column {
-    flex: 1;
-    background-color: #fff5f7;
-    min-height: 220px;
-    border-radius: 8px;
-    padding: 8px;
-    border: 1px solid #ffffff;
-    transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.kanban-column.dragover {
-    background-color: #ffffff;
-    box-shadow: 0 4px 12px rgb(255, 255, 255);
-}
-
-/* ===== Tarjetas ===== */
-.kanban-card {
-    background-color: #ffffff;
-    margin-bottom: 10px;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: grab;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    transition: transform 0.25s, box-shadow 0.25s, border-left-color 0.3s;
-    border-left: 5px solid #f0ad4e;
-}
-
-.kanban-card.dragging {
-    opacity: 0.8;
-    transform: scale(1.05);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-}
-
-.card-title {
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #4a4a4a;
-}
-
-.card-info {
-    font-size: 0.85em;
-    color: #666;
-}
-
-/* ===== Modales Compactos ===== */
-.modal-dialog {
-    max-width: 500px; /* tamaño más compacto */
-    margin: 1.75rem auto;
-}
-
-.modal-content {
-    border-radius: 12px;
-    padding: 12px;
-    background: linear-gradient(145deg, #ffffff, #ffffff);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.modal-header {
-    background-color: #ffffff;
-    color: #4a2a56;
-    border-bottom: 2px solid #ffffff;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    padding: 10px 15px;
-}
-
-.modal-body {
-    padding: 10px 15px;
-}
-
-.modal-body p {
-    margin-bottom: 6px;
-    color: #5a3f5f;
-    font-size: 0.95em;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 10px 15px;
-}
-
-.modal-footer .btn-secondary {
-    background-color: #b88abf;
-    border: none;
-    color: rgb(255, 255, 255);
-    font-size: 0.9em;
-    transition: background-color 0.3s;
-}
-
-.modal-footer .btn-secondary:hover {
-    background-color: #9c6ca1;
-}
-
-.modal.fade .modal-dialog {
-    transform: translateY(-20px);
-    transition: transform 0.3s ease-out;
-}
-
-.modal.show .modal-dialog {
-    transform: translateY(0);
+.kanban-card:hover {
+    transform: scale(1.02);
 }
