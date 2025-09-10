@@ -1,4 +1,4 @@
--- Active: 1755358617783@@127.0.0.1@3306@delafiber
+-- Active: 1743133057434@@127.0.0.1@3306@delafiber
 DROP DATABASE IF EXISTS delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
@@ -154,6 +154,9 @@ CREATE TABLE seguimiento (
     CONSTRAINT fk_seguimiento_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE CASCADE,
     CONSTRAINT fk_seguimiento_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad)
 );
+ALTER TABLE seguimiento 
+ADD COLUMN fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP;
+
 
 CREATE TABLE tareas (
     idtarea INT AUTO_INCREMENT PRIMARY KEY,
@@ -166,6 +169,9 @@ CREATE TABLE tareas (
     CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE CASCADE,
     CONSTRAINT fk_tarea_lead FOREIGN KEY (idlead) REFERENCES leads(idlead) ON DELETE CASCADE
 );
+ALTER TABLE leads ADD COLUMN idreferido INT NULL;
+ALTER TABLE leads ADD CONSTRAINT fk_leads_referido FOREIGN KEY (idreferido) REFERENCES personas(idpersona) ON DELETE SET NULL;
+
 INSERT INTO departamentos (nombre) VALUES ('Ica');
 INSERT INTO provincias (nombre, iddepartamento) VALUES ('Chincha', 1);
 INSERT INTO distritos (nombre, idprovincia) VALUES 

@@ -140,17 +140,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = btn.dataset.id;
 
       fetch(`<?= base_url('leads/modals') ?>/${id}`)
-        .then(res => res.text())  // CAMBIO AQUÍ, recibes HTML como texto
+        .then(res => res.text())
         .then(html => {
-          // Insertar el HTML en un contenedor
-          const modalContainer = document.getElementById('modalContainer');
-          modalContainer.innerHTML = html;
+          const container = document.getElementById('modalContainer');
+          container.innerHTML = html;
 
-          // Inicializar y mostrar modal
+          // Ejecutar lógica para campos (si el script está fuera del modal)
+          initModalCampos();
+
           const modalEl = document.getElementById('leadModal');
           if (modalEl) {
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
+
+            // Opcional: limpiar modal al cerrarlo
+            modalEl.addEventListener('hidden.bs.modal', () => {
+              container.innerHTML = '';
+            });
           }
         })
         .catch(() => {
@@ -162,6 +168,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
   });
+
+  function initModalCampos() {
+    const origenSelect = document.getElementById('origenSelect');
+    const campaniaDiv = document.getElementById('campaniaDiv');
+    const referenteDiv = document.getElementById('referenteDiv');
+
+    if (!origenSelect) return;
+
+    function actualizarDivs() {
+      const selectedOption = origenSelect.options[origenSelect.selectedIndex];
+      const tipo = selectedOption.getAttribute('data-tipo') || '';
+      const campSelect = document.getElementById('campaniaSelect');
+      const referidoInput = document.getElementById('referido_por');
+
+      if (tipo === 'campania') {
+        campaniaDiv.style.display = 'block';
+        referenteDiv.style.display = 'none';
+        campSelect.required = true;
+        referidoInput.required = false;
+      } else if (tipo === 'referido') {
+        campaniaDiv.style.display = 'none';
+        referenteDiv.style.display = 'block';
+        campSelect.required = false;
+        referidoInput.required = true;
+      } else {
+        campaniaDiv.style.display = 'none';
+        referenteDiv.style.display = 'none';
+        campSelect.required = false;
+        referidoInput.required = false;
+      }
+    }
+
+    origenSelect.addEventListener('change', actualizarDivs);
+    actualizarDivs();
+  }
+
 
     document.querySelectorAll('.btn-editar').forEach(btn => {
     btn.addEventListener('click', () => {

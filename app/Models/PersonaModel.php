@@ -8,8 +8,17 @@ class PersonaModel extends Model
     protected $table = 'personas';
     protected $primaryKey = 'idpersona';
     protected $allowedFields = [
-        'nombres','apellidos','dni','correo','telefono','direccion','refenrecias','iddistrito'
+        'nombres','apellidos','dni','correo','telefono','direccion','referencias','iddistrito'
     ];
+    protected function buscar($keyword){
+        return $this->like('nombres', $keyword)
+                    ->orLike('apellidos',$keyword)
+                    ->orLike('dni',$keyword)
+                    ->orLike('telefono',$keyword)
+                    ->orLike('correo',$keyword)
+                    ->findAll();
+    }
+
 
     // Validaciones
     protected $validationRules = [
