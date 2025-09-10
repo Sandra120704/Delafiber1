@@ -62,6 +62,7 @@ $routes->get('lead/detalle/(:num)', 'LeadController::detalle/$1');
 $routes->get('lead/verificar-duplicado/(:num)', 'LeadController::verificarDuplicado/$1');
 $routes->post('lead/guardarTarea', 'LeadController::guardarTarea');
 $routes->post('lead/eliminar', 'LeadController::eliminar'); 
+$routes->post('lead/guardarSeguimiento', 'LeadController::guardarSeguimiento');
 
 $routes->get('usuarios','UsuarioController::index');
 $routes->get('usuarios/crear','UsuarioController::crear');

@@ -29,7 +29,7 @@
     </ul>
 
     <form id="tareaForm">
-        <input type="hidden" id="tareaIdLead" value="<?= $lead['idlead'] ?>">
+        <input type="hidden" name="idlead" value="<?= $lead['idlead'] ?>">
         <input type="text" name="descripcion" placeholder="Nueva tarea" class="form-control mb-2" required>
         <button type="submit" class="btn btn-primary btn-sm">Agregar tarea</button>
     </form>
@@ -46,6 +46,7 @@
     </ul>
 
     <form id="seguimientoForm" class="mt-2">
+        <input type="hidden" name="idlead" value="<?= $lead['idlead'] ?>">
         <div class="mb-2">
             <select name="idmodalidad" class="form-select" required>
                 <option value="">Seleccione modalidad</option>

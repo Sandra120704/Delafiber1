@@ -6,17 +6,24 @@ $(document).ready(function() {
         const idlead = $(this).data('id');
 
         $.ajax({
-            url: `${base_url}/lead/detalles/${idlead}`,
+            url: `${base_url}/lead/detalles/${idlead}`, 
             type: 'GET',
             dataType: 'json',
             success: function(res) {
                 if (res.success) {
-              
+
+                    // Inyecta el HTML parcial en el modal
                     $('#modalLeadDetalleContent').html(res.html);
 
+                    // Inicializa y muestra el modal
                     const modal = new bootstrap.Modal(document.getElementById('modalLeadDetalle'));
                     modal.show();
- 
+
+                    // ----------------------------
+                    // Eventos dentro del modal
+                    // ----------------------------
+
+                    // Desistir Lead
                     $('#btnDesistirLead').off('click').on('click', function() {
                         $.post(`${base_url}/lead/eliminar`, { idlead: idlead }, function(res) {
                             if (res.success) {
@@ -64,6 +71,7 @@ $(document).ready(function() {
                 Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
             }
         });
+
     });
 
 });

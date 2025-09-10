@@ -46,7 +46,7 @@
                 </div>
                 <div class="mb-3">
                     <label>Público objetivo / Segmentación</label>
-                    <input type="text" name="segmento" class="form-control" placeholder="Ej: Clientes VIP, zona Lima" value="<?= $campana['segmento'] ?? '' ?>">
+                    <input type="text" name="segmento" class="form-control" placeholder="Ej: Clientes VIP, zona }Chincha" value="<?= $campana['segmento'] ?? '' ?>">
                 </div>
                 <input type="hidden" name="responsable" value="<?= session()->get('idusuario') ?>">
                 <div class="mb-3">

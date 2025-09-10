@@ -216,61 +216,81 @@ public function guardar()
         return $this->response->setJSON(['success' => true, 'message' => 'Lead desistido correctamente']);
     }
 
-    public function guardarTarea()
-    {
-        $idlead = $this->request->getPost('idlead');
-        $descripcion = $this->request->getPost('descripcion');
+public function guardarTarea()
+{
+    $idlead = $this->request->getPost('idlead');
+    $descripcion = $this->request->getPost('descripcion');
 
-        if (!$idlead || !$descripcion) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
-        }
-
-        $id = $this->tareaModel->insert([
-            'idlead'        => $idlead,
-            'descripcion'   => $descripcion,
-            'fecha'         => date('Y-m-d H:i:s') // CORRECCIÓN
+    if (!$idlead || !$descripcion) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Datos incompletos para la tarea'
         ]);
-
-        if ($id) {
-            return $this->response->setJSON([
-                'success' => true,
-                'tarea'   => ['descripcion' => $descripcion, 'fecha_registro' => date('d/m/Y H:i')]
-            ]);
-        } else {
-            return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar tarea']);
-        }
     }
 
-    public function guardarSeguimiento()
-    {
-        $idlead = $this->request->getPost('idlead');
-        $idmodalidad = $this->request->getPost('idmodalidad');
-        $comentario = $this->request->getPost('comentario');
+    $id = $this->tareaModel->insert([
+        'idlead'        => $idlead,
+        'idusuario'     => session()->get('idusuario'),
+        'descripcion'   => $descripcion,
+        'fecha_registro'=> date('Y-m-d H:i:s')
+    ]);
 
-        if (!$idlead || !$idmodalidad || !$comentario) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
-        }
-
-        $id = $this->seguimientoModel->insert([
-            'idlead'      => $idlead,
-            'idusuario'   => session()->get('idusuario'),
-            'idmodalidad' => $idmodalidad,
-            'comentario'  => $comentario,
-            'fecha_programada'       => date('Y-m-d H:i:s') // CORRECCIÓN
+    if ($id) {
+        return $this->response->setJSON([
+            'success' => true,
+            'tarea' => [
+                'id'             => $id,
+                'descripcion'    => $descripcion,
+                'fecha_registro' => date('d/m/Y H:i')
+            ]
         ]);
-
-        if ($id) {
-            return $this->response->setJSON([
-                'success'     => true,
-                'seguimiento' => [
-                    'comentario' => $comentario,
-                    'echa_programada'      => date('Y-m-d H:i:s')
-                ]
-            ]);
-        }
-
-        return $this->response->setJSON(['success' => false, 'message' => 'Error al guardar seguimiento']);
     }
+
+    return $this->response->setJSON([
+        'success' => false,
+        'message' => 'Error al guardar la tarea'
+    ]);
+}
+
+
+public function guardarSeguimiento()
+{
+    $idlead = $this->request->getPost('idlead');
+    $idmodalidad = $this->request->getPost('idmodalidad');
+    $comentario = $this->request->getPost('comentario');
+
+    if (!$idlead || !$idmodalidad || !$comentario) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Datos incompletos para el seguimiento'
+        ]);
+    }
+
+    $id = $this->seguimientoModel->insert([
+        'idlead'      => $idlead,
+        'idusuario'   => session()->get('idusuario'),
+        'idmodalidad' => $idmodalidad,
+        'comentario'  => $comentario,
+        'fecha'       => date('Y-m-d H:i:s')
+    ]);
+
+    if ($id) {
+        return $this->response->setJSON([
+            'success' => true,
+            'seguimiento' => [
+                'id'        => $id,
+                'comentario'=> $comentario,
+                'fecha'     => date('d/m/Y H:i')
+            ]
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'success' => false,
+        'message' => 'Error al guardar seguimiento'
+    ]);
+}
+
     public function convertirALead($idpersona)
     {
         // Verificar que la persona exista
