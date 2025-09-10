@@ -45,7 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
           detallePresupuesto: parseFloat(campana.presupuesto).toFixed(2),
           detalleEstado: campana.estado,
           detalleResponsable: campana.responsable_nombre ?? 'No asignado',
-          detalleFechaCreacion: campana.fecha_creacion
+          detalleFechaCreacion: campana.fecha_creacion,
+          detalleSegmento: campana.segmento ?? 'No definido',
+          detalleObjetivos: campana.objetivos ?? 'No definidos',
+          detalleNotas: campana.notas ?? 'Sin notas'
         };
 
         for (const id in mapIds) {
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const nuevoEstado = btn.dataset.estado;
 
       try {
-        const res = await fetch(`${BASE_URL}campana/cambiarEstado/${id}`, {
+        const res = await fetch(`${BASE_URL}campana/estado/${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `estado=${nuevoEstado}`

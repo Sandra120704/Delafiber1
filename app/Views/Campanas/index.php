@@ -1,23 +1,6 @@
 <?= $header ?>
-<style>
-.card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0.8rem 1.2rem rgba(0,0,0,0.25);
-}
-.card .card-body i {
-  font-size: 1.0rem;
-  margin-bottom: 10px;
-  display: block;
-}
-.card .card-title, 
-.card .card-text {
-  color: white !important;
-}
-</style>
-
+ <link rel="stylesheet" href="<?= base_url('css/campanas.css') ?>"> 
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -35,7 +18,7 @@
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card text-white shadow-lg rounded-4 text-center" style="background-color: #82219bff;">
+        <div class="card text-white shadow-lg rounded-4 text-center" style="background-color: #60219bff;">
           <div class="card-body">
             <i class="bi bi-lightning-charge-fill fs-1 mb-2"></i>
             <h5 class="card-title">Campañas Activas</h5>
@@ -62,9 +45,9 @@
         </div>
       </div>
     </div>
-    <div class="card mb-4">
+    <div class="card mb-4 mx-auto" style="max-width: 1200px;">
       <div class="card-body">
-        <div class="table-responsive">
+        <div class="table-responsive w-100">
           <table id="campanasTable" class="table table-striped table-hover">
             <thead>
               <tr>
@@ -117,16 +100,21 @@
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <strong>Nombre:</strong> <span id="detalleNombre"></span><br>
-              <strong>Descripción:</strong> <span id="detalleDescripcion"></span><br>
-              <strong>Fechas:</strong> <span id="detalleFechas"></span><br>
-              <strong>Presupuesto:</strong> S/ <span id="detallePresupuesto"></span><br>
-              <strong>Estado:</strong> <span id="detalleEstado"></span><br>
-              <div class="mb-3">
-                  <strong>Responsable:</strong> <span id="detalleResponsable"><?= $campana['responsable_nombre'] ?? 'No asignado' ?></span>
-              </div>
-              <strong>Fecha de creación:</strong> <span id="detalleFechaCreacion"></span>
+            <strong>Nombre:</strong> <span id="detalleNombre"></span><br>
+            <strong>Descripción:</strong> <span id="detalleDescripcion"></span><br>
+            <strong>Fechas:</strong> <span id="detalleFechas"></span><br>
+            <strong>Presupuesto:</strong> S/ <span id="detallePresupuesto"></span><br>
+            <strong>Estado:</strong> <span id="detalleEstado"></span><br>
+
+            <div class="mb-3">
+                <strong>Responsable:</strong> <span id="detalleResponsable"><?= $campana['responsable_nombre'] ?? 'No asignado' ?></span>
             </div>
+
+            <strong>Fecha de creación:</strong> <span id="detalleFechaCreacion"></span><br>
+            <strong>Segmentación:</strong> <span id="detalleSegmento"></span><br>
+            <strong>Objetivos / Métricas:</strong> <span id="detalleObjetivos"></span><br>
+            <strong>Notas internas:</strong> <span id="detalleNotas"></span>
+          </div>
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -151,5 +139,5 @@
 <script>
 const BASE_URL = "<?= base_url() ?>";
 </script>
-<script src="<?= base_url('js/campana.js') ?>"></script>
+<script src="<?= base_url('js/CampanasJS/campana.js') ?>"></script>
 <?= $footer ?>

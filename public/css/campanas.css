@@ -12,5 +12,21 @@
 }
 .card .card-title, 
 .card .card-text {
-  color: white !important; /* asegura blanco */
+  color: white !important;
+}
+.table-responsive table {
+  min-width: 600px; /* Evita que se achique demasiado */
+}
+
+@media (max-width: 768px) {
+  #campanasTable td, #campanasTable th {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  #campanasTable td, #campanasTable th {
+    font-size: 1rem;
+  }
 }

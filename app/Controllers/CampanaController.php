@@ -107,6 +107,9 @@ class CampanaController extends BaseController
         } else {
             $campana['responsable_nombre'] = 'No asignado';
         }
+            $campana['segmento'] = $campana['segmento'] ?? 'No definido';
+            $campana['objetivos'] = $campana['objetivos'] ?? 'No definidos';
+            $campana['notas'] = $campana['notas'] ?? 'Sin notas';
 
         $medios = $this->campanaModel->getMedios($id); 
 
