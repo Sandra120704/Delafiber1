@@ -76,7 +76,8 @@
               <select name="idorigen" id="origenSelect" class="form-control">
                 <option value="">-- Seleccionar --</option>
                 <?php foreach ($origenes as $o): ?>
-                  <option value="<?= $o['idorigen'] ?>" data-tipo="<?= strtolower($o['nombre']) ?>">
+                  <option value="<?= $o['idorigen'] ?>" 
+                          data-tipo="<?= strtolower(str_replace(['á','é','í','ó','ú'], ['a','e','i','o','u'], $o['nombre'])) ?>">
                     <?= $o['nombre'] ?>
                   </option>
                 <?php endforeach; ?>

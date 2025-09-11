@@ -1,4 +1,4 @@
-import { showConfirm, showError } from '../utils/alerts.js';
+/* import { showConfirm, showError } from '../utils/alerts.js'; */
 
 document.addEventListener('DOMContentLoaded', () => {
   // === Eliminar Persona ===
