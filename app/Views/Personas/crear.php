@@ -86,6 +86,7 @@
   const base_url = "<?= base_url(); ?>";
 </script>
 <script src="<?= base_url('js/personasJS/personas.js') ?>"></script>
+<script src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?= $footer ?>

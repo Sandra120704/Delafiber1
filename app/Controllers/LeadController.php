@@ -58,8 +58,9 @@ class LeadController extends BaseController
         ');
         $builder->join('personas', 'personas.idpersona = leads.idpersona');
         $builder->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left');
-        $builder->join('campanias', 'campanias.idcampania = leads.idcampania', 'left');
-        $builder->join('medios', 'medios.idmedio = leads.idmedio', 'left');
+        $builder->join('difusiones d', 'd.iddifusion = leads.iddifusion', 'left');
+        $builder->join('campanias', 'campanias.idcampania = d.idcampania', 'left');
+        $builder->join('medios', 'medios.idmedio = d.idmedio', 'left');
         $builder->join('etapas', 'etapas.idetapa = leads.idetapa', 'left');
         $builder->where('leads.estado !=', 'Descartado');// SOLO activos
 
@@ -84,14 +85,19 @@ public function modalCrear($idpersona)
     $modalidades   = $this->modalidadesModel->findAll();
     $origenes      = (new Origen())->findAll();
     $difusiones    = (new DifunsionModel())->getDifusionesCompletas();
+    $campanias     = $this->campanaModel->findAll(); // <-- Agregado
+    $medios        = $this->medioModel->findAll();   // <-- Agregado, si tu vista los usa
 
     return view('leads/modals', [
         'persona'     => $persona,
         'modalidades' => $modalidades,
         'origenes'    => $origenes,
-        'difusiones'  => $difusiones
+        'difusiones'  => $difusiones,
+        'campanias'   => $campanias,
+        'medios'      => $medios
     ]);
 }
+
 
 public function guardar()
 {

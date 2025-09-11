@@ -10,7 +10,7 @@ export function initLeadsForm(modalEl) {
     function actualizarDivs() {
         const tipo = origenSelect.options[origenSelect.selectedIndex]?.getAttribute('data-tipo') || '';
 
-        if (tipo === 'campania') {
+        if (tipo === 'campaña' || tipo === 'campania') {
             campaniaDiv.style.display = 'block';
             referenteDiv.style.display = 'none';
             campSelect.required = true;
@@ -34,11 +34,14 @@ export function initLeadsForm(modalEl) {
     // Evento dinámico
     origenSelect.addEventListener('change', actualizarDivs);
 
-    // Opcional: limpiar modal al cerrarlo
+    // Limpiar modal al cerrarlo
     modalEl.addEventListener('hidden.bs.modal', () => {
         campaniaDiv.style.display = 'none';
         referenteDiv.style.display = 'none';
         campSelect.required = false;
         referidoInput.required = false;
+        origenSelect.value = '';
+        campSelect.value = '';
+        referidoInput.value = '';
     });
 }

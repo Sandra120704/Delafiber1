@@ -11,7 +11,8 @@ $routes->get('/', 'Home::index');
 
 // PERSONAS
 $routes->get('personas', 'PersonaController::index');               // Listado
-$routes->get('personas/crear', 'PersonaController::crear');         // Crear persona
+$routes->get('personas/crear', 'PersonaController::crear');  
+$routes->post('personas/crear', 'PersonaController::guardar');      // Crear persona
 $routes->get('personas/editar/(:num)', 'PersonaController::editar/$1'); // Editar persona
 $routes->post('personas/guardar', 'PersonaController::guardar');   // Guardar persona
 $routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1'); // Eliminar persona

@@ -100,6 +100,7 @@ CREATE TABLE difusiones (
     CONSTRAINT fk_difusion_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio) ON DELETE CASCADE,
     CONSTRAINT unq_difusion UNIQUE (idcampania, idmedio)
 );
+ALTER TABLE difusiones ADD COLUMN descripcion VARCHAR(255) NULL;
 
 -- =============================
 -- Modalidades y origenes
