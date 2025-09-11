@@ -166,13 +166,20 @@ public function guardar()
 
         if ($idlead) {
             $persona = $this->personaModel->find($idpersona);
-            $persona->idetapa = $dataLead['idetapa'];
 
+            // Retornar array limpio para JS Kanban
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Lead registrado correctamente.',
                 'idlead'  => $idlead,
-                'persona' => $persona
+                'persona' => [
+                    'idpersona' => $persona->idpersona,
+                    'nombres'   => $persona->nombres,
+                    'apellidos' => $persona->apellidos,
+                    'telefono'  => $persona->telefono,
+                    'correo'    => $persona->correo,
+                    'idetapa'   => $dataLead['idetapa']
+                ]
             ]);
         } else {
             return $this->response->setJSON([
@@ -187,6 +194,7 @@ public function guardar()
         ]);
     }
 }
+
 
     public function detalle($idlead)
     {
@@ -341,7 +349,6 @@ public function guardarSeguimiento()
 
 public function convertirALead($idpersona)
 {
-    // Verificar que la persona exista
     $persona = $this->personaModel->find($idpersona);
     if (!$persona) {
         return $this->response->setJSON([
@@ -350,9 +357,8 @@ public function convertirALead($idpersona)
         ]);
     }
 
-    // Verificar si ya existe un lead para esta persona
-    $existeLead = $this->leadModel->where('idpersona', $idpersona)->first();
-    if ($existeLead) {
+    // Verificar si ya existe un lead
+    if ($this->leadModel->where('idpersona', $idpersona)->first()) {
         return $this->response->setJSON([
             'success' => false,
             'message' => 'El lead para esta persona ya existe.'
@@ -364,21 +370,26 @@ public function convertirALead($idpersona)
         'idpersona'         => $idpersona,
         'estado'            => 'Nuevo',
         'idetapa'           => 1, // etapa inicial
-        'idusuario_registro'=> session('idusuario'),
-        'idusuario'         => session('idusuario')
+        'idusuario_registro'=> session('idusuario') ?? 1,
+        'idusuario'         => session('idusuario') ?? 1
     ];
 
     $idlead = $this->leadModel->insert($dataLead);
 
     if ($idlead) {
-        // Agregar la etapa al array de persona para que JS coloque la tarjeta en el Kanban
-        $persona['idetapa'] = $dataLead['idetapa'];
-
+        // Retornar array limpio para JS Kanban
         return $this->response->setJSON([
             'success' => true,
             'message' => 'Lead creado correctamente.',
             'idlead'  => $idlead,
-            'persona' => $persona
+            'persona' => [
+                'idpersona' => $persona->idpersona,
+                'nombres'   => $persona->nombres,
+                'apellidos' => $persona->apellidos,
+                'telefono'  => $persona->telefono,
+                'correo'    => $persona->correo,
+                'idetapa'   => $dataLead['idetapa']
+            ]
         ]);
     }
 

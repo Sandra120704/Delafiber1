@@ -10,6 +10,8 @@ class PersonaModel extends Model
     protected $allowedFields = [
         'nombres','apellidos','dni','correo','telefono','direccion','referencias','iddistrito'
     ];
+    protected $returnType = 'array';
+
     protected function buscar($keyword){
         return $this->like('nombres', $keyword)
                     ->orLike('apellidos',$keyword)
