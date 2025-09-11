@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'warning',
                 text: 'Ingrese un DNI',
                 toast: true,
-                position: 'top-end',
+                position: 'bottom-end', 
                 timer: 3000,
                 showConfirmButton: false
             });
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showConfirmButton: false,
                     icon: 'info',
                     toast: true,
-                    position: 'top-end',
+                    position: 'bottom-end',
                     timer: 3000,
                     timerProgressBar: true,
                     background: '#9621ccff',
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'error',
                 title: 'Error al consultar el DNI',
                 toast: true,
-                position: 'top-end',
+                position: 'bottom-end',
                 timer: 3000,
                 showConfirmButton: false
             });
@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
          leadForm.addEventListener('submit', async function(e){
             e.preventDefault();
+            console.log("Intercepté el submit de Lead");
             const formData = new FormData(leadForm);
 
             try {
@@ -129,12 +130,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData
                 });
                 const data = await res.json();
-                if(data.success){
-                    Swal.fire('¡Éxito!', 'Lead registrado correctamente', 'success');
-                    modal.hide();
-                } else {
-                    Swal.fire('Error', data.message || 'No se pudo registrar el lead', 'error');
-                }
+                if (data.success) {
+                Swal.fire('¡Éxito!', data.message, 'success').then(() => {
+                    window.location.href = base_url + 'leads/index'; // Redirige a etapas
+                });
+                modal.hide();
+            } else {
+                Swal.fire({
+                    title: 'Atención',
+                    text: data.message,
+                    icon: 'warning',
+                    confirmButtonText: 'Ir a etapas'
+                }).then(() => {
+                    window.location.href = base_url + 'leads/index'; // Redirige aunque ya exista
+                });
+            }
+
             } catch(err){
                 Swal.fire('Error', 'Error al registrar el lead', 'error');
             }

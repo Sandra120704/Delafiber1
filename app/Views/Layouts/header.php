@@ -100,15 +100,15 @@
             </div>
           </li>
           <li class="nav-item nav-profile dropdown">
-            <a class="nav-link dropdown-toggle" href="<? base_url()?>" data-toggle="dropdown" id="profileDropdown">
-              <img src="<?= base_url("/faces/face28.jpg")?>" alt="profile"/>
+            <a class="nav-link dropdown-toggle" href="<?= base_url() ?>" data-toggle="dropdown" id="profileDropdown">
+              <img src="<?= base_url('faces/face28.jpg') ?>" alt="profile"/>
             </a>
             <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
               <a class="dropdown-item">
                 <i class="ti-settings text-primary"></i>
                 Configuración
               </a>
-              <a class="dropdown-item">
+              <a class="dropdown-item" href="<?= site_url('logout') ?>">
                 <i class="ti-power-off text-primary"></i>
                 Cerrar sesión
               </a>
@@ -224,14 +224,6 @@
       <a class="nav-link" href="<?= base_url('documentacion') ?>">
         <i class="icon-paper menu-icon"></i>
         <span class="menu-title">Documentación</span>
-      </a>
-    </li>
-
-    <!-- Cerrar sesión -->
-    <li class="nav-item">
-      <a class="nav-link" href="<?= site_url('logout') ?>">
-        <i class="ti-power-off text-primary"></i>
-        <span class="menu-title">Cerrar Sesión</span>
       </a>
     </li>
   </ul>

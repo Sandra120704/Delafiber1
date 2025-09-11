@@ -1,40 +1,5 @@
 <?= $header ?>
-
-<style>
-.swal2-container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* Sombra y borde redondeado para la tarjeta */
-.card {
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(12, 38, 63, .08);
-}
-
-/* Mejor separación vertical entre campos */
-.form-group {
-    margin-bottom: 1rem;
-}
-
-/* Ajuste en inputs y selects para mejor tamaño y padding */
-.form-control {
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-}
-
-/* Para que el botón buscar DNI no quede demasiado pequeño */
-#buscar-dni {
-    min-width: 100px;
-}
-
-/* Custom container para limitar el ancho máximo */
-.custom-container {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-</style>
+ <link rel="stylesheet" href="<?= base_url('css/persona.css') ?>"> 
 
 <div class="container-fluid mt-4 custom-container">
   <div class="row justify-content-center">
@@ -120,7 +85,7 @@
 <script>
   const base_url = "<?= base_url(); ?>";
 </script>
-<script src="<?= base_url('js/personas.js') ?>"></script>
+<script src="<?= base_url('js/personasJS/personas.js') ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?= $footer ?>

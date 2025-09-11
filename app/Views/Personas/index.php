@@ -94,7 +94,7 @@
                 <div class="btn-group btn-group-actions" role="group" aria-label="Acciones">
                   <button type="button" class="btn btn-sm btn-outline-warning btn-editar" data-id="<?= $p['idpersona'] ?>">Editar</button>
                   <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="<?= $p['idpersona'] ?>">Eliminar</button>
-                  <button type="button" class="btn btn-sm btn-success btn-converti" data-id="<?= $p['idpersona'] ?>" title="Convertir en Lead">
+                  <button type="button" class="btn btn-sm btn-success btn-convertir-lead" data-id="<?= $p['idpersona'] ?>" title="Convertir en Lead">
                     <i class="bi bi-arrow-right-circle"></i> Lead
                   </button>
                 </div>
@@ -113,118 +113,12 @@
 </div>
 
 <div id="modalContainer"></div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.btn-eliminar').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Esta acción eliminará la persona permanentemente.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#e74c3c',
-      }).then(result => {
-        if (result.isConfirmed) {
-          window.location.href = `<?= base_url('personas/eliminar/') ?>${id}`;
-        }
-      });
-    });
-  });
-
-  document.querySelectorAll('.btn-convertir-lead').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-
-      fetch(`<?= base_url('leads/modals') ?>/${id}`)
-        .then(res => res.text())
-        .then(html => {
-          const container = document.getElementById('modalContainer');
-          container.innerHTML = html;
-
-          // Ejecutar lógica para campos (si el script está fuera del modal)
-          initModalCampos();
-
-          const modalEl = document.getElementById('leadModal');
-          if (modalEl) {
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
-
-            // Opcional: limpiar modal al cerrarlo
-            modalEl.addEventListener('hidden.bs.modal', () => {
-              container.innerHTML = '';
-            });
-          }
-        })
-        .catch(() => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo conectar con el servidor',
-          });
-        });
-    });
-  });
-
-  function initModalCampos() {
-    const origenSelect = document.getElementById('origenSelect');
-    const campaniaDiv = document.getElementById('campaniaDiv');
-    const referenteDiv = document.getElementById('referenteDiv');
-
-    if (!origenSelect) return;
-
-    function actualizarDivs() {
-      const selectedOption = origenSelect.options[origenSelect.selectedIndex];
-      const tipo = selectedOption.getAttribute('data-tipo') || '';
-      const campSelect = document.getElementById('campaniaSelect');
-      const referidoInput = document.getElementById('referido_por');
-
-      if (tipo === 'campania') {
-        campaniaDiv.style.display = 'block';
-        referenteDiv.style.display = 'none';
-        campSelect.required = true;
-        referidoInput.required = false;
-      } else if (tipo === 'referido') {
-        campaniaDiv.style.display = 'none';
-        referenteDiv.style.display = 'block';
-        campSelect.required = false;
-        referidoInput.required = true;
-      } else {
-        campaniaDiv.style.display = 'none';
-        referenteDiv.style.display = 'none';
-        campSelect.required = false;
-        referidoInput.required = false;
-      }
-    }
-
-    origenSelect.addEventListener('change', actualizarDivs);
-    actualizarDivs();
-  }
-
-
-    document.querySelectorAll('.btn-editar').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      fetch(`<?= site_url('personas/editar/') ?>${id}`)
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('modalContainer').innerHTML = html;
-
-          const modalEl = document.getElementById('editModal'); // Debes poner id="editModal" en el modal de editar
-          if (modalEl) {
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
-          }
-        })
-        .catch(err => {
-          console.error('Error cargando el formulario de edición:', err);
-        });
-    });
-  });
-});
-</script>
-
 <?= $footer ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const BASE_URL = "<?= rtrim(base_url(), '/') ?>";
+</script>
+<script src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>
+<script src="<?= base_url('js/personasJS/index.js') ?>"></script>
