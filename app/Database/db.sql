@@ -1,4 +1,7 @@
--- Active: 1757456393932@@127.0.0.1@3306@delafiber
+-- Active: 1743133057434@@127.0.0.1@3306@delafiber
+-- =====================================
+-- Base de datos
+-- =====================================
 DROP DATABASE IF EXISTS delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
@@ -50,7 +53,7 @@ CREATE TABLE usuarios (
     usuario VARCHAR(50) NOT NULL,
     clave VARCHAR(255) NOT NULL,
     idrol INT NOT NULL,
-    idpersona INT,
+    idpersona INT UNIQUE,
     activo TINYINT(1) DEFAULT 1,
     creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES roles(idrol),
@@ -58,7 +61,6 @@ CREATE TABLE usuarios (
     CONSTRAINT unq_usuario_usuario UNIQUE (usuario)
 );
 
--- =========================
 CREATE TABLE campanias (
     idcampania INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -66,17 +68,14 @@ CREATE TABLE campanias (
     fecha_inicio DATE,
     fecha_fin DATE,
     presupuesto DECIMAL(10,2),
-    estado VARCHAR(50)
+    estado VARCHAR(50),
+    segmento VARCHAR(255) DEFAULT NULL,
+    responsable INT DEFAULT NULL,
+    objetivos TEXT DEFAULT NULL,
+    notas TEXT DEFAULT NULL,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-ALTER TABLE campanias
-ADD segmento VARCHAR(255) DEFAULT NULL,
-ADD responsable INT DEFAULT NULL,
-ADD objetivos TEXT DEFAULT NULL,
-ADD notas TEXT DEFAULT NULL;
-ALTER TABLE campanias
-ADD fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
-DESCRIBE campanas;
 CREATE TABLE medios (
     idmedio INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -122,10 +121,15 @@ CREATE TABLE etapas (
     CONSTRAINT unq_etapa_pipeline UNIQUE (idpipeline, nombre)
 );
 
--- ===========================
+CREATE TABLE modalidades (
+    idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    CONSTRAINT unq_modalidad_nombre UNIQUE (nombre)
+);
+
 CREATE TABLE leads (
     idlead INT AUTO_INCREMENT PRIMARY KEY,
-    idpersona INT NOT NULL,
+    idpersona INT NOT NULL UNIQUE,
     idcampania INT,
     idmedio INT,
     idetapa INT,
@@ -134,6 +138,7 @@ CREATE TABLE leads (
     idorigen INT,
     idmodalidad INT NOT NULL,
     referido_por VARCHAR(255) NULL,
+    idreferido INT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     estado ENUM('Nuevo','En proceso','Convertido','Descartado') DEFAULT 'Nuevo',
     CONSTRAINT fk_leads_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona) ON DELETE CASCADE,
@@ -143,22 +148,8 @@ CREATE TABLE leads (
     CONSTRAINT fk_leads_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
     CONSTRAINT fk_leads_usuario_registro FOREIGN KEY (idusuario_registro) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
     CONSTRAINT fk_leads_origenes FOREIGN KEY (idorigen) REFERENCES origenes(idorigen),
-    CONSTRAINT fk_leads_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad)
-);
-ALTER TABLE leads
-ADD CONSTRAINT uq_leads_persona UNIQUE (idpersona);
-
-DELETE l1 
-FROM leads l1
-JOIN leads l2 
-  ON l1.idpersona = l2.idpersona 
- AND l1.idlead > l2.idlead;
-
-
-CREATE TABLE modalidades (
-    idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    CONSTRAINT unq_modalidad_nombre UNIQUE (nombre)
+    CONSTRAINT fk_leads_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad),
+    CONSTRAINT fk_leads_referido FOREIGN KEY (idreferido) REFERENCES personas(idpersona) ON DELETE SET NULL
 );
 
 CREATE TABLE seguimiento (
@@ -168,14 +159,12 @@ CREATE TABLE seguimiento (
     idmodalidad INT NOT NULL,
     comentario TEXT,
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_seguimiento_lead FOREIGN KEY (idlead) REFERENCES leads(idlead) ON DELETE CASCADE,
     CONSTRAINT fk_seguimiento_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE CASCADE,
     CONSTRAINT fk_seguimiento_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad)
 );
-ALTER TABLE seguimiento 
-ADD COLUMN fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP;
-
 
 CREATE TABLE tareas (
     idtarea INT AUTO_INCREMENT PRIMARY KEY,
@@ -184,12 +173,11 @@ CREATE TABLE tareas (
     descripcion TEXT NOT NULL,
     fecha_programada DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_realizada DATETIME,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     estado VARCHAR(50) DEFAULT 'pendiente',
     CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE CASCADE,
     CONSTRAINT fk_tarea_lead FOREIGN KEY (idlead) REFERENCES leads(idlead) ON DELETE CASCADE
 );
-ALTER TABLE leads ADD COLUMN idreferido INT NULL;
-ALTER TABLE leads ADD CONSTRAINT fk_leads_referido FOREIGN KEY (idreferido) REFERENCES personas(idpersona) ON DELETE SET NULL;
 
 INSERT INTO departamentos (nombre) VALUES ('Ica');
 INSERT INTO provincias (nombre, iddepartamento) VALUES ('Chincha', 1);
@@ -211,17 +199,11 @@ INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('jperez', '123456', 1, 1),
 ('mlopez', '123456', 2, 2),
 ('cgarcia', '123456', 2, 3),
-('atorres', '123456', 2, 4),
-('prueba', '123456', 2, 1);
+('atorres', '123456', 2, 4);
 
 INSERT INTO origenes (nombre) VALUES 
-('Campaña'), 
-('Referido'), 
-('Contacto Directo'), 
-('Evento'), 
-('Marketing Offline'), 
-('Redes Sociales Orgánicas'), 
-('Otro');
+('Campaña'), ('Referido'), ('Contacto Directo'), ('Evento'), 
+('Marketing Offline'), ('Redes Sociales Orgánicas'), ('Otro');
 
 INSERT INTO campanias (nombre, descripcion, fecha_inicio, fecha_fin, presupuesto, estado) VALUES 
 ('Campaña Facebook Chincha', 'Captación de clientes por redes sociales', '2025-01-01', '2025-03-31', 1500.00, 'activo');
@@ -241,29 +223,5 @@ INSERT INTO etapas (nombre, orden, idpipeline) VALUES
 ('VENTA', 3, 1),
 ('FIDELIZACIÓN', 4, 1);
 
-INSERT INTO leads (idpersona, idcampania, idmedio, idetapa, idorigen, estado, idusuario_registro, idusuario) VALUES
-(1,1,1,1,1,'nuevo',1,2),
-(2,1,1,2,1,'en proceso',1,3),
-(3,1,2,3,1,'en proceso',1,4),
-(4,1,2,4,1,'perdido',1,1);
-
 INSERT INTO modalidades (nombre) VALUES 
-('Llamada telefónica'), 
-('WhatsApp'), 
-('Correo electrónico'), 
-('Reunión presencial');
-
-INSERT INTO seguimiento (idlead, idusuario, idmodalidad, comentario) VALUES
-(1,2,1,'Se llamó al cliente, interesado en promoción'),
-(2,3,2,'Contacto por WhatsApp, pendiente de respuesta'),
-(3,4,4,'Se realizó reunión presencial, interesado en contratar'),
-(4,1,3,'Se envió correo, cliente no respondió');
-
-INSERT INTO tareas (idusuario, idlead, descripcion, fecha_programada, estado) VALUES
-(2,1,'Llamar a Juan Pérez para seguimiento','2025-09-05 10:00:00','pendiente'),
-(3,2,'Enviar correo a Maria Lopez','2025-09-05 12:00:00','pendiente'),
-(4,3,'Visita a Carlos Garcia','2025-09-06 09:00:00','pendiente'),
-(1,4,'Revisar caso Ana Torres','2025-09-06 15:00:00','pendiente');
-
-ALTER TABLE tareas ADD COLUMN fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP;/* 
-ALTER TABLE seguimientos ADD COLUMN fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP; */
+('Llamada telefónica'), ('WhatsApp'), ('Correo electrónico'), ('Reunión presencial');
