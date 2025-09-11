@@ -1,12 +1,11 @@
 // detalle.js
 $(document).ready(function() {
 
-    // Click en tarjeta del Kanban
     $(document).on('click', '.kanban-card', function() {
         const idlead = $(this).data('id');
 
         $.ajax({
-            url: `${base_url}/lead/detalles/${idlead}`, 
+            url: `${base_url}/lead/detalle/${idlead}`, // corregido
             type: 'GET',
             dataType: 'json',
             success: function(res) {
@@ -20,10 +19,8 @@ $(document).ready(function() {
                     modal.show();
 
                     // ----------------------------
-                    // Eventos dentro del modal
-                    // ----------------------------
-
                     // Desistir Lead
+                    // ----------------------------
                     $('#btnDesistirLead').off('click').on('click', function() {
                         $.post(`${base_url}/lead/eliminar`, { idlead: idlead }, function(res) {
                             if (res.success) {
@@ -36,7 +33,9 @@ $(document).ready(function() {
                         }, 'json');
                     });
 
+                    // ----------------------------
                     // Agregar Tareas
+                    // ----------------------------
                     $('#tareaForm').off('submit').on('submit', function(e) {
                         e.preventDefault();
                         $.post(`${base_url}/lead/guardarTarea`, $(this).serialize(), function(res) {
@@ -49,12 +48,14 @@ $(document).ready(function() {
                         }, 'json');
                     });
 
+                    // ----------------------------
                     // Agregar Seguimientos
+                    // ----------------------------
                     $('#seguimientoForm').off('submit').on('submit', function(e) {
                         e.preventDefault();
                         $.post(`${base_url}/lead/guardarSeguimiento`, $(this).serialize(), function(res) {
                             if (res.success) {
-                                $('#listaSeguimientos').append(`<li>${res.seguimiento.comentario} <small class="text-muted">${res.seguimiento.fecha_programada}</small></li>`);
+                                $('#listaSeguimientos').append(`<li>${res.seguimiento.comentario} <small class="text-muted">${res.seguimiento.fecha}</small></li>`);
                                 $('#seguimientoForm')[0].reset();
                             } else {
                                 Swal.fire('Error', res.message, 'error');

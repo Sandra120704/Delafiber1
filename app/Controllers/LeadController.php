@@ -23,6 +23,7 @@ class LeadController extends BaseController
     protected $tareaModel;
     protected $seguimientoModel;
     protected $modalidadesModel;
+    protected $persona;
 
     public function __construct()
     {
@@ -34,6 +35,7 @@ class LeadController extends BaseController
         $this->tareaModel      = new TareaModel();
         $this->seguimientoModel = new SeguimientoModel();
         $this->modalidadesModel = new ModalidadesModel();
+        $this->persona = new PersonaModel();
     }
 
     public function index()
@@ -67,26 +69,46 @@ class LeadController extends BaseController
         $leads = $builder->get()->getResultArray();
 
         $leadsPorEtapa = [];
+
+        $colorEstado = [
+            'Nuevo' => '#007bff',
+            'En proceso' => '#ffc107',
+            'Convertido' => '#28a745',
+            'Descartado' => '#6c757d'
+        ];
+
         foreach ($leads as $lead) {
-            $lead['estatus_color'] = '#007bff'; // color por defecto
+            $lead['estatus_color'] = $colorEstado[$lead['estado']] ?? '#007bff';
             $leadsPorEtapa[$lead['idetapa']][] = $lead;
         }
-        $data['leadsPorEtapa'] = $leadsPorEtapa;
+        $data['leadsPorEtapa'] =  $leadsPorEtapa;
 
         $data['header'] = view('Layouts/header');
         $data['footer'] = view('Layouts/footer');
 
         return view('leads/index', $data);
     }
-
 public function modalCrear($idpersona)
 {
-    $persona       = $this->personaModel->find($idpersona);
-    $modalidades   = $this->modalidadesModel->findAll();
-    $origenes      = (new Origen())->findAll();
-    $difusiones    = (new DifunsionModel())->getDifusionesCompletas();
-    $campanias     = $this->campanaModel->findAll(); // <-- Agregado
-    $medios        = $this->medioModel->findAll();   // <-- Agregado, si tu vista los usa
+    // Obtener persona como array u objeto (no Builder)
+    $persona = $this->personaModel->find($idpersona); 
+    if (!$persona) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Persona no encontrada'
+        ]);
+    }
+
+    // Modalidades y orígenes
+    $modalidades  = $this->modalidadesModel->findAll();
+    $origenes     = (new Origen())->findAll();
+
+    // Difusiones completas (método que devuelve array)
+    $difusiones   = (new DifunsionModel())->getDifusionesCompletas();
+
+    // Campañas y medios
+    $campanias    = $this->campanaModel->findAll();
+    $medios       = $this->medioModel->findAll();
 
     return view('leads/modals', [
         'persona'     => $persona,
@@ -98,7 +120,6 @@ public function modalCrear($idpersona)
     ]);
 }
 
-
 public function guardar()
 {
     $idpersona = $this->request->getPost('idpersona');
@@ -106,10 +127,11 @@ public function guardar()
     if (!$idpersona) {
         return $this->response->setJSON([
             'success' => false,
-            'message' => 'ID de persona no proporcionado'
+            'message' => 'ID de persona no proporcionado.'
         ]);
     }
 
+    // Verificar si ya existe lead
     if ($this->leadModel->where('idpersona', $idpersona)->first()) {
         return $this->response->setJSON([
             'success' => false,
@@ -117,7 +139,8 @@ public function guardar()
         ]);
     }
 
-    $etapaInicial = $this->etapaModel->orderBy('idetapa', 'ASC')->first();
+    // Obtener la primera etapa del pipeline
+    $etapaInicial = $this->etapaModel->orderBy('orden', 'ASC')->first();
     if (!$etapaInicial) {
         return $this->response->setJSON([
             'success' => false,
@@ -125,32 +148,44 @@ public function guardar()
         ]);
     }
 
+    // Preparar datos a insertar
     $dataLead = [
-        'idpersona'        => $idpersona,
-        'iddifusion'       => $this->request->getPost('iddifusion') ?: null,
-        'idorigen'         => $this->request->getPost('idorigen') ?: null,
-        'idmodalidad'      => $this->request->getPost('idmodalidad') ?: null,
-        'referido_por'     => $this->request->getPost('referido_por') ?: null,
-        'estado'           => 'Nuevo',
-        'idetapa'          => $etapaInicial['idetapa'],
-        'idusuario_registro'=> session('idusuario'),
-        'idusuario'        => session('idusuario')
+        'idpersona'          => $idpersona,
+        'iddifusion'         => $this->request->getPost('iddifusion') ?: null,
+        'idmodalidad'        => $this->request->getPost('idmodalidad') ?: null,
+        'idorigen'           => $this->request->getPost('idorigen') ?: null,
+        'referido_por'       => $this->request->getPost('referido_por') ?: null,
+        'estado'             => 'Nuevo',
+        'idetapa'            => $etapaInicial['idetapa'],
+        'idusuario'          => session('idusuario') ?? 1,
+        'idusuario_registro' => session('idusuario') ?? 1
     ];
 
-    $idlead = $this->leadModel->insert($dataLead);
+    try {
+        $idlead = $this->leadModel->insert($dataLead);
 
-    if ($idlead) {
+        if ($idlead) {
+            $persona = $this->personaModel->find($idpersona);
+            $persona->idetapa = $dataLead['idetapa'];
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Lead registrado correctamente.',
+                'idlead'  => $idlead,
+                'persona' => $persona
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No se pudo registrar el lead.'
+            ]);
+        }
+    } catch (\Exception $e) {
         return $this->response->setJSON([
-            'success' => true,
-            'message' => 'Lead registrado correctamente',
-            'idlead' => $idlead
+            'success' => false,
+            'message' => 'Error al guardar el lead: ' . $e->getMessage()
         ]);
     }
-
-    return $this->response->setJSON([
-        'success' => false,
-        'message' => 'No se pudo registrar el lead'
-    ]);
 }
 
     public function detalle($idlead)
@@ -304,51 +339,55 @@ public function guardarSeguimiento()
     ]);
 }
 
-    public function convertirALead($idpersona)
-    {
-        // Verificar que la persona exista
-        $persona = $this->personaModel->find($idpersona);
-        if (!$persona) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Persona no encontrada.'
-            ]);
-        }
-
-        // Verificar si ya existe un lead para esta persona
-        $existeLead = $this->leadModel->where('idpersona', $idpersona)->first();
-        if ($existeLead) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'El lead para esta persona ya existe.'
-            ]);
-        }
-
-        // Insertar lead con datos básicos
-        $dataLead = [
-            'idpersona'         => $idpersona,
-            'estado'            => 'Nuevo',
-            'idetapa'           => 1, // etapa inicial
-            'idusuario_registro'=> session('idusuario'),
-            'idusuario'         => session('idusuario')
-            // Puedes agregar más campos si quieres
-        ];
-
-        $idlead = $this->leadModel->insert($dataLead);
-
-        if ($idlead) {
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Lead creado correctamente.',
-                'idlead'  => $idlead
-            ]);
-        }
-
+public function convertirALead($idpersona)
+{
+    // Verificar que la persona exista
+    $persona = $this->personaModel->find($idpersona);
+    if (!$persona) {
         return $this->response->setJSON([
             'success' => false,
-            'message' => 'Error al crear lead.'
+            'message' => 'Persona no encontrada.'
         ]);
     }
+
+    // Verificar si ya existe un lead para esta persona
+    $existeLead = $this->leadModel->where('idpersona', $idpersona)->first();
+    if ($existeLead) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'El lead para esta persona ya existe.'
+        ]);
+    }
+
+    // Insertar lead con datos básicos
+    $dataLead = [
+        'idpersona'         => $idpersona,
+        'estado'            => 'Nuevo',
+        'idetapa'           => 1, // etapa inicial
+        'idusuario_registro'=> session('idusuario'),
+        'idusuario'         => session('idusuario')
+    ];
+
+    $idlead = $this->leadModel->insert($dataLead);
+
+    if ($idlead) {
+        // Agregar la etapa al array de persona para que JS coloque la tarjeta en el Kanban
+        $persona['idetapa'] = $dataLead['idetapa'];
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Lead creado correctamente.',
+            'idlead'  => $idlead,
+            'persona' => $persona
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'success' => false,
+        'message' => 'Error al crear lead.'
+    ]);
+}
+
     public function validar($idpersona)
     {
         $existe = $this->leadModel->where('idpersona', $idpersona)->first() ? true : false;

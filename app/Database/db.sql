@@ -134,9 +134,6 @@ CREATE TABLE etapas (
     CONSTRAINT unq_etapa_pipeline UNIQUE (idpipeline, nombre)
 );
 
--- =============================
--- Leads
--- =============================
 CREATE TABLE leads (
     idlead INT AUTO_INCREMENT PRIMARY KEY,
     idpersona INT NOT NULL,
@@ -158,7 +155,7 @@ CREATE TABLE leads (
     CONSTRAINT fk_leads_referido FOREIGN KEY (idreferido) REFERENCES personas(idpersona) ON DELETE SET NULL,
     CONSTRAINT uq_leads_persona UNIQUE (idpersona)
 );
-
+ALTER TABLE leads MODIFY iddifusion INT NULL;
 -- =============================
 -- Seguimiento y tareas
 -- =============================

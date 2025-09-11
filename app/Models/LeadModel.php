@@ -8,29 +8,19 @@ class LeadModel extends Model
     protected $table      = 'leads';
     protected $primaryKey = 'idlead';
     protected $allowedFields = [
-    'idpersona',
-    'idcampania',
-    'idmedio',
-    'idetapa',
-    'idorigen',
-    'referido_por',
-    'idmodalidad',
-    'fecha_registro',
-    'idusuario',
-    'idusuario_registro',
-    'estado',
-];
+        'idpersona',
+        'iddifusion',
+        'idetapa',
+        'idusuario',
+        'idusuario_registro',
+        'idmodalidad',
+        'referido_por',
+        'estado',
+        'idreferido'
+    ];
 
     public $timestamps = false;
-    public function getLeadsConUsuarioYPersona()
-    {
-        return $this->db->table('leads')
-            ->select('leads.*, personas.nombres, personas.apellidos, usuarios.usuario as usuario_responsable')
-            ->join('personas', 'personas.idpersona = leads.idpersona')
-            ->join('usuarios', 'usuarios.idusuario = leads.idusuario')
-            ->get()
-            ->getResult();
-    }
+
     public function getLeadsConTodo()
     {
         return $this->select('
@@ -40,15 +30,50 @@ class LeadModel extends Model
                 personas.apellidos,
                 personas.telefono,
                 personas.correo,
-                campanias.nombre as campana,
-                medios.nombre as medio,
+                campanias.nombre AS campana,
+                medios.nombre AS medio,
                 usuarios.usuario
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
-            ->join('usuarios', 'usuarios.idusuario = leads.idusuario')
-            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left')
-            ->join('medios', 'medios.idmedio = leads.idmedio', 'left')
+            ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
+            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
+            ->join('campanias', 'campanias.idcampania = difusiones.idcampania', 'left')
+            ->join('medios', 'medios.idmedio = difusiones.idmedio', 'left')
             ->findAll();
     }
 
+    public function getLeadsPorEtapa()
+    {
+        $leads = $this->select('
+                leads.idlead,
+                leads.idetapa,
+                personas.nombres,
+                personas.apellidos,
+                personas.telefono,
+                personas.correo,
+                campanias.nombre AS campana,
+                medios.nombre AS medio,
+                usuarios.usuario,
+                difusiones.descripcion AS difusion_descripcion
+            ')
+            ->join('personas', 'personas.idpersona = leads.idpersona')
+            ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
+            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
+            ->join('campanias', 'campanias.idcampania = difusiones.idcampania', 'left')
+            ->join('medios', 'medios.idmedio = difusiones.idmedio', 'left')
+            ->orderBy('leads.idetapa, leads.idlead')
+            ->findAll();
+
+        // Agrupar por etapa
+        $porEtapa = [];
+        foreach ($leads as $lead) {
+            $porEtapa[$lead['idetapa']][] = $lead;
+        }
+        return $porEtapa;
+    }
+
+    public function actualizarEtapa($idlead, $idetapa)
+    {
+        return $this->update($idlead, ['idetapa' => $idetapa]);
+    }
 }

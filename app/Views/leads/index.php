@@ -76,6 +76,7 @@
 <script src="<?= base_url('js/leadsJS/kanbas.js') ?>"></script>
 <script src="<?= base_url('js/leadsJS/editar.js') ?>"></script>
 <script src="<?= base_url('js/leadsJS/detalle.js') ?>"></script>
+<script type="module" src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>
 <style>
 /* Kanban Container */
 .kanban-container { display:flex; flex-wrap:nowrap; gap:16px; overflow-x:auto; width:100%; padding:10px; }
