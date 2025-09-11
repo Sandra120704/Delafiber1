@@ -2,14 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const agregarMedioBtn = document.getElementById('agregarMedioBtn');
   const mediosContainer = document.getElementById('mediosContainer');
 
-  agregarMedioBtn.addEventListener('click', function() {
-    const nuevoMedioRow = document.querySelector('.medio-row').cloneNode(true);
-    nuevoMedioRow.querySelector('select').value = '';
-    nuevoMedioRow.querySelector('input').value = '';
-    mediosContainer.appendChild(nuevoMedioRow);
-    agregarEliminarEvent(nuevoMedioRow);
-  });
-
+  // Función para agregar evento eliminar
   function agregarEliminarEvent(medioRow) {
     const btnEliminar = medioRow.querySelector('.eliminarMedio');
     btnEliminar.addEventListener('click', function() {
@@ -21,19 +14,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  document.querySelectorAll('.medio-row').forEach(row => {
-    agregarEliminarEvent(row);
+  // Inicializar eventos eliminar en los medios existentes
+  document.querySelectorAll('.medio-row').forEach(row => agregarEliminarEvent(row));
+
+  // Agregar nueva fila de medio
+  agregarMedioBtn.addEventListener('click', function() {
+    const template = document.querySelector('.medio-row');
+    const nuevoMedioRow = template.cloneNode(true);
+    nuevoMedioRow.querySelectorAll('input, select').forEach(el => el.value = '');
+    mediosContainer.appendChild(nuevoMedioRow);
+    agregarEliminarEvent(nuevoMedioRow);
   });
 
-  const nuevoMedioBtn = document.getElementById('nuevoMedioBtn');
+  // Modal para agregar medio nuevo
   const modalNuevoMedio = new bootstrap.Modal(document.getElementById('modalNuevoMedio'));
+  document.getElementById('nuevoMedioBtn').addEventListener('click', () => modalNuevoMedio.show());
 
-  nuevoMedioBtn.addEventListener('click', function() {
-    modalNuevoMedio.show();
-  });
-
-  const guardarMedioBtn = document.getElementById('guardarMedioBtn');
-  guardarMedioBtn.addEventListener('click', function() {
+  // Guardar medio desde modal y actualizar selects
+  document.getElementById('guardarMedioBtn').addEventListener('click', async function() {
     const nombre = document.getElementById('nombreMedio').value.trim();
     const descripcion = document.getElementById('descMedio').value.trim();
 
@@ -42,18 +40,35 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    const nuevosSelects = document.querySelectorAll('select[name="medios[]"]');
-    nuevosSelects.forEach(select => {
-      const option = document.createElement('option');
-      option.value = 'nuevo';
-      option.textContent = nombre;
-      select.appendChild(option);
-    });
+    try {
+      const formData = new FormData();
+      formData.append('nombre', nombre);
+      formData.append('descripcion', descripcion);
 
-    document.getElementById('nombreMedio').value = '';
-    document.getElementById('descMedio').value = '';
-    modalNuevoMedio.hide();
+      const res = await fetch(`${BASE_URL}medio/guardar`, {
+        method: 'POST',
+        body: formData
+      });
 
-    alert('Medio agregado (simulado). Implementa el guardado en backend.');
+      const data = await res.json();
+      if(!data.success) throw new Error(data.message || 'Error al guardar medio');
+
+      // Agregar nuevo medio a todos los selects
+      document.querySelectorAll('select[name="medios[]"]').forEach(select => {
+        const option = document.createElement('option');
+        option.value = data.id; // id real del medio
+        option.textContent = nombre;
+        select.appendChild(option);
+      });
+
+      // Limpiar inputs y cerrar modal
+      document.getElementById('nombreMedio').value = '';
+      document.getElementById('descMedio').value = '';
+      modalNuevoMedio.hide();
+
+    } catch(err) {
+      console.error(err);
+      alert('No se pudo guardar el medio. Intente nuevamente.');
+    }
   });
 });
