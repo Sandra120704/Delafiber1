@@ -56,8 +56,6 @@ $routes->get('leads/modalCrear/(:num)', 'LeadController::modalCrear/$1'); //Moda
 $routes->get('leads/registrar/(:num)', 'LeadController::registrar/$1');
 $routes->post('leads/guardar', 'LeadController::guardar');
 $routes->get('leads/index', 'LeadController::index');
-$routes->get('leads/crear/(:num)', 'LeadController::crear/$1'); // Crear lead a partir de persona
-$routes->post('leads/guardar', 'LeadController::guardar'); // oficial en plural
 $routes->get('lead/detalle/(:num)', 'LeadController::detalle/$1');
 $routes->get('lead/verificar-duplicado/(:num)', 'LeadController::verificarDuplicado/$1');
 $routes->post('lead/guardarTarea', 'LeadController::guardarTarea');

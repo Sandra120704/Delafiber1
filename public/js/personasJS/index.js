@@ -1,11 +1,13 @@
+import { initLeadsForm } from '../leadsJS/leadsForm.js';
 /* import { showConfirm, showError } from '../utils/alerts.js'; */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('modalContainer');
+
   // === Eliminar Persona ===
   document.querySelectorAll('.btn-eliminar').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
-
       showConfirm('¿Estás seguro?', 'Esta acción eliminará la persona permanentemente.')
         .then(result => {
           if (result.isConfirmed) {
@@ -23,15 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
       fetch(`${BASE_URL}/leads/modals/${id}`)
         .then(res => res.text())
         .then(html => {
-          const container = document.getElementById('modalContainer');
           container.innerHTML = html;
-
-          const modalEl = document.getElementById('leadModal');
+          const modalEl = container.querySelector('#leadModal');
           if (modalEl) {
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
 
-            // limpiar modal al cerrarlo
+            // Inicializar JS del modal
+            initLeadsForm(modalEl);
+
+            // Limpiar modal al cerrarlo
             modalEl.addEventListener('hidden.bs.modal', () => {
               container.innerHTML = '';
             });
@@ -51,9 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
       fetch(`${BASE_URL}/personas/editar/${id}`)
         .then(res => res.text())
         .then(html => {
-          document.getElementById('modalContainer').innerHTML = html;
-
-          const modalEl = document.getElementById('editModal');
+          container.innerHTML = html;
+          const modalEl = container.querySelector('#editModal');
           if (modalEl) {
             const modal = new bootstrap.Modal(modalEl);
             modal.show();

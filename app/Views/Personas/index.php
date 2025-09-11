@@ -122,4 +122,4 @@
 </script>
 <script src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>
 <script type="module" src="<?= base_url('js/personasJS/index.js') ?>"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+

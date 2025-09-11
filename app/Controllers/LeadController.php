@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CampanaModel;
+use App\Models\DifunsionModel;
 use App\Models\LeadModel;
 use App\Models\EtapaModel;
 use App\Models\MedioModel;
@@ -77,32 +78,31 @@ class LeadController extends BaseController
         return view('leads/index', $data);
     }
 
-    public function modalCrear($idpersona)
-    {
-        $personaModel     = new PersonaModel();
-        $campaniaModel    = new CampanaModel();
-        $medioModel       = new MedioModel();
-        $modalidadModel   = new ModalidadesModel();
-        $origenModel      = new Origen();
+public function modalCrear($idpersona)
+{
+    $persona       = $this->personaModel->find($idpersona);
+    $modalidades   = $this->modalidadesModel->findAll();
+    $origenes      = (new Origen())->findAll();
+    $difusiones    = (new DifunsionModel())->getDifusionesCompletas();
 
-        $persona      = $personaModel->find($idpersona);
-        $campanas     = $campaniaModel->findAll();
-        $medios       = $medioModel->findAll();
-        $modalidades  = $modalidadModel->findAll();
-        $origenes     = $origenModel->findAll();
-
-        return view('leads/modals', [
-            'persona'      => $persona,
-            'campanias'     => $campanas,
-            'medios'       => $medios,
-            'modalidades'  => $modalidades,
-            'origenes'     => $origenes
-        ]);
-    }
+    return view('leads/modals', [
+        'persona'     => $persona,
+        'modalidades' => $modalidades,
+        'origenes'    => $origenes,
+        'difusiones'  => $difusiones
+    ]);
+}
 
 public function guardar()
 {
     $idpersona = $this->request->getPost('idpersona');
+
+    if (!$idpersona) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'ID de persona no proporcionado'
+        ]);
+    }
 
     if ($this->leadModel->where('idpersona', $idpersona)->first()) {
         return $this->response->setJSON([
@@ -111,17 +111,24 @@ public function guardar()
         ]);
     }
 
+    $etapaInicial = $this->etapaModel->orderBy('idetapa', 'ASC')->first();
+    if (!$etapaInicial) {
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'No hay etapas configuradas en el sistema.'
+        ]);
+    }
+
     $dataLead = [
-        'idpersona' => $idpersona,
-        'idcampania' => $this->request->getPost('idcampania') ?: null,
-        'idmedio' => $this->request->getPost('idmedio') ?: null,
-        'idorigen' => $this->request->getPost('idorigen') ?: null,
-        'idmodalidad' => $this->request->getPost('idmodalidad'),
-        'referido_por' => $this->request->getPost('referido_por') ?: null,
-        'estado' => 'Nuevo',
-        'idetapa' => 1,
-        'idusuario_registro' => session('idusuario'),
-        'idusuario' => session('idusuario')
+        'idpersona'        => $idpersona,
+        'iddifusion'       => $this->request->getPost('iddifusion') ?: null,
+        'idorigen'         => $this->request->getPost('idorigen') ?: null,
+        'idmodalidad'      => $this->request->getPost('idmodalidad') ?: null,
+        'referido_por'     => $this->request->getPost('referido_por') ?: null,
+        'estado'           => 'Nuevo',
+        'idetapa'          => $etapaInicial['idetapa'],
+        'idusuario_registro'=> session('idusuario'),
+        'idusuario'        => session('idusuario')
     ];
 
     $idlead = $this->leadModel->insert($dataLead);
@@ -132,12 +139,12 @@ public function guardar()
             'message' => 'Lead registrado correctamente',
             'idlead' => $idlead
         ]);
-    } else {
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => 'No se pudo registrar el lead'
-        ]);
     }
+
+    return $this->response->setJSON([
+        'success' => false,
+        'message' => 'No se pudo registrar el lead'
+    ]);
 }
 
     public function detalle($idlead)

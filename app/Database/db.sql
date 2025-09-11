@@ -1,11 +1,13 @@
--- Active: 1743133057434@@127.0.0.1@3306@delafiber
--- =====================================
--- Base de datos
--- =====================================
+-- =============================
+-- DROP DATABASE y creación
+-- =============================
 DROP DATABASE IF EXISTS delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
 
+-- =============================
+-- Ubicación
+-- =============================
 CREATE TABLE departamentos (
     iddepartamento INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL
@@ -25,42 +27,43 @@ CREATE TABLE distritos (
     CONSTRAINT fk_distrito_provincia FOREIGN KEY (idprovincia) REFERENCES provincias(idprovincia) ON DELETE CASCADE
 );
 
+-- =============================
+-- Personas y usuarios
+-- =============================
 CREATE TABLE personas (
     idpersona INT AUTO_INCREMENT PRIMARY KEY,
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
-    dni VARCHAR(8) NOT NULL,
-    correo VARCHAR(100) NOT NULL,
-    telefono VARCHAR(15) NOT NULL,
+    dni VARCHAR(8) NOT NULL UNIQUE,
+    correo VARCHAR(100) NOT NULL UNIQUE,
+    telefono VARCHAR(15) NOT NULL UNIQUE,
     direccion VARCHAR(200),
     referencias TEXT,
     iddistrito INT NOT NULL,
-    CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito) ON DELETE CASCADE,
-    CONSTRAINT unq_persona_dni UNIQUE (dni),
-    CONSTRAINT unq_persona_correo UNIQUE (correo),
-    CONSTRAINT unq_persona_telefono UNIQUE (telefono)
+    CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito) ON DELETE CASCADE
 );
 
 CREATE TABLE roles (
     idrol INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    descripcion VARCHAR(150),
-    CONSTRAINT unq_rol_nombre UNIQUE (nombre)
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(150)
 );
 
 CREATE TABLE usuarios (
     idusuario INT AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(50) NOT NULL,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
     clave VARCHAR(255) NOT NULL,
     idrol INT NOT NULL,
-    idpersona INT UNIQUE,
+    idpersona INT,
     activo TINYINT(1) DEFAULT 1,
     creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES roles(idrol),
-    CONSTRAINT fk_usuario_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona) ON DELETE SET NULL,
-    CONSTRAINT unq_usuario_usuario UNIQUE (usuario)
+    CONSTRAINT fk_usuario_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona) ON DELETE SET NULL
 );
 
+-- =============================
+-- Campañas y medios
+-- =============================
 CREATE TABLE campanias (
     idcampania INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -78,16 +81,10 @@ CREATE TABLE campanias (
 
 CREATE TABLE medios (
     idmedio INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
     descripcion TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT unq_medio_nombre UNIQUE (nombre)
-);
-
-CREATE TABLE origenes (
-    idorigen INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE difusiones (
@@ -104,11 +101,26 @@ CREATE TABLE difusiones (
     CONSTRAINT unq_difusion UNIQUE (idcampania, idmedio)
 );
 
+-- =============================
+-- Modalidades y origenes
+-- =============================
+CREATE TABLE modalidades (
+    idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE origenes (
+    idorigen INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL
+);
+
+-- =============================
+-- Pipelines y etapas
+-- =============================
 CREATE TABLE pipelines (
     idpipeline INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    CONSTRAINT unq_pipeline_nombre UNIQUE (nombre)
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion TEXT
 );
 
 CREATE TABLE etapas (
@@ -121,37 +133,34 @@ CREATE TABLE etapas (
     CONSTRAINT unq_etapa_pipeline UNIQUE (idpipeline, nombre)
 );
 
-CREATE TABLE modalidades (
-    idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    CONSTRAINT unq_modalidad_nombre UNIQUE (nombre)
-);
-
+-- =============================
+-- Leads
+-- =============================
 CREATE TABLE leads (
     idlead INT AUTO_INCREMENT PRIMARY KEY,
-    idpersona INT NOT NULL UNIQUE,
-    idcampania INT,
-    idmedio INT,
+    idpersona INT NOT NULL,
+    iddifusion INT NOT NULL,
     idetapa INT,
     idusuario INT,
     idusuario_registro INT,
-    idorigen INT,
     idmodalidad INT NOT NULL,
     referido_por VARCHAR(255) NULL,
-    idreferido INT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     estado ENUM('Nuevo','En proceso','Convertido','Descartado') DEFAULT 'Nuevo',
+    idreferido INT NULL,
     CONSTRAINT fk_leads_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona) ON DELETE CASCADE,
-    CONSTRAINT fk_leads_campania FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE SET NULL,
-    CONSTRAINT fk_leads_medio FOREIGN KEY (idmedio) REFERENCES medios(idmedio) ON DELETE SET NULL,
+    CONSTRAINT fk_leads_difusion FOREIGN KEY (iddifusion) REFERENCES difusiones(iddifusion) ON DELETE CASCADE,
     CONSTRAINT fk_leads_etapa FOREIGN KEY (idetapa) REFERENCES etapas(idetapa) ON DELETE SET NULL,
     CONSTRAINT fk_leads_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
     CONSTRAINT fk_leads_usuario_registro FOREIGN KEY (idusuario_registro) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
-    CONSTRAINT fk_leads_origenes FOREIGN KEY (idorigen) REFERENCES origenes(idorigen),
     CONSTRAINT fk_leads_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad),
-    CONSTRAINT fk_leads_referido FOREIGN KEY (idreferido) REFERENCES personas(idpersona) ON DELETE SET NULL
+    CONSTRAINT fk_leads_referido FOREIGN KEY (idreferido) REFERENCES personas(idpersona) ON DELETE SET NULL,
+    CONSTRAINT uq_leads_persona UNIQUE (idpersona)
 );
 
+-- =============================
+-- Seguimiento y tareas
+-- =============================
 CREATE TABLE seguimiento (
     idseguimiento INT AUTO_INCREMENT PRIMARY KEY,
     idlead INT NOT NULL,
@@ -159,7 +168,6 @@ CREATE TABLE seguimiento (
     idmodalidad INT NOT NULL,
     comentario TEXT,
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_seguimiento_lead FOREIGN KEY (idlead) REFERENCES leads(idlead) ON DELETE CASCADE,
     CONSTRAINT fk_seguimiento_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE CASCADE,
@@ -173,16 +181,18 @@ CREATE TABLE tareas (
     descripcion TEXT NOT NULL,
     fecha_programada DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_realizada DATETIME,
-    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     estado VARCHAR(50) DEFAULT 'pendiente',
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE CASCADE,
     CONSTRAINT fk_tarea_lead FOREIGN KEY (idlead) REFERENCES leads(idlead) ON DELETE CASCADE
 );
 
+-- =============================
+-- Datos iniciales de ejemplo
+-- =============================
 INSERT INTO departamentos (nombre) VALUES ('Ica');
 INSERT INTO provincias (nombre, iddepartamento) VALUES ('Chincha', 1);
-INSERT INTO distritos (nombre, idprovincia) VALUES 
-('Chincha Alta', 1), ('Sunampe', 1), ('Grocio Prado', 1), ('Pueblo Nuevo', 1);
+INSERT INTO distritos (nombre, idprovincia) VALUES ('Chincha Alta', 1), ('Sunampe', 1), ('Grocio Prado', 1), ('Pueblo Nuevo', 1);
 
 INSERT INTO personas (nombres, apellidos, dni, correo, telefono, direccion, iddistrito) VALUES
 ('Juan', 'Perez', '12345678', 'juan.perez@gmail.com', '999111222', 'Av. Los Incas 123', 1),
@@ -190,10 +200,7 @@ INSERT INTO personas (nombres, apellidos, dni, correo, telefono, direccion, iddi
 ('Carlos', 'Garcia', '11223344', 'carlos.garcia@hotmail.com', '999333444', 'Jr. Libertad 789', 3),
 ('Ana', 'Torres', '44332211', 'ana.torres@gmail.com', '999444555', 'Urb. Las Flores Mz A Lt 10', 4);
 
-INSERT INTO roles (nombre, descripcion) VALUES 
-('admin', 'Acceso total al sistema'), 
-('vendedor', 'Gestiona leads y clientes'), 
-('supervisor', 'Supervisa y controla reportes');
+INSERT INTO roles (nombre, descripcion) VALUES ('admin', 'Acceso total al sistema'), ('vendedor', 'Gestiona leads y clientes'), ('supervisor', 'Supervisa y controla reportes');
 
 INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('jperez', '123456', 1, 1),
@@ -201,9 +208,7 @@ INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('cgarcia', '123456', 2, 3),
 ('atorres', '123456', 2, 4);
 
-INSERT INTO origenes (nombre) VALUES 
-('Campaña'), ('Referido'), ('Contacto Directo'), ('Evento'), 
-('Marketing Offline'), ('Redes Sociales Orgánicas'), ('Otro');
+INSERT INTO origenes (nombre) VALUES ('Campaña'), ('Referido'), ('Contacto Directo'), ('Evento'), ('Marketing Offline'), ('Redes Sociales Orgánicas'), ('Otro');
 
 INSERT INTO campanias (nombre, descripcion, fecha_inicio, fecha_fin, presupuesto, estado) VALUES 
 ('Campaña Facebook Chincha', 'Captación de clientes por redes sociales', '2025-01-01', '2025-03-31', 1500.00, 'activo');
@@ -223,5 +228,4 @@ INSERT INTO etapas (nombre, orden, idpipeline) VALUES
 ('VENTA', 3, 1),
 ('FIDELIZACIÓN', 4, 1);
 
-INSERT INTO modalidades (nombre) VALUES 
-('Llamada telefónica'), ('WhatsApp'), ('Correo electrónico'), ('Reunión presencial');
+INSERT INTO modalidades (nombre) VALUES ('Llamada telefónica'), ('WhatsApp'), ('Correo electrónico'), ('Reunión presencial');

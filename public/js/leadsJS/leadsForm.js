@@ -1,12 +1,13 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const origenSelect = document.getElementById('origenSelect');
-    const campaniaDiv = document.getElementById('campaniaDiv');
-    const campSelect = document.getElementById('campaniaSelect');
-    const referenteDiv = document.getElementById('referenteDiv');
-    const referidoInput = document.getElementById('referido_por');
+export function initLeadsForm(modalEl) {
+    const origenSelect = modalEl.querySelector('#origenSelect');
+    const campaniaDiv = modalEl.querySelector('#campaniaDiv');
+    const campSelect = modalEl.querySelector('#campaniaSelect');
+    const referenteDiv = modalEl.querySelector('#referenteDiv');
+    const referidoInput = modalEl.querySelector('#referido_por');
+
+    if (!origenSelect) return;
 
     function actualizarDivs() {
-        if (!origenSelect) return;
         const tipo = origenSelect.options[origenSelect.selectedIndex]?.getAttribute('data-tipo') || '';
 
         if (tipo === 'campania') {
@@ -27,11 +28,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Inicializar al cargar
+    // Inicializar
     actualizarDivs();
 
-    // Cambiar dinámicamente
-    if (origenSelect) {
-        origenSelect.addEventListener('change', actualizarDivs);
-    }
-});
+    // Evento dinámico
+    origenSelect.addEventListener('change', actualizarDivs);
+
+    // Opcional: limpiar modal al cerrarlo
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        campaniaDiv.style.display = 'none';
+        referenteDiv.style.display = 'none';
+        campSelect.required = false;
+        referidoInput.required = false;
+    });
+}

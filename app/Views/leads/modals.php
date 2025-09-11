@@ -8,6 +8,7 @@
       </div>
       <div class="modal-body">
         <form id="leadForm" action="<?= base_url('leads/guardar') ?>" method="POST">
+          
           <!-- Persona -->
           <input type="hidden" name="idpersona" id="idpersona" value="<?= $persona['idpersona'] ?? '' ?>">
 
@@ -41,12 +42,14 @@
 
           <!-- Datos Lead -->
           <div class="row">
-            <div class="col-md-6 mb-2" id="campaniaDiv" style="display:none;">
-              <label>Campaña:</label>
-              <select name="idcampania" id="campaniaSelect" class="form-control">
+            <div class="col-md-6 mb-2">
+              <label>Difusión:</label>
+              <select name="iddifusion" class="form-control" required>
                 <option value="">-- Seleccionar --</option>
-                <?php foreach ($campanias as $c): ?>
-                  <option value="<?= $c['idcampania'] ?>"><?= $c['nombre'] ?></option>
+                <?php foreach ($difusiones as $d): ?>
+                  <option value="<?= $d['iddifusion'] ?>">
+                    <?= $d['campania_nombre'] ?> - <?= $d['medio_nombre'] ?>
+                  </option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -57,16 +60,6 @@
                 <option value="">-- Seleccionar --</option>
                 <?php foreach ($modalidades as $mo): ?>
                   <option value="<?= $mo['idmodalidad'] ?>"><?= $mo['nombre'] ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-
-            <div class="col-md-6 mb-2">
-              <label>Medio:</label>
-              <select name="idmedio" class="form-control">
-                <option value="">-- Seleccionar --</option>
-                <?php foreach ($medios as $m): ?>
-                  <option value="<?= $m['idmedio'] ?>"><?= $m['nombre'] ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
