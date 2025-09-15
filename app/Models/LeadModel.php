@@ -5,21 +5,25 @@ use CodeIgniter\Model;
 
 class LeadModel extends Model
 {
-    protected $table      = 'leads';
-    protected $primaryKey = 'idlead';
+    protected $table          = 'leads';
+    protected $primaryKey     = 'idlead';
     protected $allowedFields = [
         'idpersona',
-        'iddifusion',
+        'idorigen', 
+        'idcampania', 
+        'medio_comunicacion', 
+        'idmodalidad',
         'idetapa',
         'idusuario',
         'idusuario_registro',
-        'idmodalidad',
         'referido_por',
         'estado',
         'idreferido'
     ];
 
-    public $timestamps = false;
+    protected $useTimestamps = true;
+    protected $createdField  = 'fecha_creacion';
+    protected $updatedField  = 'fecha_modificacion';
 
     public function getLeadsConTodo()
     {
@@ -31,14 +35,15 @@ class LeadModel extends Model
                 personas.telefono,
                 personas.correo,
                 campanias.nombre AS campana,
-                medios.nombre AS medio,
+                difusiones.medio AS medio,
+                origenes.nombre AS origen,
                 usuarios.usuario
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
             ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
+            ->join('origenes', 'origenes.idorigen = leads.idorigen', 'left') // Nueva unión
+            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left') // Nueva unión
             ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
-            ->join('campanias', 'campanias.idcampania = difusiones.idcampania', 'left')
-            ->join('medios', 'medios.idmedio = difusiones.idmedio', 'left')
             ->findAll();
     }
 
@@ -52,19 +57,18 @@ class LeadModel extends Model
                 personas.telefono,
                 personas.correo,
                 campanias.nombre AS campana,
-                medios.nombre AS medio,
-                usuarios.usuario,
-                difusiones.descripcion AS difusion_descripcion
+                difusiones.descripcion AS difusion_descripcion,
+                origenes.nombre AS origen,
+                usuarios.usuario
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
             ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
+            ->join('origenes', 'origenes.idorigen = leads.idorigen', 'left') // Nueva unión
+            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left') // Nueva unión
             ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
-            ->join('campanias', 'campanias.idcampania = difusiones.idcampania', 'left')
-            ->join('medios', 'medios.idmedio = difusiones.idmedio', 'left')
             ->orderBy('leads.idetapa, leads.idlead')
             ->findAll();
 
-        // Agrupar por etapa
         $porEtapa = [];
         foreach ($leads as $lead) {
             $porEtapa[$lead['idetapa']][] = $lead;

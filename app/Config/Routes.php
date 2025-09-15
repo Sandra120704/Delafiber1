@@ -12,12 +12,19 @@ $routes->get('/', 'Home::index');
 // PERSONAS
 $routes->get('personas', 'PersonaController::index');               // Listado
 $routes->get('personas/crear', 'PersonaController::crear');  
-$routes->post('personas/crear', 'PersonaController::guardar');      // Crear persona
+$routes->post('personas/guardar', 'PersonaController::guardar');    // Crear / Actualizar persona
 $routes->get('personas/editar/(:num)', 'PersonaController::editar/$1'); // Editar persona
-$routes->post('personas/guardar', 'PersonaController::guardar');   // Guardar persona
-$routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1'); // Eliminar persona
-$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
-$routes->post('personas/guardar', 'PersonaController::guardar');
+$routes->post('personas/eliminar/(:num)', 'PersonaController::eliminar/$1');
+// API para búsqueda DNI
+$routes->get('personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
+$routes->get('personas/buscadordni/(:num)', 'PersonaController::BuscadorDni/$1'); // opción adicional si ya la tenías
+$routes->get('personas', 'PersonaController::index');
+$routes->get('leads/modalCrear/(:any)', 'LeadController::modalCrear/$1');
+
+// --- RUTAS NUEVAS ---
+// Agrega esta línea para manejar las peticiones POST a la URL /personas.
+// Esto dirigirá cualquier envío de formulario a la función 'store' en tu PersonaController.
+$routes->post('personas', 'PersonaController::guardar');
 // UBICACION (Departamentos / Provincias / Distritos)
 $routes->get('ubicacion/provincias/(:num)', 'UbicacionController::getProvincias/$1');
 $routes->get('ubicacion/distritos/(:num)', 'UbicacionController::getDistritos/$1');
@@ -50,8 +57,8 @@ $routes->group('', ['filter' => 'auth'], function($routes){
 // Lead modal
 $routes->get('leads', 'LeadController::index');          // Vista Kanban
 $routes->get('lead/detalles/(:num)', 'LeadController::detalle/$1');
-$routes->get('leads/modals/(:num)', 'LeadController::modalCrear/$1');
-$routes->get('leads/modals/(:num)', 'LeadController::convertirALead/$1');
+$routes->get('leads/modalCrear/(:num)', 'LeadController::modalCrear/$1');
+$routes->get('leads/modalCrear/(:num)', 'LeadController::convertirALead/$1');
 $routes->post('lead/actualizarEtapa', 'LeadController::actualizarEtapa');
 $routes->get('leads/modalCrear/(:num)', 'LeadController::modalCrear/$1'); //Modals cre crear Persona
 $routes->get('leads/registrar/(:num)', 'LeadController::registrar/$1');
@@ -65,3 +72,23 @@ $routes->post('lead/guardarSeguimiento', 'LeadController::guardarSeguimiento');
 
 $routes->get('usuarios','UsuarioController::index');
 $routes->get('usuarios/crear','UsuarioController::crear');
+
+$routes->get('personas', 'PersonaController::index');
+$routes->get('personas/crear', 'PersonaController::crear');
+$routes->post('personas/guardar', 'PersonaController::guardar');
+$routes->get('personas/buscardni/(:num)', 'PersonaController::buscarDni/$1');
+$routes->post('personas/eliminar/(:num)', 'PersonaController::eliminar/$1');
+$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
+$routes->post('personas/actualizar', 'PersonaController::actualizar');
+$routes->get('personas/buscarAjax', 'PersonaController::buscarAjax');
+
+// === NUEVA RUTA PARA EL MODAL CREAR LEAD ===
+$routes->get('personas/modalCrear/(:num)', 'PersonaController::modalCrear/$1');
+
+// === NUEVA RUTA PARA GUARDAR EL LEAD ===
+$routes->post('persona/guardarLead', 'PersonaController::guardarLead');
+
+// Rutas para Leads
+$routes->get('leads', 'LeadController::index');
+$routes->get('leads/modal-crear', 'LeadController::modalCrear');
+$routes->post('leads/guardar', 'LeadController::guardar');

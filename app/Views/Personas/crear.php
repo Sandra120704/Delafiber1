@@ -83,7 +83,7 @@
 </div>
 <div id="modalContainer"></div>
 <script>
-  const base_url = "<?= base_url(); ?>";
+  const BASE_URL = "<?= rtrim(base_url(), '/') ?>/";
 </script>
 <script src="<?= base_url('js/personasJS/personas.js') ?>"></script>
 <script type="module" src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>

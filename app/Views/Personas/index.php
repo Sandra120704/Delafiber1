@@ -1,40 +1,5 @@
 <?= $header ?>
-
-<style>
-.main-card {
-    max-width: 12000rem;
-    width: 100%;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(12, 38, 63, 0.08);
-    background: #fff;
-}
-
-.person-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    text-transform: uppercase;
-}
-
-.table-hover tbody tr:hover {
-    background: #f8f9fa;
-}
-
-.small-muted {
-    font-size: 0.85rem;
-    color: #6c757d;
-}
-
-.btn-group-actions > * {
-    margin-right: 0.25rem;
-}
-</style>
+ <link rel="stylesheet" href="<?= base_url('css/personas.css') ?>"> 
 
 <div class="d-flex justify-content-center py-5">
   <div class="main-card p-4 mx-auto">
@@ -113,14 +78,14 @@
 </div>
 
 <div id="modalContainer"></div>
+
 <?= $footer ?>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="<?= base_url('js/leadsJS/editar.js') ?>"></script>
+
 <script>
-  const BASE_URL = "<?= rtrim(base_url(), '/') ?>";
+  const BASE_URL = "<?= rtrim(base_url(), '/') ?>/";
 </script>
-<script src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>
 
-<script type="module" src="<?= base_url('js/personasJS/index.js') ?>"></script>
-
+<script src="<?= base_url('js/personasJS/personas.js') ?>"></script>

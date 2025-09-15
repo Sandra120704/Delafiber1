@@ -33,6 +33,9 @@ CREATE TABLE personas (
     CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito)
 );
 
+ALTER TABLE personas
+ADD COLUMN referencias VARCHAR(255);
+
 CREATE TABLE roles (
     idrol INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
@@ -138,19 +141,7 @@ CREATE TABLE tareas (
     CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario)
 );
 
-DELIMITER //
-CREATE TRIGGER trg_update_leads_generados
-AFTER INSERT ON leads
-FOR EACH ROW
-BEGIN
-    IF NEW.iddifusion IS NOT NULL THEN
-        UPDATE difusiones
-        SET leads_generados = leads_generados + 1
-        WHERE iddifusion = NEW.iddifusion;
-    END IF;
-END;
-//
-DELIMITER ;
+DROP TRIGGER IF EXISTS trg_update_leads_generados;
 
 -- =========================
 -- INSERTS DE PRUEBA
@@ -218,3 +209,28 @@ INSERT INTO modalidades (nombre) VALUES
 ('WhatsApp'), 
 ('Correo electrónico'), 
 ('Reunión presencial');
+
+ALTER TABLE leads DROP FOREIGN KEY fk_lead_difusion;
+ALTER TABLE leads DROP COLUMN iddifusion;
+
+-- Paso 2: Añadir las nuevas columnas para el origen, la campaña, la modalidad, el medio y el usuario de registro.
+-- Se añaden las columnas en un orden lógico para mantener la estructura legible.
+ALTER TABLE leads ADD COLUMN idcampania INT NULL AFTER idpersona;
+ALTER TABLE leads ADD COLUMN medio_comunicacion VARCHAR(100) NULL AFTER idcampania;
+ALTER TABLE leads ADD COLUMN idmodalidad INT NULL AFTER medio_comunicacion;
+ALTER TABLE leads ADD COLUMN idusuario_registro INT NULL AFTER idusuario;
+ALTER TABLE leads ADD COLUMN referido_por INT NULL AFTER idusuario_registro;
+
+-- Paso 3: Añadir las llaves foráneas para las nuevas relaciones.
+-- Esto asegura la integridad referencial de los datos.
+ALTER TABLE leads ADD CONSTRAINT fk_lead_campania FOREIGN KEY (idcampania) REFERENCES campanias(idcampania);
+ALTER TABLE leads ADD CONSTRAINT fk_lead_modalidad FOREIGN KEY (idmodalidad) REFERENCES modalidades(idmodalidad);
+ALTER TABLE leads ADD CONSTRAINT fk_lead_usuario_registro FOREIGN KEY (idusuario_registro) REFERENCES usuarios(idusuario);
+ALTER TABLE leads ADD CONSTRAINT fk_lead_referido_por FOREIGN KEY (referido_por) REFERENCES personas(idpersona);
+
+-- Paso 4: Añadir las columnas de fecha que el modelo de CodeIgniter usará automáticamente.
+ALTER TABLE leads ADD COLUMN fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE leads ADD COLUMN fecha_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+-- Nota: Tu tabla ya tenía la columna 'idorigen' y su llave foránea.
+-- El script no necesita agregarla, pero se incluyó en el LeadModel actualizado para reflejar la estructura completa.
