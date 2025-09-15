@@ -1,0 +1,138 @@
+
+/* css/custom-dark-theme.css */
+
+/* --- Estilos para la barra de navegación superior (Navbar) --- */
+.navbar-dark-theme {
+    background-color: #2c3e50; /* Un azul oscuro similar al de las imágenes */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+.navbar-dark-theme .navbar-brand-wrapper {
+    background-color: #2c3e50; /* Mismo color de fondo para la sección del logo */
+    border-bottom: 1px solid #3d5a7d; /* Borde sutil */
+}
+
+.navbar-dark-theme .navbar-brand-wrapper .navbar-brand.brand-logo img,
+.navbar-dark-theme .navbar-brand-wrapper .navbar-brand.brand-logo-mini img {
+    height: 30px; /* Ajusta el tamaño del logo si es necesario */
+    width: auto;
+    filter: brightness(0) invert(1); /* Hace que los logos se vean blancos/claros si son oscuros */
+}
+
+.navbar-dark-theme .navbar-toggler .icon-menu,
+.navbar-dark-theme .navbar-nav .nav-link .text-white { /* Iconos y texto de usuario */
+    color: #ffffff !important; /* Texto e iconos blancos */
+}
+
+/* Estilo para el campo de búsqueda */
+.navbar-dark-theme .input-group .search-icon {
+    background-color: #3d5a7d; /* Fondo del ícono de búsqueda */
+    border: 1px solid #3d5a7d;
+    color: #ffffff;
+}
+
+.navbar-dark-theme .input-group .search-input {
+    background-color: #3d5a7d; /* Fondo del input de búsqueda */
+    border: 1px solid #3d5a7d;
+    color: #ffffff; /* Color del texto */
+    padding-left: 15px; /* Espacio para el placeholder */
+}
+
+.navbar-dark-theme .input-group .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7); /* Color del placeholder */
+}
+
+/* Estilo para el nombre de usuario en la barra superior */
+.navbar-dark-theme .nav-profile-name {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* --- Estilos para la barra lateral (Sidebar) --- */
+.sidebar-dark-theme {
+    background-color: #34495e; /* Un gris azulado oscuro para el sidebar */
+    color: #ecf0f1; /* Color del texto claro */
+}
+
+.sidebar-dark-theme .nav-item .nav-link {
+    color: #ecf0f1; /* Color de los enlaces */
+    padding: 15px 25px; /* Espaciado */
+    display: flex;
+    align-items: center;
+    border-radius: 5px; /* Bordes ligeramente redondeados */
+    margin: 5px 10px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-dark-theme .nav-item .nav-link .menu-icon {
+    color: #8bb7f0; /* Color azulado para los iconos */
+    font-size: 1.2rem;
+    margin-right: 15px;
+    width: 20px; /* Ancho fijo para alinear iconos */
+    text-align: center;
+}
+
+.sidebar-dark-theme .nav-item .nav-link .menu-title {
+    font-weight: 500;
+}
+
+.sidebar-dark-theme .nav-item .nav-link:hover,
+.sidebar-dark-theme .nav-item.active > .nav-link { /* Estado activo o hover */
+    background-color: #4a6784; /* Fondo al pasar el ratón o si está activo */
+    color: #ffffff; /* Texto blanco */
+}
+
+.sidebar-dark-theme .nav-item.active > .nav-link .menu-icon {
+    color: #ffffff; /* Icono blanco si está activo */
+}
+
+/* Sección de perfil de usuario en el sidebar */
+.sidebar-dark-theme .nav-profile {
+    display: flex;
+    align-items: center;
+    padding: 20px 25px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #4a6784; /* Separador */
+}
+
+.sidebar-dark-theme .nav-profile .profile-image img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.sidebar-dark-theme .nav-profile .text-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-dark-theme .nav-profile .profile-name {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.sidebar-dark-theme .nav-profile .designation {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
+}
+
+/* Separador de menú */
+.sidebar-dark-theme .nav-divider {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.sidebar-dark-theme .nav-divider .menu-title {
+    color: rgba(255, 255, 255, 0.5); /* Color más claro para el título de sección */
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 20px;
+}
+
+/* Ajustes para el contenido principal si es necesario */
+.main-panel {
+    background-color: #f8f9fa; /* Fondo claro para el área de contenido */
+}

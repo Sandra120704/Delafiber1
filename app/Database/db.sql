@@ -1,3 +1,6 @@
+-- Active: 1743133057434@@127.0.0.1@3306@delafiber
+
+DROP DATABASE delafiber;
 
 CREATE DATABASE delafiber;
 USE delafiber;

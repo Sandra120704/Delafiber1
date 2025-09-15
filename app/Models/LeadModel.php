@@ -11,14 +11,12 @@ class LeadModel extends Model
         'idpersona',
         'idorigen', 
         'idcampania', 
-        'medio_comunicacion', 
         'idmodalidad',
         'idetapa',
         'idusuario',
         'idusuario_registro',
         'referido_por',
-        'estado',
-        'idreferido'
+        'estado'
     ];
 
     protected $useTimestamps = true;
@@ -35,15 +33,15 @@ class LeadModel extends Model
                 personas.telefono,
                 personas.correo,
                 campanias.nombre AS campana,
-                difusiones.medio AS medio,
+                modalidades.nombre AS modalidad,
                 origenes.nombre AS origen,
-                usuarios.usuario
+                usuarios.usuario AS usuario_registro
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
-            ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
-            ->join('origenes', 'origenes.idorigen = leads.idorigen', 'left') // Nueva unión
-            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left') // Nueva unión
-            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
+            ->join('usuarios', 'usuarios.idusuario = leads.idusuario_registro', 'left')
+            ->join('origenes', 'origenes.idorigen = leads.idorigen', 'left')
+            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left')
+            ->join('modalidades', 'modalidades.idmodalidad = leads.idmodalidad', 'left')
             ->findAll();
     }
 
@@ -57,15 +55,15 @@ class LeadModel extends Model
                 personas.telefono,
                 personas.correo,
                 campanias.nombre AS campana,
-                difusiones.descripcion AS difusion_descripcion,
+                modalidades.nombre AS modalidad,
                 origenes.nombre AS origen,
-                usuarios.usuario
+                usuarios.usuario AS usuario_registro
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
-            ->join('usuarios', 'usuarios.idusuario = leads.idusuario', 'left')
-            ->join('origenes', 'origenes.idorigen = leads.idorigen', 'left') // Nueva unión
-            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left') // Nueva unión
-            ->join('difusiones', 'difusiones.iddifusion = leads.iddifusion', 'left')
+            ->join('usuarios', 'usuarios.idusuario = leads.idusuario_registro', 'left')
+            ->join('origenes', 'origenes.idorigen = leads.idorigen', 'left')
+            ->join('campanias', 'campanias.idcampania = leads.idcampania', 'left')
+            ->join('modalidades', 'modalidades.idmodalidad = leads.idmodalidad', 'left')
             ->orderBy('leads.idetapa, leads.idlead')
             ->findAll();
 
@@ -76,6 +74,9 @@ class LeadModel extends Model
         return $porEtapa;
     }
 
+    /**
+     * Actualiza la etapa de un lead
+     */
     public function actualizarEtapa($idlead, $idetapa)
     {
         return $this->update($idlead, ['idetapa' => $idetapa]);

@@ -10,9 +10,6 @@ class EtapaModel extends Model
     protected $primaryKey = 'idetapa';
     protected $allowedFields = ['nombre', 'orden', 'idpipeline', 'activo'];
 
-    /**
-     * Obtener todas las etapas de un pipeline específico
-     */
     public function getEtapasPorPipeline($idpipeline)
     {
         return $this->where('idpipeline', $idpipeline)
@@ -20,10 +17,12 @@ class EtapaModel extends Model
                     ->orderBy('orden', 'ASC')
                     ->findAll();
     }
+    
+    public function getEtapasActivas()
+    {
+        return $this->orderBy('orden', 'ASC')->findAll();
+    }
 
-    /**
-     * Obtener la etapa inicial de un pipeline
-     */
     public function getEtapaInicial($idpipeline)
     {
         return $this->where('idpipeline', $idpipeline)
@@ -32,9 +31,6 @@ class EtapaModel extends Model
                     ->first();
     }
 
-    /**
-     * Obtener todas las etapas activas (general)
-     */
     public function getEtapasIniciales()
     {
         return $this->where('activo', 1)
