@@ -103,7 +103,7 @@
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="<?= base_url('inicio') ?>">
+            <a class="nav-link" href="<?= base_url(('dashboard/index') ) ?>">
               <i class='bx bx-grid-alt menu-icon'></i>
               <span class="menu-title">Inicio</span>
             </a>

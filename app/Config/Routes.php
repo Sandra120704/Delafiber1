@@ -93,3 +93,6 @@ $routes->post('persona/guardarLead', 'PersonaController::guardarLead');
 $routes->get('leads', 'LeadController::index');
 $routes->get('leads/modal-crear', 'LeadController::modalCrear');
 $routes->post('leads/guardar', 'LeadController::guardar');
+
+//Dashboard
+$routes->get('dashboard/index', 'DashboardController::index');

@@ -109,12 +109,22 @@ class LeadController extends BaseController
         try {
             $idlead = $this->leadModel->insert($dataLead);
 
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Lead registrado correctamente.',
-                'idlead' => $idlead,
-            ]);
+            if ($idlead) {
+                $persona = $this->personaModel->find($idpersona);
+                $persona['idetapa'] = $dataLead['idetapa'];
 
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Lead registrado correctamente.',
+                    'idlead'  => $idlead,
+                    'persona' => $persona
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No se pudo registrar el lead.'
+            ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false,
@@ -176,5 +186,94 @@ class LeadController extends BaseController
         $this->leadModel->update($idlead, ['estado' => 'Descartado']);
 
         return $this->response->setJSON(['success' => true, 'message' => 'Lead descartado correctamente']);
+    }
+
+    public function guardarSeguimiento()
+    {
+        $idlead = $this->request->getPost('idlead');
+        $idmodalidad = $this->request->getPost('idmodalidad');
+        $comentario = $this->request->getPost('comentario');
+
+        if (!$idlead || !$idmodalidad || !$comentario) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Datos incompletos para el seguimiento'
+            ]);
+        }
+
+        $id = $this->seguimientoModel->insert([
+            'idlead'      => $idlead,
+            'idusuario'   => session()->get('idusuario'),
+            'idmodalidad' => $idmodalidad,
+            'comentario'  => $comentario,
+            'fecha'       => date('Y-m-d H:i:s')
+        ]);
+
+        if ($id) {
+            return $this->response->setJSON([
+                'success' => true,
+                'seguimiento' => [
+                    'id'        => $id,
+                    'comentario'=> $comentario,
+                    'fecha'     => date('d/m/Y H:i')
+                ]
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Error al guardar seguimiento'
+        ]);
+    }
+
+    public function convertirALead($idpersona)
+    {
+        $persona = $this->personaModel->find($idpersona);
+        if (!$persona) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Persona no encontrada.'
+            ]);
+        }
+
+        $existeLead = $this->leadModel->where('idpersona', $idpersona)->first();
+        if ($existeLead) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'El lead para esta persona ya existe.'
+            ]);
+        }
+
+        $dataLead = [
+            'idpersona'         => $idpersona,
+            'estado'            => 'Nuevo',
+            'idetapa'           => 1,
+            'idusuario_registro'=> session('idusuario'),
+            'idusuario'         => session('idusuario')
+        ];
+
+        $idlead = $this->leadModel->insert($dataLead);
+
+        if ($idlead) {
+            $persona['idetapa'] = $dataLead['idetapa'];
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Lead creado correctamente.',
+                'idlead'  => $idlead,
+                'persona' => $persona
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Error al crear lead.'
+        ]);
+    }
+
+    public function validar($idpersona)
+    {
+        $existe = $this->leadModel->where('idpersona', $idpersona)->first() ? true : false;
+        return $this->response->setJSON(['exists' => $existe]);
     }
 }
