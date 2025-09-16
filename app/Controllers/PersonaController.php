@@ -166,10 +166,13 @@ class PersonaController extends BaseController
             $leadData = [
                 'idpersona' => $post['idpersona'],
                 'idorigen' => $post['idorigen'],
+                'idusuario' => session()->get('idusuario'),
                 'idmodalidad' => $post['idmodalidad'],
+                'idcampania' => $tipoOrigen === 'campaña' ? $post['idcampania'] : null,
+                'referido_por' => $tipoOrigen === 'referido' ? $post['referido_por'] : null,
+                'idusuario_registro' => session()->get('idusuario'), 
                 'estado' => 'Convertido',
-                'idcampania' => null,
-                'referido_por' => null,
+                'idetapa' => 1,
             ];
 
             // Guardar campaña o referido según tipo
@@ -180,13 +183,15 @@ class PersonaController extends BaseController
             }
 
             $this->leadModel->insert($leadData);
+            $idlead = $this->leadModel->getInsertID();
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Lead registrado correctamente.'
+                'message' => 'Lead registrado correctamente.',
+                'redirect' => base_url('leads/index'),
+                'idlead' => $idlead, // por si luego quieres usarlo
             ]);
-
-        } catch (\Exception $e) {
+            } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Error en el servidor: ' . $e->getMessage()

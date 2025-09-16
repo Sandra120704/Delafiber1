@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dniInput = document.getElementById('dni');
     const btnBuscar = document.getElementById('buscar-dni');
     const apellidosInput = document.getElementById('apellidos');
-    const nombresInput = document = document.getElementById('nombres');
+    const nombresInput = document.getElementById('nombres');
     const buscando = document.getElementById('searching');
     const formPersona = document.getElementById('form-persona');
     const modalContainer = document.getElementById("modalContainer");
@@ -152,10 +152,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         const data = await res.json();
 
                         if (data.success) {
-                            Swal.fire('¡Éxito!', data.message, 'success');
-                            modal.hide();
-                            location.reload();
-                        } else {
+                                Swal.fire('¡Éxito!', data.message, 'success').then(() => {
+                                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                                    if (modalInstance) modalInstance.hide();
+
+                                    const redirectUrl = BASE_URL.endsWith('/')
+                                        ? BASE_URL + 'leads/index'
+                                        : BASE_URL + '/leads/index';
+
+                                    console.log("Redirigiendo a:", redirectUrl); // 👈 Te ayudará a depurar
+                                    window.location.href = redirectUrl;
+                                });
+                            }
+                            else {
                             modalEl.querySelectorAll('.error-message').forEach(el => el.textContent = '');
 
                             if (data.errors) {

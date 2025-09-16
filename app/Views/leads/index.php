@@ -35,7 +35,7 @@
                 <div class="card-info text-xs text-gray-500">
                   <small class="block truncate"><?= htmlspecialchars($lead['telefono']) ?> | <?= htmlspecialchars($lead['correo']) ?></small>
                   <small class="block truncate"><?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></small>
-                  <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario']) ?></small>
+                  <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario'] ?? 'Sin asignar') ?></small>
                 </div>
               </div>
             <?php endforeach; ?>
@@ -103,11 +103,9 @@
 <script>
     const base_url = "<?= rtrim(base_url(), '/') ?>";
 </script>
-<!-- Scripts JS -->
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="<?= base_url('js/leadsJS/kanbas.js') ?>"></script>
-<script src="<?= base_url('js/leadsJS/editar.js') ?>"></script>
-<script src="<?= base_url('js/leadsJS/detalle.js') ?>"></script>
-<script type="module" src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script type="module" src="<?= base_url('js/leadsJS/index.js') ?>"></script>

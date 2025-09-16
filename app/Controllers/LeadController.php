@@ -41,6 +41,7 @@ class LeadController extends BaseController
         $data['campanias'] = $this->campanaModel->findAll();
         $data['modalidades'] = $this->modalidadesModel->findAll();
         $data['origenes'] = $this->origenModel->findAll();
+        $data['leadsPorEtapa'] = $this->leadModel->getLeadsPorEtapa();
 
         $data['header'] = view('Layouts/header');
         $data['footer'] = view('Layouts/footer');

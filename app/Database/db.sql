@@ -107,10 +107,10 @@ CREATE TABLE etapas (
 CREATE TABLE leads (
     idlead INT AUTO_INCREMENT PRIMARY KEY,
     idpersona INT NOT NULL,
-    iddifusion INT,
-    idetapa INT,
-    idusuario INT,
-    idorigen INT,
+    iddifusion INT NOT NULL,
+    idetapa INT NOT NULL,
+    idusuario INT NOT NULL,
+    idorigen INT NOT NULL,
     estado ENUM('Convertido','Descartado') DEFAULT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_lead_persona FOREIGN KEY (idpersona) REFERENCES personas(idpersona),
@@ -119,6 +119,8 @@ CREATE TABLE leads (
     CONSTRAINT fk_lead_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario),
     CONSTRAINT fk_lead_origen FOREIGN KEY (idorigen) REFERENCES origenes(idorigen)
 );
+ALTER TABLE leads MODIFY idetapa INT NOT NULL DEFAULT 1;
+
 
 CREATE TABLE seguimiento (
     idseguimiento INT AUTO_INCREMENT PRIMARY KEY,
@@ -170,6 +172,8 @@ INSERT INTO roles (nombre, descripcion) VALUES
 ('admin', 'Acceso total al sistema'), 
 ('vendedor', 'Gestiona leads y clientes'), 
 ('supervisor', 'Supervisa y controla reportes');
+ALTER TABLE leads ADD UNIQUE (idpersona);
+
 
 INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('jperez', '123456', 1, 1),

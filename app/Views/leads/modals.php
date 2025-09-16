@@ -89,3 +89,4 @@
         </div>
     </div>
 </div>
+<script src="<?= base_url('js/leadsJS/leadsForm.js') ?>"></script>

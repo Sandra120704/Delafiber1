@@ -35,7 +35,7 @@ class LeadModel extends Model
                 campanias.nombre AS campana,
                 modalidades.nombre AS modalidad,
                 origenes.nombre AS origen,
-                usuarios.usuario AS usuario_registro
+                usuarios.usuario AS usuario
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
             ->join('usuarios', 'usuarios.idusuario = leads.idusuario_registro', 'left')
@@ -57,7 +57,7 @@ class LeadModel extends Model
                 campanias.nombre AS campana,
                 modalidades.nombre AS modalidad,
                 origenes.nombre AS origen,
-                usuarios.usuario AS usuario_registro
+                usuarios.usuario AS usuario
             ')
             ->join('personas', 'personas.idpersona = leads.idpersona')
             ->join('usuarios', 'usuarios.idusuario = leads.idusuario_registro', 'left')
@@ -74,11 +74,5 @@ class LeadModel extends Model
         return $porEtapa;
     }
 
-    /**
-     * Actualiza la etapa de un lead
-     */
-    public function actualizarEtapa($idlead, $idetapa)
-    {
-        return $this->update($idlead, ['idetapa' => $idetapa]);
-    }
+
 }
