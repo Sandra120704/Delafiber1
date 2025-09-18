@@ -119,8 +119,11 @@ CREATE TABLE leads (
     CONSTRAINT fk_lead_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario),
     CONSTRAINT fk_lead_origen FOREIGN KEY (idorigen) REFERENCES origenes(idorigen)
 );
+ALTER TABLE leads ADD COLUMN idlead INT AUTO_INCREMENT PRIMARY KEY;
+
 ALTER TABLE leads MODIFY idetapa INT NOT NULL DEFAULT 1;
 
+SELECT t.idtarea, l.idlead FROM tareas t JOIN leads l ON t.idlead = l.idlead
 
 CREATE TABLE seguimiento (
     idseguimiento INT AUTO_INCREMENT PRIMARY KEY,
@@ -144,7 +147,7 @@ CREATE TABLE tareas (
     estado ENUM('Pendiente','En progreso','Completada') DEFAULT 'Pendiente',
     CONSTRAINT fk_tarea_lead FOREIGN KEY (idlead) REFERENCES leads(idlead),
     CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario)
-);
+);DESCRIBE leads;
 
 DROP TRIGGER IF EXISTS trg_update_leads_generados;
 
@@ -241,3 +244,34 @@ ALTER TABLE leads ADD COLUMN fecha_modificacion DATETIME NOT NULL DEFAULT CURREN
 
 -- Nota: Tu tabla ya tenía la columna 'idorigen' y su llave foránea.
 -- El script no necesita agregarla, pero se incluyó en el LeadModel actualizado para reflejar la estructura completa.
+-- Verificar si existe la tabla leads
+SHOW TABLES LIKE 'leads';
+
+-- Ver la estructura de la tabla leads
+DESCRIBE leads;
+
+-- Ver todas las tablas de tu base de datos
+SHOW TABLES;
+SELECT COUNT(*) FROM leads;
+SELECT * FROM leads LIMIT 5;
+SELECT * FROM tareas LIMIT 5;
+ALTER TABLE leads ADD COLUMN idlead INT AUTO_INCREMENT PRIMARY KEY;
+-- Insertar leads de prueba
+INSERT INTO leads (idpersona, idetapa, idusuario, idorigen, idcampania, idmodalidad) VALUES
+(1, 1, 1, 1, 1, 1),
+(2, 2, 2, 2, 1, 2),
+(3, 1, 3, 1, 1, 1),
+(4, 3, 4, 3, 1, 3);
+INSERT INTO tareas (idlead, idusuario, descripcion, fecha_inicio, fecha_fin, estado) VALUES
+(1, 1, 'Llamar al cliente para agendar cita de instalación', '2025-01-20', '2025-01-22', 'Pendiente'),
+(2, 2, 'Enviar cotización por correo electrónico', '2025-01-21', '2025-01-23', 'En progreso'),
+(3, 3, 'Realizar visita técnica para evaluar instalación', '2025-01-22', '2025-01-24', 'Completada');
+-- Ver los IDs de leads existentes
+SELECT idlead, idpersona FROM leads;
+ALTER TABLE tareas ADD COLUMN tipo_tarea VARCHAR(50) DEFAULT 'llamada';
+ALTER TABLE tareas ADD COLUMN titulo VARCHAR(200) NOT NULL;
+ALTER TABLE tareas ADD COLUMN prioridad ENUM('baja','media','alta','urgente') DEFAULT 'media';
+ALTER TABLE tareas ADD COLUMN fecha_vencimiento DATETIME NULL;
+ALTER TABLE tareas ADD COLUMN fecha_completado DATETIME NULL;
+ALTER TABLE tareas ADD COLUMN notas_resultado TEXT NULL;
+ALTER TABLE usuarios ADD COLUMN activo BOOLEAN DEFAULT TRUE;

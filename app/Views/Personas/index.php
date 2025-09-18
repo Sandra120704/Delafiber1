@@ -14,7 +14,7 @@
 
     <form class="mb-3" method="get" action="<?= site_url('personas') ?>">
       <div class="input-group">
-        <input name="q" value="<?= esc($_GET['q'] ?? '') ?>" class="form-control" placeholder="Buscar por nombre, DNI, teléfono o correo" autocomplete="off">
+        <input name="q" value="<?= esc($q ?? '') ?>" class="form-control" placeholder="Buscar por nombre, DNI, teléfono o correo" autocomplete="off">
         <button class="btn btn-outline-secondary" type="submit">Buscar</button>
       </div>
     </form>

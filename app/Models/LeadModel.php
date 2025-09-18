@@ -73,6 +73,18 @@ class LeadModel extends Model
         }
         return $porEtapa;
     }
+    public function obtenerLeadsParaTareas()
+    {
+        $builder = $this->builder();
+        $builder->select('l.idlead, p.nombres, p.apellidos, p.telefono, e.nombre as etapa');
+        $builder->join('personas p', 'l.idpersona = p.idpersona');
+        $builder->join('etapas e', 'l.idetapa = e.idetapa');
+        $builder->where('l.estado !=', 'Descartado');
+        $builder->orderBy('p.nombres');
+        
+        return $builder->get()->getResultArray();
+    }
 
 
 }
+

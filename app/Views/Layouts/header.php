@@ -121,7 +121,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= base_url('tareas') ?>">
+            <a class="nav-link" href="<?= base_url('tarea/tarea') ?>">
               <i class='bx bx-list-check menu-icon'></i>
               <span class="menu-title">Tareas</span>
             </a>

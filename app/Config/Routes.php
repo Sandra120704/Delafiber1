@@ -74,14 +74,21 @@ $routes->post('personas/guardarLead', 'PersonaController::guardarLead');
 $routes->get('usuarios','UsuarioController::index');
 $routes->get('usuarios/crear','UsuarioController::crear');
 
+// Asegúrate de tener estas rutas
 $routes->get('personas', 'PersonaController::index');
 $routes->get('personas/crear', 'PersonaController::crear');
 $routes->post('personas/guardar', 'PersonaController::guardar');
-$routes->get('personas/buscardni/(:num)', 'PersonaController::buscarDni/$1');
-$routes->post('personas/eliminar/(:num)', 'PersonaController::eliminar/$1');
-$routes->get('personas/editar/(:num)', 'PersonaController::editar/$1');
-$routes->post('personas/actualizar', 'PersonaController::actualizar');
+$routes->get('personas/buscardni/(:num)', 'PersonaController::buscardni/$1');
 $routes->get('personas/buscarAjax', 'PersonaController::buscarAjax');
+$routes->post('personas/eliminar/(:num)', 'PersonaController::eliminar/$1');
+$routes->get('personas/modalCrear/(:num)', 'PersonaController::modalCrear/$1');
+$routes->post('persona/guardarLead', 'PersonaController::guardarLead'); 
+$routes->get('personas/buscadorDni', 'PersonaController::buscadorDni');
+$routes->get('personas/buscardni', 'PersonaController::buscardni');
+$routes->get('personas/eliminar/(:num)', 'PersonaController::eliminar/$1');
+$routes->get('personas/buscarAjax', 'PersonaController::buscarAjax');
+
+
 
 // === NUEVA RUTA PARA EL MODAL CREAR LEAD ===
 $routes->get('personas/modalCrear/(:num)', 'PersonaController::modalCrear/$1');
@@ -96,3 +103,26 @@ $routes->post('leads/guardar', 'LeadController::guardar');
 
 //Dashboard
 $routes->get('dashboard/index', 'DashboardController::index');
+
+$routes->get('tarea/tarea', 'TareaController::index');
+$routes->post('tareas/crear', 'TareaController::crear');
+$routes->post('tareas/editar/(:num)', 'TareaController::editar/$1');
+$routes->delete('tareas/eliminar/(:num)', 'TareaController::eliminar/$1');
+$routes->post('tareas/cambiarEstado/(:num)', 'TareaController::cambiarEstado/$1');
+$routes->get('tareas/calendario', 'TareaController::calendario');
+
+
+// Rutas para tareas
+$routes->get('tareas', 'TareaController::index');
+$routes->post('tareas/crear', 'TareaController::crear');
+$routes->post('tareas/editar/(:num)', 'TareaController::editar/$1');  
+$routes->delete('tareas/eliminar/(:num)', 'TareaController::eliminar/$1');
+$routes->post('tareas/cambiarEstado/(:num)', 'TareaController::cambiarEstado/$1');
+$routes->get('tareas/calendario', 'TareaController::calendario');
+
+$routes->get('usuarios', 'UsuarioController::index');
+$routes->post('usuarios/crear', 'UsuarioController::crear');
+$routes->post('usuarios/editar/(:num)', 'UsuarioController::editar/$1');
+$routes->delete('usuarios/eliminar/(:num)', 'UsuarioController::eliminar/$1');
+$routes->post('usuarios/cambiarEstado/(:num)', 'UsuarioController::cambiarEstado/$1');
+$routes->post('usuarios/resetearPassword/(:num)', 'UsuarioController::resetearPassword/$1');

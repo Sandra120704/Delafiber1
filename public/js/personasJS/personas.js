@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBuscar.disabled = true;
 
         try {
-            const res = await fetch(`${BASE_URL}personas/buscardni/${dni}`);
+            const res = await fetch(`${BASE_URL}personas/buscardni?q=${dni}`);
             if (res.status === 404) {
                 apellidosInput.value = '';
                 nombresInput.value = '';
