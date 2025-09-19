@@ -275,3 +275,225 @@ ALTER TABLE tareas ADD COLUMN fecha_vencimiento DATETIME NULL;
 ALTER TABLE tareas ADD COLUMN fecha_completado DATETIME NULL;
 ALTER TABLE tareas ADD COLUMN notas_resultado TEXT NULL;
 ALTER TABLE usuarios ADD COLUMN activo BOOLEAN DEFAULT TRUE;
+-- ===== ESTRUCTURA DE BASE DE DATOS MEJORADA =====
+-- Sistema de Campañas con funcionalidades avanzadas
+
+-- 1. Tabla campanias mejorada
+ALTER TABLE campanias; 
+ADD COLUMN prioridad ENUM('alta', 'media', 'baja') DEFAULT 'media' AFTER estado;
+ADD COLUMN categoria VARCHAR(50) DEFAULT 'general' AFTER prioridad,
+ADD COLUMN tags TEXT AFTER categoria,
+ADD COLUMN creado_por INT AFTER responsable,
+ADD COLUMN fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER fecha_creacion,
+ADD COLUMN fecha_finalizacion TIMESTAMP NULL AFTER fecha_actualizacion,
+ADD COLUMN objetivo_leads INT DEFAULT 0 AFTER presupuesto,
+ADD COLUMN objetivo_roi DECIMAL(5,2) DEFAULT 0.00 AFTER objetivo_leads,
+ADD COLUMN meta_descripcion TEXT AFTER notas,
+ADD INDEX idx_estado (estado),
+ADD INDEX idx_prioridad (prioridad),
+ADD INDEX idx_categoria (categoria),
+ADD INDEX idx_responsable (responsable),
+ADD INDEX idx_creado_por (creado_por),
+ADD INDEX idx_fechas (fecha_inicio, fecha_fin);
+
+-- Actualizar el ENUM de estado para incluir más opciones
+ALTER TABLE campanias 
+MODIFY COLUMN estado ENUM('borrador', 'activa', 'pausada', 'finalizada', 'cancelada') DEFAULT 'borrador';
+
+-- Agregar foreign keys si no existen
+ALTER TABLE campanias 
+ADD CONSTRAINT fk_campana_responsable 
+FOREIGN KEY (responsable) REFERENCES usuarios(idusuario) ON DELETE SET NULL,
+ADD CONSTRAINT fk_campana_creado_por 
+FOREIGN KEY (creado_por) REFERENCES usuarios(idusuario) ON DELETE SET NULL;
+
+-- 2. Tabla difusiones mejorada
+ALTER TABLE difusiones
+ADD COLUMN objetivo_leads INT DEFAULT 0 AFTER leads_generados,
+ADD COLUMN cpc DECIMAL(10,2) DEFAULT 0.00 AFTER objetivo_leads,
+ADD COLUMN cpm DECIMAL(10,2) DEFAULT 0.00 AFTER cpc,
+ADD COLUMN impresiones INT DEFAULT 0 AFTER cpm,
+ADD COLUMN clics INT DEFAULT 0 AFTER impresiones,
+ADD COLUMN conversiones INT DEFAULT 0 AFTER clics,
+ADD COLUMN estado ENUM('activo', 'pausado', 'finalizado') DEFAULT 'activo' AFTER conversiones,
+ADD COLUMN actualizado TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER creado,
+ADD INDEX idx_campania (idcampania),
+ADD INDEX idx_medio (idmedio),
+ADD INDEX idx_estado (estado);
+
+-- 3. Nueva tabla: campana_actividad (log de actividades)
+CREATE TABLE campana_actividad (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idcampania INT NOT NULL,
+    usuario_id INT,
+    accion VARCHAR(50) NOT NULL,
+    descripcion TEXT,
+    datos_previos JSON,
+    datos_nuevos JSON,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_campania (idcampania),
+    INDEX idx_usuario (usuario_id),
+    INDEX idx_fecha (fecha),
+    INDEX idx_accion (accion),
+    
+    FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(idusuario) ON DELETE SET NULL
+);
+
+-- 4. Nueva tabla: campana_archivos (archivos adjuntos)
+CREATE TABLE campana_archivos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idcampania INT NOT NULL,
+    nombre_original VARCHAR(255) NOT NULL,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    ruta VARCHAR(500) NOT NULL,
+    tipo_mime VARCHAR(100),
+    tamanio INT,
+    tipo_archivo ENUM('imagen', 'documento', 'video', 'audio', 'otro') DEFAULT 'otro',
+    descripcion TEXT,
+    subido_por INT,
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_campania (idcampania),
+    INDEX idx_tipo (tipo_archivo),
+    INDEX idx_subido_por (subido_por),
+    
+    FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE CASCADE,
+    FOREIGN KEY (subido_por) REFERENCES usuarios(idusuario) ON DELETE SET NULL
+);
+
+-- 5. Nueva tabla: campana_metricas_diarias (métricas históricas)
+CREATE TABLE campana_metricas_diarias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idcampania INT NOT NULL,
+    fecha DATE NOT NULL,
+    leads_dia INT DEFAULT 0,
+    inversion_dia DECIMAL(10,2) DEFAULT 0.00,
+    impresiones_dia INT DEFAULT 0,
+    clics_dia INT DEFAULT 0,
+    conversiones_dia INT DEFAULT 0,
+    roi_dia DECIMAL(5,2) DEFAULT 0.00,
+    ctr DECIMAL(5,2) DEFAULT 0.00,
+    cpc_promedio DECIMAL(10,2) DEFAULT 0.00,
+    creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    UNIQUE KEY unique_campana_fecha (idcampania, fecha),
+    INDEX idx_campania (idcampania),
+    INDEX idx_fecha (fecha),
+    
+    FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE CASCADE
+);
+
+-- 6. Nueva tabla: campana_objetivos (objetivos específicos por campaña)
+CREATE TABLE campana_objetivos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idcampania INT NOT NULL,
+    tipo_objetivo ENUM('leads', 'roi', 'impresiones', 'clics', 'conversiones', 'presupuesto') NOT NULL,
+    valor_objetivo DECIMAL(10,2) NOT NULL,
+    valor_actual DECIMAL(10,2) DEFAULT 0.00,
+    porcentaje_cumplimiento DECIMAL(5,2) DEFAULT 0.00,
+    fecha_limite DATE,
+    estado ENUM('pendiente', 'en_progreso', 'cumplido', 'no_cumplido') DEFAULT 'pendiente',
+    notas TEXT,
+    creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    actualizado TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_campania (idcampania),
+    INDEX idx_tipo (tipo_objetivo),
+    INDEX idx_estado (estado),
+    
+    FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE CASCADE
+);
+
+-- 7. Nueva tabla: campana_comentarios (comentarios y notas)
+CREATE TABLE campana_comentarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idcampania INT NOT NULL,
+    usuario_id INT NOT NULL,
+    comentario TEXT NOT NULL,
+    tipo ENUM('comentario', 'nota', 'alerta', 'recordatorio') DEFAULT 'comentario',
+    es_privado BOOLEAN DEFAULT FALSE,
+    fecha_recordatorio TIMESTAMP NULL,
+    estado ENUM('activo', 'resuelto', 'archivado') DEFAULT 'activo',
+    creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    actualizado TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_campania (idcampania),
+    INDEX idx_usuario (usuario_id),
+    INDEX idx_tipo (tipo),
+    INDEX idx_fecha_recordatorio (fecha_recordatorio),
+    
+    FOREIGN KEY (idcampania) REFERENCES campanias(idcampania) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(idusuario) ON DELETE CASCADE
+);
+
+-- 8. Tabla medios mejorada (si no tiene estos campos)
+ALTER TABLE medios 
+ADD COLUMN IF NOT EXISTS tipo VARCHAR(50) DEFAULT 'digital',
+ADD COLUMN IF NOT EXISTS descripcion TEXT,
+ADD COLUMN IF NOT EXISTS configuracion JSON,
+ADD COLUMN IF NOT EXISTS estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+ADD COLUMN IF NOT EXISTS orden_mostrar INT DEFAULT 0,
+ADD INDEX IF NOT EXISTS idx_tipo (tipo),
+ADD INDEX IF NOT EXISTS idx_estado (estado);
+
+-- 9. Nueva tabla: plantillas_campana (plantillas reutilizables)
+CREATE TABLE plantillas_campana (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    categoria VARCHAR(50) DEFAULT 'general',
+    configuracion JSON NOT NULL,
+    medios_incluidos JSON,
+    es_publica BOOLEAN DEFAULT FALSE,
+    creado_por INT NOT NULL,
+    uso_contador INT DEFAULT 0,
+    creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    actualizado TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_categoria (categoria),
+    INDEX idx_creado_por (creado_por),
+    INDEX idx_publica (es_publica),
+    
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idusuario) ON DELETE CASCADE
+);
+
+-- 10. Vista para dashboard de métricas
+CREATE VIEW vista_dashboard_campanas AS
+SELECT 
+    c.idcampania,
+    c.nombre,
+    c.descripcion,
+    c.estado,
+    c.prioridad,
+    c.categoria,
+    c.fecha_inicio,
+    c.fecha_fin,
+    c.presupuesto,
+    c.objetivo_leads,
+    c.objetivo_roi,
+    u.nombre as responsable_nombre,
+    u.email as responsable_email,
+    uc.nombre as creado_por_nombre,
+    COUNT(DISTINCT d.idmedio) as medios_count,
+    COALESCE(SUM(d.inversion), 0) as inversion_total,
+    COALESCE(SUM(d.leads_generados), 0) as leads_total,
+    COALESCE(SUM(d.impresiones), 0) as impresiones_total,
+    COALESCE(SUM(d.clics), 0) as clics_total,
+    COALESCE(SUM(d.conversiones), 0) as conversiones_total,
+    CASE 
+        WHEN COALESCE(SUM(d.inversion), 0) > 0
+
+        ALTER TABLE campanias ADD COLUMN responsable INT NULL;
+ALTER TABLE campanias 
+    ADD CONSTRAINT fk_campania_responsable 
+    FOREIGN KEY (responsable) REFERENCES usuarios(idusuario);
+    ALTER TABLE campanias ADD COLUMN fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE campanias ADD COLUMN presupuesto DECIMAL(9,2) DEFAULT 0 AFTER fecha_fin;
+
+ALTER TABLE difusiones 
+ADD COLUMN presupuesto DECIMAL(12,2) NOT NULL DEFAULT 0 AFTER idmedio;

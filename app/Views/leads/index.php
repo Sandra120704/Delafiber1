@@ -9,6 +9,8 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<!-- SortableJS para Drag & Drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
 <style>
     .tarea-badge {
@@ -23,22 +25,77 @@
         align-items: center;
         justify-content: center;
     }
+    
     .kanban-card {
         position: relative;
+        transition: all 0.3s ease;
+        cursor: grab;
     }
+    
+    .kanban-card:active {
+        cursor: grabbing;
+    }
+    
+    /* Estilos para drag & drop */
+    .sortable-ghost {
+        opacity: 0.4;
+        background: #f8f9fa;
+        transform: rotate(2deg);
+    }
+    
+    .sortable-chosen {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        z-index: 999;
+    }
+    
+    .sortable-drag {
+        transform: rotate(3deg);
+        opacity: 0.8;
+    }
+    
+    /* Zona de drop activa */
+    .kanban-column.drag-over {
+        background: linear-gradient(145deg, #e3f2fd, #f3e5f5);
+        border: 2px dashed #2196f3;
+        transform: scale(1.02);
+    }
+    
+    /* Indicador visual de drop */
+    .drop-indicator {
+        height: 4px;
+        background: linear-gradient(90deg, #4CAF50, #2196F3);
+        border-radius: 2px;
+        margin: 8px 0;
+        opacity: 0;
+        animation: pulse 1s infinite;
+    }
+    
+    .drop-indicator.active {
+        opacity: 1;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+    
     .tarea-indicador {
         font-size: 11px;
         padding: 2px 6px;
         border-radius: 10px;
         margin: 2px 0;
     }
+    
     .lead-actions {
         opacity: 0;
         transition: opacity 0.3s ease;
     }
+    
     .kanban-card:hover .lead-actions {
         opacity: 1;
     }
+    
     .floating-task-summary {
         position: fixed;
         top: 20px;
@@ -46,11 +103,49 @@
         z-index: 1050;
         min-width: 300px;
     }
+    
+    /* Estilos para modales mejorados */
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .modal-header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    /* Loading state */
+    .loading-card {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    /* Mejorar responsividad */
+    @media (max-width: 768px) {
+        .floating-task-summary {
+            position: relative;
+            top: auto;
+            right: auto;
+            margin-bottom: 20px;
+        }
+        
+        .kanban-container {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
 <div class="p-8 bg-gray-100 min-h-screen font-sans antialiased">
     <!-- Resumen flotante de tareas -->
-    <div class="floating-task-summary">
+<!--     <div class="floating-task-summary">
         <div class="card border-0 shadow-lg">
             <div class="card-header bg-primary text-white">
                 <h6 class="mb-0"><i class="fas fa-tasks"></i> Resumen de Tareas</h6>
@@ -88,7 +183,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Cabecera del tablero -->
     <div class="flex justify-between items-center mb-8">
@@ -106,50 +201,69 @@
         </div>
     </div>
 
-    <!-- Contenedor del Kanban -->
+    <!-- Contenedor del Kanban con Drag & Drop -->
     <div class="kanban-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <?php foreach ($etapas as $etapa): ?>
-        <div class="kanban-column bg-white rounded-xl shadow-lg p-6" id="kanban-column-<?= $etapa['idetapa'] ?>" data-etapa="<?= $etapa['idetapa'] ?>">
-            <div class="kanban-stage text-center font-semibold text-lg mb-4 text-gray-700"><?= htmlspecialchars($etapa['nombre']) ?></div>
-            <?php
-              $leadsEtapa = $leadsPorEtapa[$etapa['idetapa']] ?? [];
-            ?>
-            <?php foreach ($leadsEtapa as $lead): ?>
-              <div class="kanban-card bg-white rounded-lg shadow-md mb-4 p-4 cursor-pointer transition-transform transform hover:scale-105 hover:shadow-xl" 
-                    id="kanban-card-<?= $lead['idlead'] ?>" 
-                    data-id="<?= $lead['idlead'] ?>" 
-                    draggable="true" 
-                    style="border-left:5px solid <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;">
-                
-                <!-- Badge de tareas pendientes -->
-                <span class="tarea-badge bg-warning text-dark d-none" id="badge-tareas-<?= $lead['idlead'] ?>">0</span>
-                
-                <div class="card-title text-sm font-bold text-gray-900 mb-1"><?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?></div>
-                <div class="card-info text-xs text-gray-500">
-                  <small class="block truncate"><?= htmlspecialchars($lead['telefono']) ?> | <?= htmlspecialchars($lead['correo']) ?></small>
-                  <small class="block truncate"><?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></small>
-                  <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario'] ?? 'Sin asignar') ?></small>
-                </div>
+        <div class="kanban-column bg-white rounded-xl shadow-lg p-6 sortable-container" 
+             id="kanban-column-<?= $etapa['idetapa'] ?>" 
+             data-etapa="<?= $etapa['idetapa'] ?>">
+             
+            <div class="kanban-stage text-center font-semibold text-lg mb-4 text-gray-700 flex items-center justify-between">
+                <span><?= htmlspecialchars($etapa['nombre']) ?></span>
+                <span class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full" id="count-<?= $etapa['idetapa'] ?>">
+                    <?= count($leadsPorEtapa[$etapa['idetapa']] ?? []) ?>
+                </span>
+            </div>
+            
+            <!-- Indicador de drop -->
+            <div class="drop-indicator" id="drop-indicator-<?= $etapa['idetapa'] ?>"></div>
+            
+            <!-- Container para las cards (aquí van los leads) -->
+            <div class="leads-container" id="leads-container-<?= $etapa['idetapa'] ?>">
+                <?php
+                $leadsEtapa = $leadsPorEtapa[$etapa['idetapa']] ?? [];
+                foreach ($leadsEtapa as $lead): 
+                ?>
+                  <div class="kanban-card bg-white rounded-lg shadow-md mb-4 p-4 cursor-pointer transition-transform transform hover:scale-105 hover:shadow-xl" 
+                        id="kanban-card-<?= $lead['idlead'] ?>" 
+                        data-id="<?= $lead['idlead'] ?>" 
+                        data-etapa="<?= $etapa['idetapa'] ?>"
+                        draggable="true" 
+                        onclick="abrirDetalleLeadModal(<?= $lead['idlead'] ?>)"
+                        style="border-left:5px solid <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;">
+                    
+                    <!-- Badge de tareas pendientes -->
+                    <span class="tarea-badge bg-warning text-dark d-none" id="badge-tareas-<?= $lead['idlead'] ?>">0</span>
+                    
+                    <div class="card-title text-sm font-bold text-gray-900 mb-1">
+                        <?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>
+                    </div>
+                    <div class="card-info text-xs text-gray-500">
+                      <small class="block truncate"><?= htmlspecialchars($lead['telefono']) ?> | <?= htmlspecialchars($lead['correo']) ?></small>
+                      <small class="block truncate"><?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></small>
+                      <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario'] ?? 'Sin asignar') ?></small>
+                    </div>
 
-                <!-- Indicadores de tareas -->
-                <div class="mt-2" id="tareas-info-<?= $lead['idlead'] ?>">
-                    <!-- Se llena dinámicamente con JS -->
-                </div>
+                    <!-- Indicadores de tareas -->
+                    <div class="mt-2" id="tareas-info-<?= $lead['idlead'] ?>">
+                        <!-- Se llena dinámicamente con JS -->
+                    </div>
 
-                <!-- Acciones rápidas -->
-                <div class="lead-actions mt-3 d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-primary flex-1" onclick="event.stopPropagation(); crearTareaRapida(<?= $lead['idlead'] ?>, '<?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>')">
-                        <i class="fas fa-plus"></i> Tarea
-                    </button>
-                    <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); verTareasLead(<?= $lead['idlead'] ?>)">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); completarTareaPendiente(<?= $lead['idlead'] ?>)">
-                        <i class="fas fa-check"></i>
-                    </button>
-                </div>
-              </div>
-            <?php endforeach; ?>
+                    <!-- Acciones rápidas -->
+                    <div class="lead-actions mt-3 d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-primary flex-1" onclick="event.stopPropagation(); crearTareaRapida(<?= $lead['idlead'] ?>, '<?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>')">
+                            <i class="fas fa-plus"></i> Tarea
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); verTareasLead(<?= $lead['idlead'] ?>)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); completarTareaPendiente(<?= $lead['idlead'] ?>)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+            </div>
             
             <button class="btn btn-sm btn-outline-primary w-full mt-2 text-blue-500 hover:bg-blue-500 hover:text-white transition duration-300 rounded-lg border border-blue-500 py-2" onclick="crearLeadEnEtapa(<?= $etapa['idetapa'] ?>)">
                 + Agregar Lead
@@ -158,14 +272,28 @@
       <?php endforeach; ?>
     </div>
 
-    <!-- Modal de Detalle (el contenido se carga con JS) -->
-    <div class="modal fade" id="modalLeadDetalle" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-xl shadow-2xl"></div>
+    <!-- Modal de Detalle de Lead (MEJORADO) -->
+    <div class="modal fade" id="modalLeadDetalle" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header modal-header-gradient">
+            <h5 class="modal-title">
+              <i class="fas fa-user-circle"></i> Detalle del Lead
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="detalle-lead-content">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Modal de Creación de Lead -->
+    <!-- Modal de Creación de Lead (SIN CAMBIOS) -->
     <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-xl shadow-2xl border-t-4 border-blue-500">
@@ -209,7 +337,7 @@
       </div>
     </div>
 
-    <!-- Modal de Tarea Rápida -->
+    <!-- Modal de Tarea Rápida (SIN CAMBIOS IMPORTANTES) -->
     <div class="modal fade" id="modalTareaRapida" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content border-0 shadow-2xl">
@@ -280,7 +408,7 @@
       </div>
     </div>
 
-    <!-- Modal de Tareas del Lead -->
+    <!-- Modal de Tareas del Lead (SIN CAMBIOS) -->
     <div class="modal fade" id="modalTareasLead" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-2xl">
@@ -313,11 +441,13 @@
 <script>
 // Variables globales
 let tareasData = {};
+let sortableInstances = [];
 
 // Cargar datos al inicializar
 $(document).ready(function() {
     cargarResumenTareas();
     cargarTareasLeads();
+    inicializarDragDrop();
     
     // Auto-refresh cada 3 minutos
     setInterval(() => {
@@ -331,6 +461,514 @@ $(document).ready(function() {
     mañana.setHours(9, 0, 0, 0);
     $('#fecha-personalizada').val(mañana.toISOString().slice(0, 16));
 });
+
+// ===============================
+// NUEVA FUNCIONALIDAD: DRAG & DROP
+// ===============================
+
+function inicializarDragDrop() {
+    // Inicializar SortableJS para cada columna
+    document.querySelectorAll('.leads-container').forEach(container => {
+        const etapaId = container.closest('.kanban-column').dataset.etapa;
+        
+        const sortable = new Sortable(container, {
+            group: 'kanban-leads', // Permite mover entre columnas
+            animation: 300,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            
+            // Eventos del drag & drop
+            onStart: function(evt) {
+                // Agregar clase visual a todas las columnas
+                document.querySelectorAll('.kanban-column').forEach(col => {
+                    if (col !== evt.from.closest('.kanban-column')) {
+                        col.classList.add('drag-over');
+                    }
+                });
+            },
+            
+            onEnd: function(evt) {
+                // Remover clases visuales
+                document.querySelectorAll('.kanban-column').forEach(col => {
+                    col.classList.remove('drag-over');
+                });
+                
+                // Si cambió de columna, actualizar la base de datos
+                const itemEl = evt.item;
+                const newEtapa = evt.to.closest('.kanban-column').dataset.etapa;
+                const oldEtapa = evt.from.closest('.kanban-column').dataset.etapa;
+                
+                if (newEtapa !== oldEtapa) {
+                    const leadId = itemEl.dataset.id;
+                    moverLeadEtapa(leadId, newEtapa, oldEtapa);
+                }
+            },
+            
+            onMove: function(evt) {
+                // Mostrar indicador de drop
+                const targetColumn = evt.to.closest('.kanban-column');
+                const indicator = targetColumn.querySelector('.drop-indicator');
+                if (indicator) {
+                    indicator.classList.add('active');
+                }
+            }
+        });
+        
+        sortableInstances.push(sortable);
+    });
+}
+
+// Función para mover lead entre etapas
+function moverLeadEtapa(leadId, nuevaEtapa, etapaAnterior) {
+    // Mostrar loading en la card
+    const card = document.getElementById(`kanban-card-${leadId}`);
+    if (card) {
+        card.style.opacity = '0.6';
+        card.style.pointerEvents = 'none';
+    }
+    
+    $.ajax({
+        url: `${base_url}/leads/cambiarEtapa`,
+        method: 'POST',
+        data: {
+            idlead: leadId,
+            nueva_etapa: nuevaEtapa,
+            etapa_anterior: etapaAnterior
+        }
+    })
+    .done(function(response) {
+        if (response.success) {
+            // Actualizar datos de la card
+            if (card) {
+                card.dataset.etapa = nuevaEtapa;
+                card.style.opacity = '1';
+                card.style.pointerEvents = 'auto';
+            }
+            
+            // Actualizar contadores
+            actualizarContadoresEtapas();
+            
+            // Mostrar notificación
+            mostrarNotificacionExito('Lead movido exitosamente');
+            
+            // Registrar actividad (opcional)
+            registrarActividad(leadId, 'moved', `Movido a ${getNombreEtapa(nuevaEtapa)}`);
+            
+        } else {
+            // Revertir el movimiento si falla
+            revertirMovimiento(leadId, etapaAnterior);
+            mostrarNotificacionError(response.message || 'Error al mover el lead');
+        }
+    })
+    .fail(function() {
+        // Revertir el movimiento si falla la conexión
+        revertirMovimiento(leadId, etapaAnterior);
+        mostrarNotificacionError('Error de conexión');
+    });
+}
+
+// Revertir movimiento en caso de error
+function revertirMovimiento(leadId, etapaAnterior) {
+    const card = document.getElementById(`kanban-card-${leadId}`);
+    const contenedorAnterior = document.getElementById(`leads-container-${etapaAnterior}`);
+    
+    if (card && contenedorAnterior) {
+        contenedorAnterior.appendChild(card);
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+    }
+}
+
+// Actualizar contadores de las etapas
+function actualizarContadoresEtapas() {
+    document.querySelectorAll('.kanban-column').forEach(columna => {
+        const etapaId = columna.dataset.etapa;
+        const contador = columna.querySelector(`#count-${etapaId}`);
+        const numLeads = columna.querySelectorAll('.kanban-card').length;
+        
+        if (contador) {
+            contador.textContent = numLeads;
+            
+            // Animación del contador
+            contador.classList.add('animate-pulse');
+            setTimeout(() => {
+                contador.classList.remove('animate-pulse');
+            }, 1000);
+        }
+    });
+}
+
+// ===============================
+// NUEVA FUNCIONALIDAD: MODAL DE DETALLE MEJORADO
+// ===============================
+
+function abrirDetalleLeadModal(leadId) {
+    const modal = new bootstrap.Modal(document.getElementById('modalLeadDetalle'));
+    
+    // Mostrar modal inmediatamente con loading
+    modal.show();
+    
+    // Cargar contenido del lead
+    $.ajax({
+        url: `${base_url}/leads/detalle/${leadId}`,
+        method: 'GET'
+    })
+    .done(function(response) {
+        if (response.success) {
+            mostrarDetalleLeadContent(response.lead, response.tareas, response.actividades);
+        } else {
+            $('#detalle-lead-content').html(`
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Error cargando el detalle del lead
+                </div>
+            `);
+        }
+    })
+    .fail(function() {
+        $('#detalle-lead-content').html(`
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-wifi"></i>
+                Error de conexión
+            </div>
+        `);
+    });
+}
+
+function mostrarDetalleLeadContent(lead, tareas = [], actividades = []) {
+    const tareasPendientes = tareas.filter(t => ['pendiente', 'en_progreso'].includes(t.estado));
+    const tareasCompletadas = tareas.filter(t => t.estado === 'completada');
+    
+    const html = `
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Información Principal -->
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-user"></i> Información Personal</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Nombre:</strong> ${lead.nombres} ${lead.apellidos}</p>
+                                    <p><strong>DNI:</strong> ${lead.dni || 'No especificado'}</p>
+                                    <p><strong>Teléfono:</strong> ${lead.telefono}</p>
+                                    <p><strong>Email:</strong> ${lead.correo}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Campaña:</strong> ${lead.campania || 'No especificada'}</p>
+                                    <p><strong>Medio:</strong> ${lead.medio || 'No especificado'}</p>
+                                    <p><strong>Usuario Asignado:</strong> ${lead.usuario || 'Sin asignar'}</p>
+                                    <p><strong>Fecha de Registro:</strong> ${formatearFecha(lead.fecha_registro)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline de Actividades -->
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="fas fa-history"></i> Timeline de Actividades</h6>
+                            <button class="btn btn-sm btn-primary" onclick="agregarActividad(${lead.idlead})">
+                                <i class="fas fa-plus"></i> Nueva Actividad
+                            </button>
+                        </div>
+                        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                            ${actividades.length > 0 ? renderTimeline(actividades) : '<p class="text-muted text-center">No hay actividades registradas</p>'}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Panel Lateral - Tareas -->
+                <div class="col-md-4">
+                    <!-- Resumen de Tareas -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="fas fa-tasks"></i> Resumen de Tareas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="text-warning">
+                                        <i class="fas fa-clock fa-2x"></i>
+                                        <div class="fw-bold">${tareasPendientes.length}</div>
+                                        <small>Pendientes</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-success">
+                                        <i class="fas fa-check-circle fa-2x"></i>
+                                        <div class="fw-bold">${tareasCompletadas.length}</div>
+                                        <small>Completadas</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tareas Pendientes -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Tareas Pendientes</h6>
+                            <button class="btn btn-sm btn-light" onclick="crearTareaRapida(${lead.idlead}, '${lead.nombres} ${lead.apellidos}')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="card-body p-2" style="max-height: 300px; overflow-y: auto;">
+                            ${tareasPendientes.length > 0 ? renderTareasPendientes(tareasPendientes) : '<p class="text-muted small text-center">No hay tareas pendientes</p>'}
+                        </div>
+                    </div>
+                    
+                    <!-- Acciones Rápidas -->
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="llamarLead('${lead.telefono}')">
+                                    <i class="fas fa-phone"></i> Llamar
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" onclick="whatsappLead('${lead.telefono}')">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="emailLead('${lead.correo}')">
+                                    <i class="fas fa-envelope"></i> Email
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="editarLead(${lead.idlead})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('#detalle-lead-content').html(html);
+}
+
+function renderTimeline(actividades) {
+    return actividades.map(actividad => `
+        <div class="timeline-item mb-3">
+            <div class="d-flex align-items-start">
+                <div class="timeline-icon me-3">
+                    <i class="fas fa-${getIconoActividad(actividad.tipo)} text-primary"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <strong class="text-sm">${actividad.titulo}</strong>
+                        <small class="text-muted">${formatearFechaCorta(actividad.fecha)}</small>
+                    </div>
+                    <p class="text-muted small mb-1">${actividad.descripcion || ''}</p>
+                    <small class="text-muted">Por: ${actividad.usuario}</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderTareasPendientes(tareas) {
+    return tareas.map(tarea => {
+        const esVencida = new Date(tarea.fecha_vencimiento) < new Date();
+        const colorClass = esVencida ? 'border-danger bg-light' : '';
+        
+        return `
+            <div class="card mb-2 ${colorClass}">
+                <div class="card-body p-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 text-sm">${tarea.titulo}</h6>
+                            <small class="text-muted">
+                                <i class="fas fa-${getIconoTipo(tarea.tipo_tarea)}"></i>
+                                ${formatearFecha(tarea.fecha_vencimiento)}
+                            </small>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <span class="badge bg-${getColorPrioridad(tarea.prioridad)} badge-sm">${tarea.prioridad}</span>
+                            <button class="btn btn-success btn-xs" onclick="completarTareaModal(${tarea.idtarea})" title="Completar">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ===============================
+// FUNCIONES DE ACCIONES RÁPIDAS
+// ===============================
+
+function llamarLead(telefono) {
+    window.open(`tel:${telefono}`, '_self');
+    // Registrar la actividad
+    registrarActividad(null, 'llamada', `Llamada realizada a ${telefono}`);
+}
+
+function whatsappLead(telefono) {
+    const mensaje = encodeURIComponent('Hola, me comunico desde [tu empresa] para darle seguimiento a su consulta.');
+    window.open(`https://wa.me/${telefono.replace(/[^0-9]/g, '')}?text=${mensaje}`, '_blank');
+    registrarActividad(null, 'whatsapp', `WhatsApp enviado a ${telefono}`);
+}
+
+function emailLead(email) {
+    window.open(`mailto:${email}`, '_self');
+    registrarActividad(null, 'email', `Email enviado a ${email}`);
+}
+
+function editarLead(leadId) {
+    // Cerrar modal actual y abrir modal de edición
+    $('#modalLeadDetalle').modal('hide');
+    // Aquí cargarías los datos en el formulario de edición
+    setTimeout(() => {
+        $('#leadModal').modal('show');
+        cargarDatosParaEdicion(leadId);
+    }, 300);
+}
+
+function agregarActividad(leadId) {
+    Swal.fire({
+        title: 'Nueva Actividad',
+        html: `
+            <div class="text-start">
+                <div class="mb-3">
+                    <label class="form-label">Tipo:</label>
+                    <select class="form-select" id="tipo-actividad">
+                        <option value="llamada">📞 Llamada</option>
+                        <option value="reunion">🤝 Reunión</option>
+                        <option value="email">📧 Email</option>
+                        <option value="whatsapp">💬 WhatsApp</option>
+                        <option value="nota">📝 Nota</option>
+                        <option value="seguimiento">👁️ Seguimiento</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Título:</label>
+                    <input type="text" class="form-control" id="titulo-actividad" placeholder="Resumen de la actividad">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción:</label>
+                    <textarea class="form-control" id="desc-actividad" rows="3" placeholder="Detalles de lo realizado..."></textarea>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar Actividad',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const tipo = document.getElementById('tipo-actividad').value;
+            const titulo = document.getElementById('titulo-actividad').value;
+            const descripcion = document.getElementById('desc-actividad').value;
+            
+            if (!titulo.trim()) {
+                Swal.showValidationMessage('El título es requerido');
+                return false;
+            }
+            
+            return { tipo, titulo, descripcion };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarActividad(leadId, result.value);
+        }
+    });
+}
+
+function guardarActividad(leadId, actividad) {
+    $.ajax({
+        url: `${base_url}/leads/agregarActividad`,
+        method: 'POST',
+        data: {
+            idlead: leadId,
+            tipo: actividad.tipo,
+            titulo: actividad.titulo,
+            descripcion: actividad.descripcion
+        }
+    })
+    .done(function(response) {
+        if (response.success) {
+            // Recargar el detalle del lead
+            abrirDetalleLeadModal(leadId);
+            mostrarNotificacionExito('Actividad agregada exitosamente');
+        } else {
+            mostrarNotificacionError('Error al guardar la actividad');
+        }
+    })
+    .fail(function() {
+        mostrarNotificacionError('Error de conexión');
+    });
+}
+
+// ===============================
+// FUNCIONES AUXILIARES MEJORADAS
+// ===============================
+
+function mostrarNotificacionExito(mensaje) {
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: mensaje,
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+    });
+}
+
+function mostrarNotificacionError(mensaje) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: mensaje,
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+    });
+}
+
+function registrarActividad(leadId, tipo, descripcion) {
+    if (!leadId) return; // Si no hay leadId, no registrar
+    
+    $.post(`${base_url}/leads/registrarActividad`, {
+        idlead: leadId,
+        tipo: tipo,
+        descripcion: descripcion
+    });
+}
+
+function getNombreEtapa(etapaId) {
+    const etapas = {
+        '1': 'Nuevo',
+        '2': 'Contactado',
+        '3': 'Calificado',
+        '4': 'Propuesta',
+        '5': 'Cerrado'
+    };
+    return etapas[etapaId] || 'Etapa ' + etapaId;
+}
+
+function getIconoActividad(tipo) {
+    const iconos = {
+        'llamada': 'phone',
+        'reunion': 'handshake',
+        'email': 'envelope',
+        'whatsapp': 'comment-dots',
+        'nota': 'sticky-note',
+        'seguimiento': 'eye',
+        'moved': 'arrows-alt'
+    };
+    return iconos[tipo] || 'circle';
+}
+
+// ===============================
+// FUNCIONES ORIGINALES (MANTENIDAS)
+// ===============================
 
 // Cargar resumen de tareas
 function cargarResumenTareas() {
@@ -411,7 +1049,12 @@ function crearTareaRapida(idlead, nombreLead) {
     $('#formTareaRapida')[0].reset();
     $('#tarea-idlead').val(idlead); // Restaurar después del reset
     
-    $('#modalTareaRapida').modal('show');
+    // Cerrar modal de detalle si está abierto
+    $('#modalLeadDetalle').modal('hide');
+    
+    setTimeout(() => {
+        $('#modalTareaRapida').modal('show');
+    }, 300);
 }
 
 // Guardar tarea rápida
@@ -457,13 +1100,7 @@ function guardarTareaRapida() {
     .done(function(response) {
         if (response.success) {
             $('#modalTareaRapida').modal('hide');
-            Swal.fire({
-                icon: 'success',
-                title: '¡Tarea creada!',
-                text: 'La tarea se creó exitosamente',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            mostrarNotificacionExito('Tarea creada exitosamente');
             
             // Recargar tareas del lead
             const idlead = $('#tarea-idlead').val();
@@ -582,12 +1219,7 @@ function completarTareaRapida(idtarea, titulo) {
             })
             .done(function(response) {
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Completada!',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                    mostrarNotificacionExito('Tarea completada exitosamente');
                     cargarTareasLeads();
                     cargarResumenTareas();
                 }
@@ -613,7 +1245,6 @@ function manejarVencimiento() {
 
 // Abrir modal de nueva tarea general
 function abrirModalTarea() {
-    // Redirigir a página de tareas o abrir modal más completo
     window.open(`${base_url}/tareas`, '_blank');
 }
 
