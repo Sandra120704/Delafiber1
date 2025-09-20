@@ -1,6 +1,4 @@
-// ====================================================
-// GESTIÓN DE DETALLES Y ACCIONES DE LEADS
-// ====================================================
+
 
 $(document).ready(function() {
     console.log('Sistema de detalles de leads iniciado - Base URL:', typeof base_url !== 'undefined' ? base_url : 'NO DEFINIDO');
@@ -9,9 +7,6 @@ $(document).ready(function() {
     inicializarEventosDetalle();
 });
 
-// ====================================================
-// INICIALIZACIÓN DE EVENTOS
-// ====================================================
 function inicializarEventosDetalle() {
     // Evento para abrir detalle al hacer click en card (si no es del kanban modal)
     $(document).on('click', '.kanban-card', function(e) {
@@ -23,9 +18,6 @@ function inicializarEventosDetalle() {
     });
 }
 
-// ====================================================
-// CARGA DE DETALLE COMPLETO DEL LEAD
-// ====================================================
 function cargarDetalleLeadCompleto(idlead) {
     $.ajax({
         url: `${base_url}/leads/detalle/${idlead}`,
@@ -58,14 +50,9 @@ function cargarDetalleLeadCompleto(idlead) {
     });
 }
 
-// ====================================================
-// CONFIGURACIÓN DE EVENTOS ESPECÍFICOS DEL DETALLE
-// ====================================================
+
 function configurarEventosDetalle(idlead) {
     
-    // ----------------------------
-    // DESISTIR/ELIMINAR LEAD
-    // ----------------------------
     $('#btnDesistirLead').off('click').on('click', function() {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -83,41 +70,28 @@ function configurarEventosDetalle(idlead) {
         });
     });
 
-    // ----------------------------
-    // FORMULARIO DE TAREAS ESPECÍFICAS
-    // ----------------------------
+
     $('#tareaForm').off('submit').on('submit', function(e) {
         e.preventDefault();
         guardarTareaDetalle(idlead, $(this));
     });
 
-    // ----------------------------
-    // FORMULARIO DE SEGUIMIENTOS
-    // ----------------------------
     $('#seguimientoForm').off('submit').on('submit', function(e) {
         e.preventDefault();
         guardarSeguimiento(idlead, $(this));
     });
 
-    // ----------------------------
-    // CAMBIO DE ETAPA DESDE DETALLE
-    // ----------------------------
     $('#selectEtapaDetalle').off('change').on('change', function() {
         const nuevaEtapa = $(this).val();
         cambiarEtapaDetalle(idlead, nuevaEtapa);
     });
 
-    // ----------------------------
-    // EDITAR DATOS DEL LEAD
-    // ----------------------------
+
     $('#btnEditarLead').off('click').on('click', function() {
         habilitarEdicionLead(idlead);
     });
 }
 
-// ====================================================
-// FUNCIONES DE GESTIÓN DE LEADS
-// ====================================================
 
 // Eliminar lead
 function eliminarLead(idlead) {
@@ -305,10 +279,6 @@ function guardarCambiosLead(idlead) {
         Swal.fire('Error', 'Error al actualizar el lead', 'error');
     });
 }
-
-// ====================================================
-// FUNCIONES AUXILIARES
-// ====================================================
 
 // Mostrar loading en detalle
 function mostrarLoadingDetalle() {
