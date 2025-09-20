@@ -38,6 +38,7 @@ class CampanaController extends BaseController
 
             return view('campanas/index', $datos);
         } catch (\Exception $e) {
+            // TODO: Implementar mejor logging aquí
             log_message('error', 'Error en CampanaController::index: ' . $e->getMessage());
             return redirect()->to('/')->with('error', 'Error al cargar las campañas');
         }

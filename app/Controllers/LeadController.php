@@ -311,8 +311,8 @@ class LeadController extends BaseController
                 // Registrar actividad en seguimiento
                 $this->seguimientoModel->insert([
                     'idlead' => $idlead,
-                    'idusuario' => session()->get('idusuario') ?? 1, // Usuario actual o default
-                    'idmodalidad' => 1, // Modalidad default para movimiento
+                    'idusuario' => session()->get('idusuario') ?? 1, 
+                    'idmodalidad' => 1, 
                     'nota' => "Lead movido de etapa {$etapaAnterior} a etapa {$nuevaEtapa}",
                     'fecha' => date('Y-m-d H:i:s')
                 ]);

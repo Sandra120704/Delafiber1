@@ -1,14 +1,9 @@
-/**
- * Validaciones para Modal de Campañas
- * Maneja validaciones específicas del modal de creación rápida
- */
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Modal validation JS cargado');
     
     initModalValidation();
 });
-
 
  // Inicializa las validaciones del modal principa
 function initModalValidation() {

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
+// Modelo para gestionar personas en el CRM
+// TODO: Agregar validación para números de teléfono peruanos
 class PersonaModel extends Model
 {
     protected $table = 'personas';
@@ -24,7 +26,7 @@ class PersonaModel extends Model
         'referencias'
     ];
     
-    protected $useTimestamps = false;
+    protected $useTimestamps = false; 
     
     protected $validationRules = [
         'dni' => 'required|exact_length[8]|is_unique[personas.dni,idpersona,{idpersona}]',

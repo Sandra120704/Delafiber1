@@ -1,59 +1,13 @@
 <?= $header ?>
 <!-- Hoja de estilos de Bootstrap 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Estilos personalizados para el tablero -->
 <link rel="stylesheet" href="<?= base_url('css/leads.css') ?>">
-<!-- Estilos para SweetAlert2 -->
 <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css" rel="stylesheet">
-<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<!-- SortableJS para Drag & Drop -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
 <div class="p-8 bg-gray-100 min-h-screen font-sans antialiased">
-    <!-- Resumen flotante de tareas -->
-<!--     <div class="floating-task-summary">
-        <div class="card border-0 shadow-lg">
-            <div class="card-header bg-primary text-white">
-                <h6 class="mb-0"><i class="fas fa-tasks"></i> Resumen de Tareas</h6>
-            </div>
-            <div class="card-body p-3">
-                <div class="row text-center">
-                    <div class="col-3">
-                        <div class="text-warning">
-                            <i class="fas fa-clock"></i>
-                            <div class="fw-bold" id="tareas-hoy">0</div>
-                            <small>Hoy</small>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation"></i>
-                            <div class="fw-bold" id="tareas-vencidas">0</div>
-                            <small>Vencidas</small>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="text-info">
-                            <i class="fas fa-calendar"></i>
-                            <div class="fw-bold" id="tareas-semana">0</div>
-                            <small>Semana</small>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="text-success">
-                            <i class="fas fa-check"></i>
-                            <div class="fw-bold" id="tareas-completadas">0</div>
-                            <small>Hechas</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
     <!-- Cabecera del tablero -->
     <div class="flex justify-between items-center mb-8">
         <h3 class="text-3xl font-bold text-gray-800">Flujo de Leads con Tareas</h3>
@@ -71,7 +25,7 @@
     </div>
 
     <!-- Contenedor del Kanban con Drag & Drop -->
-    <div class="kanban-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="kanban-container">
       <?php foreach ($etapas as $etapa): ?>
         <div class="kanban-column bg-white rounded-xl shadow-lg p-6 sortable-container" 
              id="kanban-column-<?= $etapa['idetapa'] ?>" 
@@ -300,17 +254,40 @@
 
 <script>
     const base_url = "<?= rtrim(base_url(), '/') ?>";
-    console.log('Base URL configurada:', base_url); // Debug
+    console.log('Base URL configurada:', base_url);
 </script>
 
-<!-- Scripts especializados -->
+<!-- Librerías externas PRIMERO -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Scripts especializados DESPUÉS -->
 <script src="<?= base_url('js/leadsJS/kanban.js') ?>"></script>
 <script src="<?= base_url('js/leadsJS/tareas.js') ?>"></script>
 <script src="<?= base_url('js/leadsJS/detalles.js') ?>"></script>
 
-<!-- Librerías externas -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Debug y test automático -->
+<script>
+$(document).ready(function() {
+    console.log('Test automático del sistema...');
+    
+    // Test después de que todo esté cargado
+    setTimeout(function() {
+        if (typeof window.diagnosticarKanban === 'function') {
+            window.diagnosticarKanban();
+        }
+        
+        // Auto-reparar si es necesario
+        if (typeof window.repararDragAndDrop === 'function') {
+            const cards = document.querySelectorAll('.kanban-card');
+            if (cards.length > 0 && window.sortableInstances?.length === 0) {
+                console.log('Auto-reparando drag & drop...');
+                window.repararDragAndDrop();
+            }
+        }
+    }, 2000);
+});
+</script>
 
 <?= $footer ?>

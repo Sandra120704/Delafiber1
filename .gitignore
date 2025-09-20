@@ -88,6 +88,12 @@ phpunit
 vendor/
 
 #-------------------------
+# Third-party assets and libraries
+#-------------------------
+public/assets/
+!public/assets/.gitkeep
+
+#-------------------------
 # IDE / Development Files
 #-------------------------
 

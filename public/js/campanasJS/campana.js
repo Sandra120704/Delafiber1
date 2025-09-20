@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Campañas JS cargado correctamente');
   
-  // Inicializar tooltips
+  // Inicializar tooltips de Bootstrap
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 
@@ -370,10 +370,17 @@ document.addEventListener('DOMContentLoaded', () => {
         timer: 3000,
         showConfirmButton: false,
         toast: true,
-        position: 'top-end'
+        position: 'top-end',
+        allowEscapeKey: true,
+        allowOutsideClick: true,
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp'
+        }
       });
     } else {
-      // Fallback a alert básico
       alert(message);
     }
   }
@@ -382,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#campaignsTable').DataTable({
       responsive: true,
       pageLength: 10,
-      order: [[0, 'desc']], // Ordenar por primera columna (Campaña) descendente
+      order: [[0, 'desc']],
       language: {
         search: "Buscar:",
         lengthMenu: "Mostrar _MENU_ registros por página",

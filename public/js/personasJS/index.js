@@ -16,13 +16,13 @@ btnBuscar?.addEventListener('click', async () => {
     btnBuscar.disabled = true;
 
     try {
-        const res = await fetch(${BASE_URL}personas/buscardni?q=${dni});
+        const res = await fetch(`${BASE_URL}personas/buscardni?q=${dni}`);
         if (!res.ok) throw new Error('Error en la consulta');
 
         const data = await res.json();
 
         if (!data.success) {
-            // Caso 3: No existe en BD ni en RENIEC
+            // No existe en BD ni en la api  de DeColecta
             apellidosInput.value = '';
             nombresInput.value = '';
             Swal.fire({
@@ -53,8 +53,8 @@ btnBuscar?.addEventListener('click', async () => {
             nombresInput.value = '';
 
         } else {
-            // Caso 2: No existe en BD, pero sí en RENIEC → cargar datos para registrar
-            apellidosInput.value = ${data.apepaterno} ${data.apematerno};
+            // Verificar  que No existe en BD
+            apellidosInput.value = `${data.apepaterno} ${data.apematerno}`;
             nombresInput.value = data.nombres;
 
             Swal.fire({

@@ -1,4 +1,4 @@
--- Active: 1755358617783@@127.0.0.1@3306@delafiber
+-- Active: 1743133057434@@127.0.0.1@3306@delafiber
 drop DATABASE if exists delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
@@ -174,19 +174,19 @@ CREATE TABLE tareas (
     CONSTRAINT fk_tarea_usuario FOREIGN KEY (idusuario) REFERENCES usuarios(idusuario) ON DELETE RESTRICT
 );
 
-/* Se aplicaron indices para optimizar las consultas */
 -- Índices para tablas principales
+-- TODO: Revisar si realmente necesitamos todos estos índices
 CREATE INDEX idx_personas_dni ON personas(dni);
 CREATE INDEX idx_personas_correo ON personas(correo);
 CREATE INDEX idx_usuarios_usuario ON usuarios(usuario);
 CREATE INDEX idx_usuarios_activo ON usuarios(activo);
 
--- Índices para campañas
+-- Índices para campañas 
 CREATE INDEX idx_campanias_estado ON campanias(estado);
 CREATE INDEX idx_campanias_fechas ON campanias(fecha_inicio, fecha_fin);
 CREATE INDEX idx_campanias_responsable ON campanias(responsable);
 
--- Índices para leads
+-- Índices para leads (agregados después por performance)
 CREATE INDEX idx_leads_estado ON leads(estado);
 CREATE INDEX idx_leads_fecha ON leads(fecha_registro);
 CREATE INDEX idx_leads_usuario ON leads(idusuario);
@@ -259,12 +259,10 @@ INSERT INTO pipelines (nombre, descripcion) VALUES
 ('Pipeline Principal', 'Pipeline general de ventas para servicios de fibra óptica');
 
 INSERT INTO etapas (idpipeline, nombre, orden) VALUES
-(1, 'PROSPECTO', 1),
-(1, 'CONTACTADO', 2),
-(1, 'CALIFICADO', 3),
-(1, 'PROPUESTA', 4),
-(1, 'NEGOCIACIÓN', 5),
-(1, 'CIERRE', 6);
+(1, 'CAPTACION', 1),
+(1, 'CONVERSION', 2),
+(1, 'VENTA', 3),
+(1, 'FIDELIZACION', 4);
 
 -- Medios de comunicación
 INSERT INTO medios (nombre, descripcion) VALUES

@@ -230,7 +230,7 @@
 </div>
 
 <!-- Modal Crear Campaña -->
-<div class="modal fade" id="createCampaignModal" tabindex="-1">
+<!-- <div class="modal fade" id="createCampaignModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -281,8 +281,6 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <!-- Estado oculto, por defecto Activa -->
-                        <input type="hidden" name="estado" value="Activa">
                     </div>
                 </form>
             </div>
@@ -294,7 +292,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>  -->
 
 <!-- Modal Detalle de Campaña -->
 <div class="modal fade" id="detalleCampanaModal" tabindex="-1">

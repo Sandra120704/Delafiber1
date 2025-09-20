@@ -1,143 +1,247 @@
-.tarea-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+
+.kanban-container {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 1.5rem !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 1rem 0.5rem !important;
+    min-height: calc(100vh - 200px) !important;
+    scroll-behavior: smooth !important;
+
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
 }
+
+.kanban-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.kanban-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.kanban-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.kanban-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Columnas del Kanban */
+.kanban-column {
+    min-width: 300px !important;
+    max-width: 320px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    padding: 1.5rem !important;
+    height: fit-content !important;
+    max-height: calc(100vh - 220px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border: 1px solid #e5e7eb;
+}
+
+/* Container de leads dentro de cada columna */
+.leads-container {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 320px) !important;
+    padding-right: 0.25rem;
     
+    /* Scrollbar interno */
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f9fafb;
+}
+
+.leads-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.leads-container::-webkit-scrollbar-track {
+    background: #f9fafb;
+    border-radius: 3px;
+}
+
+.leads-container::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+/* Cards de leads - IMPORTANTE para drag & drop */
 .kanban-card {
-    position: relative;
-    transition: all 0.3s ease;
-    cursor: grab;
+    cursor: grab !important;
+    user-select: none !important;
+    touch-action: none !important;
+    position: relative !important;
+    z-index: 1 !important;
 }
-    
+
 .kanban-card:active {
-    cursor: grabbing;
+    cursor: grabbing !important;
 }
-    
-/* Estilos para drag & drop */
+
+/* Estados del drag & drop */
 .sortable-ghost {
-    opacity: 0.4;
-    background: #f8f9fa;
-    transform: rotate(2deg);
+    opacity: 0.4 !important;
+    background: #f0f9ff !important;
+    border: 2px dashed #3b82f6 !important;
+    transform: rotate(2deg) !important;
 }
-    
+
 .sortable-chosen {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    z-index: 999;
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    transform: scale(1.02) !important;
+    z-index: 1000 !important;
 }
-    
+
 .sortable-drag {
-    transform: rotate(3deg);
-    opacity: 0.8;
+    background: #ecfdf5 !important;
+    border-color: #10b981 !important;
+    opacity: 0.9 !important;
+    transform: rotate(-2deg) scale(1.05) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    z-index: 2000 !important;
 }
-    
+
 /* Zona de drop activa */
 .kanban-column.drag-over {
-    background: linear-gradient(145deg, #e3f2fd, #f3e5f5);
-    border: 2px dashed #2196f3;
-    transform: scale(1.02);
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 2px dashed #0ea5e9 !important;
+    transform: scale(1.02) !important;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1) !important;
 }
-    
-/* Indicador visual de drop */
+
+/* Indicador de drop */
 .drop-indicator {
-    height: 4px;
-    background: linear-gradient(90deg, #4CAF50, #2196F3);
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
     border-radius: 2px;
-    margin: 8px 0;
+    margin: 0.5rem 0;
     opacity: 0;
-    animation: pulse 1s infinite;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
-    
+
 .drop-indicator.active {
     opacity: 1;
-}
-    
-@keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-}
-    
-.tarea-indicador {
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin: 2px 0;
-}
-    
-.lead-actions {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-    
-.kanban-card:hover .lead-actions {
-     opacity: 1;
-}
-    
-.floating-task-summary {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    min-width: 300px;
-}
-    
-/* Estilos para modales mejorados */
-.modal-content {
-    border: none;
-    border-radius: 15px;
-    overflow: hidden;
-}
-    
-.modal-header-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-     color: white;
-}
-    
-/* Loading state */
-.loading-card {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
+    transform: scaleX(1.05);
+    animation: dropGlow 1s ease-in-out infinite alternate;
 }
 
-/* Estado moving para drag & drop */
+/* Animaciones personalizadas */
+@keyframes dropGlow {
+    from {
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes dropZoneGlow {
+    0%, 100% {
+        background: white;
+    }
+    50% {
+        background: #f0f9ff;
+    }
+}
+
+@keyframes successGlow {
+    0% {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        background: #dcfce7;
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+        transform: scale(1.02);
+    }
+    100% {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: scale(1);
+    }
+}
+
+/* Estado de movimiento */
 .kanban-card.moving {
-    opacity: 0.6;
-    pointer-events: none;
-    transform: scale(0.95);
-    background: linear-gradient(90deg, #f8f9fa 25%, #e9ecef 50%, #f8f9fa 75%);
-    background-size: 200% 100%;
-    animation: moving 1s infinite;
-}
-
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-@keyframes moving {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-    
-/* Mejorar responsividad */
-@media (max-width: 768px) {
-.floating-task-summary {
+    opacity: 0.6 !important;
+    pointer-events: none !important;
     position: relative;
-    top: auto;
-    right: auto;
-    margin-bottom: 20px;
 }
-        
-.kanban-container {
-    grid-template-columns: 1fr;
- }
+
+.kanban-card.moving::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    animation: pulse 1s infinite;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .kanban-column {
+        min-width: 280px !important;
+        max-width: 300px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .kanban-container {
+        gap: 1rem !important;
+        padding: 0.5rem !important;
+    }
+    
+    .kanban-column {
+        min-width: 250px !important;
+        max-width: 270px !important;
+        padding: 1rem !important;
+    }
+    
+    .leads-container {
+        max-height: calc(100vh - 280px) !important;
+    }
+}
+
+/* Mejoras visuales adicionales */
+.kanban-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Fix para botones dentro de las cards */
+.kanban-card .btn {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
+}
+
+.kanban-card .lead-actions {
+    pointer-events: auto !important;
+}
+
+/* Asegurar que el drag funcione en toda la card */
+.kanban-card * {
+    pointer-events: none;
+}
+
+.kanban-card .lead-actions,
+.kanban-card .lead-actions * {
+    pointer-events: auto !important;
 }

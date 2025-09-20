@@ -3,12 +3,11 @@
 $(document).ready(function() {
     console.log('Sistema de detalles de leads iniciado - Base URL:', typeof base_url !== 'undefined' ? base_url : 'NO DEFINIDO');
     
-    // Inicializar eventos de detalle de leads
+
     inicializarEventosDetalle();
 });
 
 function inicializarEventosDetalle() {
-    // Evento para abrir detalle al hacer click en card (si no es del kanban modal)
     $(document).on('click', '.kanban-card', function(e) {
         // Solo si no viene del modal principal de tareas
         if (!$(e.target).closest('.modal').length) {
@@ -30,10 +29,8 @@ function cargarDetalleLeadCompleto(idlead) {
     })
     .done(function(response) {
         if (response.success) {
-            // Inyectar el HTML completo en el modal
             $('#modalLeadDetalleContent').html(response.html);
             
-            // Inicializar y mostrar el modal
             const modal = new bootstrap.Modal(document.getElementById('modalLeadDetalle'));
             modal.show();
             
@@ -318,6 +315,7 @@ function mostrarNotificacionExito(mensaje) {
         showConfirmButton: false,
         toast: true,
         position: 'top-end'
+        // Sonido desactivado por solicitud del usuario
     });
 }
 
@@ -330,6 +328,7 @@ function mostrarNotificacionError(mensaje) {
         showConfirmButton: false,
         toast: true,
         position: 'top-end'
+        // Sin sonido - comentado para que no sea molesto
     });
 }
 
