@@ -16,7 +16,8 @@ class LeadModel extends Model
         'idusuario',
         'idusuario_registro',
         'referido_por',
-        'estado'
+        'estado',
+        'fecha_modificacion'
     ];
 
     protected $useTimestamps = true;

@@ -8,6 +8,11 @@ class SeguimientoModel extends Model
 {
     protected $table = 'seguimiento'; 
     protected $primaryKey = 'idseguimiento';
-    protected $allowedFields = ['idlead', 'idusuario', 'idmodalidad', 'nota', 'fecha'];
+    protected $allowedFields = [
+        'idlead', 
+        'idusuario', 
+        'idmodalidad', 
+        'nota', 
+        'fecha'];
     protected $useTimestamps = false;
 }

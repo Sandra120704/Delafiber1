@@ -47,7 +47,7 @@ class PersonaController extends BaseController
         if ($q) {
             $model = $model->groupStart()
                 ->like('nombres', $q)
-                ->orLike('apellidos', $q)  // AGREGUÉ APELLIDOS
+                ->orLike('apellidos', $q)  
                 ->orLike('dni', $q)
                 ->orLike('telefono', $q)
                 ->orLike('correo', $q)
@@ -72,7 +72,7 @@ class PersonaController extends BaseController
             'footer' => view('layouts/footer'),
             'departamentos' => $this->departamentoModel->findAll(),
             'distritos' => $this->distritoModel->findAll(),
-            'persona' => null // AGREGUÉ ESTA LÍNEA para evitar errores en la vista
+            'persona' => null 
         ];
 
         return view('personas/crear', $data);
@@ -197,7 +197,7 @@ class PersonaController extends BaseController
         try {
             $idpersona = $this->request->getPost('idpersona');
 
-            // CORRECCIÓN: Reglas de validación más específicas
+            // Reglas de validación específicas
             $rules = [
                 'dni' => [
                     'rules' => $idpersona ? 
@@ -313,8 +313,6 @@ class PersonaController extends BaseController
             ]);
         }
     }
-
-    // CORRECCIÓN: Cambié el nombre del método para que coincida con tu JS
     public function buscardni($dni = "")
     {
         $dni = $this->request->getGet('q');
@@ -333,6 +331,8 @@ class PersonaController extends BaseController
             if ($persona) {
                 return $this->response->setJSON([
                     'success' => true,
+                    'registrado' => true,
+                    'DNI' => $persona['dni'],
                     'nombres' => $persona['nombres'],
                     'apepaterno' => explode(' ', $persona['apellidos'])[0] ?? '',
                     'apematerno' => explode(' ', $persona['apellidos'])[1] ?? '',
@@ -365,6 +365,7 @@ class PersonaController extends BaseController
                     if (isset($decoded_response['first_name'])) {
                         return $this->response->setJSON([
                             'success' => true,
+                            'registrado' => false,
                             'apepaterno' => $decoded_response['first_last_name'] ?? '',
                             'apematerno' => $decoded_response['second_last_name'] ?? '',
                             'nombres' => $decoded_response['first_name'] ?? '',
@@ -386,6 +387,7 @@ class PersonaController extends BaseController
                 'success' => false,
                 'message' => 'Error al consultar el DNI'
             ]);
+            
         }
     }
 
@@ -425,7 +427,7 @@ class PersonaController extends BaseController
         }
     }
 
-    // MÉTODO ADICIONAL PARA BÚSQUEDA AJAX
+    // Metodo de Busqueda de AJAX
     public function buscarAjax()
     {
         $query = $this->request->getGet('q');

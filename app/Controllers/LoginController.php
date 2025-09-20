@@ -8,7 +8,7 @@ class LoginController extends BaseController
 {
     public function index()
     {
-        return view('login/login'); // Asegúrate que la vista exista
+        return view('login/login');
     }
 
     public function auth()
@@ -18,7 +18,7 @@ class LoginController extends BaseController
 
         $model = new UsuarioModel();
         $user = $model->where('usuario', $usuario)
-                      ->where('clave', $clave) // temporal, luego usar hash
+                      ->where('clave', $clave) 
                       ->first();
 
         if($user) {
@@ -40,7 +40,7 @@ class LoginController extends BaseController
 
     public function logout()
     {
-        session()->destroy();  // destruye la sesión del usuario
-        return redirect()->to('login');  // redirige al login
+        session()->destroy();  
+        return redirect()->to('login'); 
     }
 }

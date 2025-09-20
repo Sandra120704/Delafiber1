@@ -276,4 +276,64 @@ class LeadController extends BaseController
         $existe = $this->leadModel->where('idpersona', $idpersona)->first() ? true : false;
         return $this->response->setJSON(['exists' => $existe]);
     }
+
+    public function moverEtapa()
+    {
+        try {
+            $idlead = $this->request->getPost('idlead');
+            $nuevaEtapa = $this->request->getPost('nueva_etapa');
+            $etapaAnterior = $this->request->getPost('etapa_anterior');
+
+            // Validar datos
+            if (!$idlead || !$nuevaEtapa) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Datos incompletos'
+                ]);
+            }
+
+            // Verificar que el lead existe
+            $lead = $this->leadModel->find($idlead);
+            if (!$lead) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Lead no encontrado'
+                ]);
+            }
+
+            // Actualizar la etapa del lead
+            $resultado = $this->leadModel->update($idlead, [
+                'idetapa' => $nuevaEtapa,
+                'fecha_modificacion' => date('Y-m-d H:i:s')
+            ]);
+
+            if ($resultado) {
+                // Registrar actividad en seguimiento
+                $this->seguimientoModel->insert([
+                    'idlead' => $idlead,
+                    'idusuario' => session()->get('idusuario') ?? 1, // Usuario actual o default
+                    'idmodalidad' => 1, // Modalidad default para movimiento
+                    'nota' => "Lead movido de etapa {$etapaAnterior} a etapa {$nuevaEtapa}",
+                    'fecha' => date('Y-m-d H:i:s')
+                ]);
+
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Lead movido exitosamente'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Error al actualizar el lead'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Error moviendo lead: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error interno del servidor'
+            ]);
+        }
+    }
 }

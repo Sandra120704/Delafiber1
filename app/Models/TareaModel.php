@@ -104,8 +104,6 @@ public function obtenerTareasConDetalles($filtros = [])
 
     return $builder->get()->getResultArray();
 }
-
-
     // Obtener tareas del día actual
     public function obtenerTareasHoy($usuarioId = null)
 {
@@ -127,7 +125,6 @@ public function obtenerTareasConDetalles($filtros = [])
 
     return $builder->get()->getResultArray();
 }
-
 
     // Obtener tareas pendientes por usuario
     public function obtenerTareasPendientes($usuarioId)

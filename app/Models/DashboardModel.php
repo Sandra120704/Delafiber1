@@ -6,9 +6,8 @@ use CodeIgniter\Model;
 
 class DashboardModel extends Model
 {
-    protected $table = 'leads'; // Tabla principal
+    protected $table = 'leads'; 
 
-    // Obtiene el total de leads registrados
     public function getTotalLeads(): int
     {
         return $this->db->table('leads')->countAllResults();

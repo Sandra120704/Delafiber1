@@ -24,7 +24,7 @@ class DashboardController extends BaseController
 
     public function index()
     {
-        // Datos para las tarjetas KPI
+        // Datos Que saldra en las tarjetas Kpis
         $data = [
             'total_leads' => $this->dashboardModel->getTotalLeads(),
             'leads_convertidos' => $this->dashboardModel->getLeadsConvertidosEsteMes(),
@@ -65,4 +65,3 @@ class DashboardController extends BaseController
         return $this->response->setJSON($data);
     }
 }
-?>

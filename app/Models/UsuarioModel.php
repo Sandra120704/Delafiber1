@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use Config\Database;
 
 class UsuarioModel extends Model
 {
     protected $table = 'usuarios';
     protected $primaryKey = 'idusuario';
     protected $allowedFields = ['usuario', 'clave', 'idrol', 'idpersona', 'activo'];
-    protected $useTimestamps = false; // Tu tabla no parece tener estas columnas
-    
-    // Método principal para la vista de usuarios (versión simplificada)
+    protected $useTimestamps = false; 
+    protected $db;
     public function getUsuariosConDetalle()
     {
         // Primero prueba una query simple
-        $db = \Config\Database::connect();
+       $db = Database::connect();
         
         $query = "
             SELECT 
@@ -48,12 +48,11 @@ class UsuarioModel extends Model
         }
     }
     
-    // Método de respaldo básico
     public function getUsuariosBasico()
     {
         $usuarios = $this->findAll();
         
-        // Agregar campos faltantes con valores por defecto
+        // se Agrega campos faltantes con valores por defecto
         foreach ($usuarios as &$usuario) {
             $usuario['username'] = $usuario['usuario'] ?? '';
             $usuario['nombre_persona'] = 'Usuario ID: ' . $usuario['idusuario'];
@@ -69,7 +68,7 @@ class UsuarioModel extends Model
         return $usuarios;
     }
     
-    // Método existente actualizado
+    // Método  actualizar
     public function obtenerUsuariosConNombres()
     {
         return $this->select('u.*, CONCAT(p.nombres, " ", p.apellidos) as nombre_completo')
@@ -77,7 +76,7 @@ class UsuarioModel extends Model
                     ->findAll();
     }
     
-    // Método para obtener usuario con detalles
+    // Método obtener usuario con detalles
     public function obtenerUsuarioCompleto($id)
     {
         return $this->select('

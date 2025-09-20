@@ -150,7 +150,7 @@ document.getElementById('leadForm').addEventListener('submit', function(e){
             confirmButtonColor: "#007bff"
         });
     } else {
-        e.preventDefault(); // detener envío normal
+        e.preventDefault(); 
         Swal.fire({
             icon: "question",
             title: "¿Guardar Lead?",
@@ -162,7 +162,7 @@ document.getElementById('leadForm').addEventListener('submit', function(e){
             cancelButtonColor: "#6c757d"
         }).then((result) => {
             if (result.isConfirmed) {
-                e.target.submit(); // ahora sí enviamos el form
+                e.target.submit(); 
             }
         });
     }

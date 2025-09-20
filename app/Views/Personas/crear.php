@@ -26,11 +26,13 @@
                   <div class="row g-3">
                       <div class="col-md-6 form-group">
                           <label for="apellidos" class="form-label">Apellidos</label>
-                          <input type="text" class="form-control" name="apellidos" id="apellidos" required value="<?= esc($persona['apellidos'] ?? '') ?>">
+                          <input type="text" class="form-control" name="apellidos" id="apellidos" required 
+                            value="<?= esc($persona['apellidos'] ?? '') ?>" readonly>
                       </div>
                       <div class="col-md-6 form-group">
                           <label for="nombres" class="form-label">Nombres</label>
-                          <input type="text" class="form-control" name="nombres" id="nombres" required value="<?= esc($persona['nombres'] ?? '') ?>">
+                          <input type="text" class="form-control" name="nombres" id="nombres" required 
+                            value="<?= esc($persona['nombres'] ?? '') ?>" readonly>
                       </div>
                   </div>
 

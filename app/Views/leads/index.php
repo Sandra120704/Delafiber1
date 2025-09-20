@@ -9,48 +9,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-<style>
-    .tarea-badge {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        min-width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        font-size: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .kanban-card {
-        position: relative;
-    }
-    .tarea-indicador {
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 10px;
-        margin: 2px 0;
-    }
-    .lead-actions {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    .kanban-card:hover .lead-actions {
-        opacity: 1;
-    }
-    .floating-task-summary {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1050;
-        min-width: 300px;
-    }
-</style>
+<!-- SortableJS para Drag & Drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
 <div class="p-8 bg-gray-100 min-h-screen font-sans antialiased">
     <!-- Resumen flotante de tareas -->
-    <div class="floating-task-summary">
+<!--     <div class="floating-task-summary">
         <div class="card border-0 shadow-lg">
             <div class="card-header bg-primary text-white">
                 <h6 class="mb-0"><i class="fas fa-tasks"></i> Resumen de Tareas</h6>
@@ -88,7 +52,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Cabecera del tablero -->
     <div class="flex justify-between items-center mb-8">
@@ -106,50 +70,69 @@
         </div>
     </div>
 
-    <!-- Contenedor del Kanban -->
+    <!-- Contenedor del Kanban con Drag & Drop -->
     <div class="kanban-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <?php foreach ($etapas as $etapa): ?>
-        <div class="kanban-column bg-white rounded-xl shadow-lg p-6" id="kanban-column-<?= $etapa['idetapa'] ?>" data-etapa="<?= $etapa['idetapa'] ?>">
-            <div class="kanban-stage text-center font-semibold text-lg mb-4 text-gray-700"><?= htmlspecialchars($etapa['nombre']) ?></div>
-            <?php
-              $leadsEtapa = $leadsPorEtapa[$etapa['idetapa']] ?? [];
-            ?>
-            <?php foreach ($leadsEtapa as $lead): ?>
-              <div class="kanban-card bg-white rounded-lg shadow-md mb-4 p-4 cursor-pointer transition-transform transform hover:scale-105 hover:shadow-xl" 
-                    id="kanban-card-<?= $lead['idlead'] ?>" 
-                    data-id="<?= $lead['idlead'] ?>" 
-                    draggable="true" 
-                    style="border-left:5px solid <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;">
-                
-                <!-- Badge de tareas pendientes -->
-                <span class="tarea-badge bg-warning text-dark d-none" id="badge-tareas-<?= $lead['idlead'] ?>">0</span>
-                
-                <div class="card-title text-sm font-bold text-gray-900 mb-1"><?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?></div>
-                <div class="card-info text-xs text-gray-500">
-                  <small class="block truncate"><?= htmlspecialchars($lead['telefono']) ?> | <?= htmlspecialchars($lead['correo']) ?></small>
-                  <small class="block truncate"><?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></small>
-                  <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario'] ?? 'Sin asignar') ?></small>
-                </div>
+        <div class="kanban-column bg-white rounded-xl shadow-lg p-6 sortable-container" 
+             id="kanban-column-<?= $etapa['idetapa'] ?>" 
+             data-etapa="<?= $etapa['idetapa'] ?>">
+             
+            <div class="kanban-stage text-center font-semibold text-lg mb-4 text-gray-700 flex items-center justify-between">
+                <span><?= htmlspecialchars($etapa['nombre']) ?></span>
+                <span class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full" id="count-<?= $etapa['idetapa'] ?>">
+                    <?= count($leadsPorEtapa[$etapa['idetapa']] ?? []) ?>
+                </span>
+            </div>
+            
+            <!-- Indicador de drop -->
+            <div class="drop-indicator" id="drop-indicator-<?= $etapa['idetapa'] ?>"></div>
+            
+            <!-- Container para las cards (aquí van los leads) -->
+            <div class="leads-container" id="leads-container-<?= $etapa['idetapa'] ?>">
+                <?php
+                $leadsEtapa = $leadsPorEtapa[$etapa['idetapa']] ?? [];
+                foreach ($leadsEtapa as $lead): 
+                ?>
+                  <div class="kanban-card bg-white rounded-lg shadow-md mb-4 p-4 cursor-pointer transition-transform transform hover:scale-105 hover:shadow-xl" 
+                        id="kanban-card-<?= $lead['idlead'] ?>" 
+                        data-id="<?= $lead['idlead'] ?>" 
+                        data-etapa="<?= $etapa['idetapa'] ?>"
+                        draggable="true" 
+                        onclick="abrirDetalleLeadModal(<?= $lead['idlead'] ?>)"
+                        style="border-left:5px solid <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;">
+                    
+                    <!-- Badge de tareas pendientes -->
+                    <span class="tarea-badge bg-warning text-dark d-none" id="badge-tareas-<?= $lead['idlead'] ?>">0</span>
+                    
+                    <div class="card-title text-sm font-bold text-gray-900 mb-1">
+                        <?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>
+                    </div>
+                    <div class="card-info text-xs text-gray-500">
+                      <small class="block truncate"><?= htmlspecialchars($lead['telefono']) ?> | <?= htmlspecialchars($lead['correo']) ?></small>
+                      <small class="block truncate"><?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></small>
+                      <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario'] ?? 'Sin asignar') ?></small>
+                    </div>
 
-                <!-- Indicadores de tareas -->
-                <div class="mt-2" id="tareas-info-<?= $lead['idlead'] ?>">
-                    <!-- Se llena dinámicamente con JS -->
-                </div>
+                    <!-- Indicadores de tareas -->
+                    <div class="mt-2" id="tareas-info-<?= $lead['idlead'] ?>">
+                        <!-- Se llena dinámicamente con JS -->
+                    </div>
 
-                <!-- Acciones rápidas -->
-                <div class="lead-actions mt-3 d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-primary flex-1" onclick="event.stopPropagation(); crearTareaRapida(<?= $lead['idlead'] ?>, '<?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>')">
-                        <i class="fas fa-plus"></i> Tarea
-                    </button>
-                    <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); verTareasLead(<?= $lead['idlead'] ?>)">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); completarTareaPendiente(<?= $lead['idlead'] ?>)">
-                        <i class="fas fa-check"></i>
-                    </button>
-                </div>
-              </div>
-            <?php endforeach; ?>
+                    <!-- Acciones rápidas -->
+                    <div class="lead-actions mt-3 d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-primary flex-1" onclick="event.stopPropagation(); crearTareaRapida(<?= $lead['idlead'] ?>, '<?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>')">
+                            <i class="fas fa-plus"></i> Tarea
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); verTareasLead(<?= $lead['idlead'] ?>)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); completarTareaPendiente(<?= $lead['idlead'] ?>)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+            </div>
             
             <button class="btn btn-sm btn-outline-primary w-full mt-2 text-blue-500 hover:bg-blue-500 hover:text-white transition duration-300 rounded-lg border border-blue-500 py-2" onclick="crearLeadEnEtapa(<?= $etapa['idetapa'] ?>)">
                 + Agregar Lead
@@ -158,14 +141,28 @@
       <?php endforeach; ?>
     </div>
 
-    <!-- Modal de Detalle (el contenido se carga con JS) -->
-    <div class="modal fade" id="modalLeadDetalle" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-xl shadow-2xl"></div>
+    <!-- Modal de Detalle de Lead (MEJORADO) -->
+    <div class="modal fade" id="modalLeadDetalle" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header modal-header-gradient">
+            <h5 class="modal-title">
+              <i class="fas fa-user-circle"></i> Detalle del Lead
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="detalle-lead-content">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Modal de Creación de Lead -->
+    <!-- Modal de Creación de Lead (SIN CAMBIOS) -->
     <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-xl shadow-2xl border-t-4 border-blue-500">
@@ -300,379 +297,20 @@
     </div>
 </div>
 
-<?= $footer ?>
 
 <script>
     const base_url = "<?= rtrim(base_url(), '/') ?>";
+    console.log('Base URL configurada:', base_url); // Debug
 </script>
 
+<!-- Scripts especializados -->
+<script src="<?= base_url('js/leadsJS/kanban.js') ?>"></script>
+<script src="<?= base_url('js/leadsJS/tareas.js') ?>"></script>
+<script src="<?= base_url('js/leadsJS/detalles.js') ?>"></script>
+
+<!-- Librerías externas -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-// Variables globales
-let tareasData = {};
-
-// Cargar datos al inicializar
-$(document).ready(function() {
-    cargarResumenTareas();
-    cargarTareasLeads();
-    
-    // Auto-refresh cada 3 minutos
-    setInterval(() => {
-        cargarResumenTareas();
-        cargarTareasLeads();
-    }, 180000);
-    
-    // Configurar fecha por defecto para mañana
-    const mañana = new Date();
-    mañana.setDate(mañana.getDate() + 1);
-    mañana.setHours(9, 0, 0, 0);
-    $('#fecha-personalizada').val(mañana.toISOString().slice(0, 16));
-});
-
-// Cargar resumen de tareas
-function cargarResumenTareas() {
-    $.get(`${base_url}/tareas/resumen`)
-        .done(function(data) {
-            $('#tareas-hoy').text(data.pendientes_hoy || 0);
-            $('#tareas-vencidas').text(data.vencidas || 0);
-            $('#tareas-semana').text(data.total_semana || 0);
-            $('#tareas-completadas').text(data.completadas_hoy || 0);
-        })
-        .fail(function() {
-            console.log('Error cargando resumen de tareas');
-        });
-}
-
-// Cargar tareas de todos los leads
-function cargarTareasLeads() {
-    $('.kanban-card').each(function() {
-        const idlead = $(this).data('id');
-        cargarTareasLead(idlead);
-    });
-}
-
-// Cargar tareas de un lead específico
-function cargarTareasLead(idlead) {
-    $.get(`${base_url}/tareas/obtenerTareasPorLead/${idlead}`)
-        .done(function(response) {
-            if (response.success) {
-                mostrarInfoTareas(idlead, response.tareas);
-            }
-        })
-        .fail(function() {
-            console.log(`Error cargando tareas del lead ${idlead}`);
-        });
-}
-
-// Mostrar información de tareas en la card del lead
-function mostrarInfoTareas(idlead, tareas) {
-    const pendientes = tareas.filter(t => ['pendiente', 'en_progreso'].includes(t.estado));
-    const vencidas = pendientes.filter(t => new Date(t.fecha_vencimiento) < new Date());
-    const proximaTarea = pendientes.sort((a, b) => new Date(a.fecha_vencimiento) - new Date(b.fecha_vencimiento))[0];
-    
-    // Badge de tareas pendientes
-    const badge = $(`#badge-tareas-${idlead}`);
-    if (pendientes.length > 0) {
-        badge.text(pendientes.length).removeClass('d-none');
-        if (vencidas.length > 0) {
-            badge.removeClass('bg-warning').addClass('bg-danger text-white');
-        }
-    } else {
-        badge.addClass('d-none');
-    }
-    
-    // Información de tareas en la card
-    let infoHtml = '';
-    if (proximaTarea) {
-        const esVencida = new Date(proximaTarea.fecha_vencimiento) < new Date();
-        const colorClase = esVencida ? 'bg-danger text-white' : getColorPrioridad(proximaTarea.prioridad);
-        
-        infoHtml = `
-            <div class="tarea-indicador ${colorClase}">
-                <i class="fas fa-${getIconoTipo(proximaTarea.tipo_tarea)}"></i>
-                ${proximaTarea.titulo}
-                <small class="d-block">${formatearFechaCorta(proximaTarea.fecha_vencimiento)}</small>
-            </div>
-        `;
-    }
-    
-    $(`#tareas-info-${idlead}`).html(infoHtml);
-}
-
-// Abrir modal de tarea rápida
-function crearTareaRapida(idlead, nombreLead) {
-    $('#tarea-idlead').val(idlead);
-    $('#tarea-lead-nombre').text(nombreLead);
-    
-    // Limpiar formulario
-    $('#formTareaRapida')[0].reset();
-    $('#tarea-idlead').val(idlead); // Restaurar después del reset
-    
-    $('#modalTareaRapida').modal('show');
-}
-
-// Guardar tarea rápida
-function guardarTareaRapida() {
-    // Calcular fecha de vencimiento según selección
-    const vencimiento = $('#select-vencimiento').val();
-    let fechaVencimiento = new Date();
-    
-    switch(vencimiento) {
-        case '1h':
-            fechaVencimiento.setHours(fechaVencimiento.getHours() + 1);
-            break;
-        case '3h':
-            fechaVencimiento.setHours(fechaVencimiento.getHours() + 3);
-            break;
-        case '1d':
-            fechaVencimiento.setDate(fechaVencimiento.getDate() + 1);
-            fechaVencimiento.setHours(9, 0, 0, 0);
-            break;
-        case '3d':
-            fechaVencimiento.setDate(fechaVencimiento.getDate() + 3);
-            fechaVencimiento.setHours(9, 0, 0, 0);
-            break;
-        case 'custom':
-            fechaVencimiento = new Date($('#fecha-personalizada').val());
-            break;
-    }
-    
-    // Actualizar campo de fecha
-    if (vencimiento !== 'custom') {
-        $('input[name="fecha_vencimiento"]').val(fechaVencimiento.toISOString().slice(0, 16));
-    }
-    
-    const formData = new FormData($('#formTareaRapida')[0]);
-    
-    $.ajax({
-        url: `${base_url}/tareas/crear`,
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false
-    })
-    .done(function(response) {
-        if (response.success) {
-            $('#modalTareaRapida').modal('hide');
-            Swal.fire({
-                icon: 'success',
-                title: '¡Tarea creada!',
-                text: 'La tarea se creó exitosamente',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            
-            // Recargar tareas del lead
-            const idlead = $('#tarea-idlead').val();
-            cargarTareasLead(idlead);
-            cargarResumenTareas();
-        } else {
-            Swal.fire('Error', response.message || 'No se pudo crear la tarea', 'error');
-        }
-    })
-    .fail(function() {
-        Swal.fire('Error', 'Error de conexión', 'error');
-    });
-}
-
-// Ver todas las tareas de un lead
-function verTareasLead(idlead) {
-    $.get(`${base_url}/tareas/obtenerTareasPorLead/${idlead}`)
-        .done(function(response) {
-            if (response.success) {
-                mostrarTareasEnModal(response.tareas);
-                $('#modalTareasLead').modal('show');
-            }
-        });
-}
-
-// Mostrar tareas en modal
-function mostrarTareasEnModal(tareas) {
-    let html = '';
-    
-    if (tareas.length === 0) {
-        html = '<div class="text-center text-muted"><i class="fas fa-inbox fa-3x mb-3"></i><p>No hay tareas para este lead</p></div>';
-    } else {
-        // Agrupar por estado
-        const pendientes = tareas.filter(t => ['pendiente', 'en_progreso'].includes(t.estado));
-        const completadas = tareas.filter(t => t.estado === 'completada');
-        
-        if (pendientes.length > 0) {
-            html += '<h6 class="text-warning mb-3"><i class="fas fa-clock"></i> Tareas Pendientes</h6>';
-            pendientes.forEach(tarea => {
-                const esVencida = new Date(tarea.fecha_vencimiento) < new Date();
-                html += `
-                    <div class="card mb-2 ${esVencida ? 'border-danger' : ''}">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">${tarea.titulo}</h6>
-                                    <p class="mb-1 text-muted small">${tarea.descripcion || 'Sin descripción'}</p>
-                                    <small class="text-muted">
-                                        <i class="fas fa-${getIconoTipo(tarea.tipo_tarea)}"></i> ${tarea.tipo_tarea} - 
-                                        ${formatearFecha(tarea.fecha_vencimiento)}
-                                    </small>
-                                </div>
-                                <div class="d-flex gap-1">
-                                    <span class="badge bg-${getColorPrioridad(tarea.prioridad)}">${tarea.prioridad}</span>
-                                    <button class="btn btn-success btn-sm" onclick="completarTareaModal(${tarea.idtarea})">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        
-        if (completadas.length > 0) {
-            html += '<hr><h6 class="text-success mb-3"><i class="fas fa-check-circle"></i> Completadas</h6>';
-            completadas.slice(0, 3).forEach(tarea => {
-                html += `
-                    <div class="card mb-2 bg-light">
-                        <div class="card-body p-2">
-                            <small class="text-muted">
-                                <i class="fas fa-check text-success"></i> ${tarea.titulo} - 
-                                ${formatearFecha(tarea.fecha_completado)}
-                            </small>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-    }
-    
-    $('#contenido-tareas-lead').html(html);
-}
-
-// Completar tarea pendiente más próxima
-function completarTareaPendiente(idlead) {
-    $.get(`${base_url}/tareas/obtenerTareasPorLead/${idlead}`)
-        .done(function(response) {
-            if (response.success) {
-                const pendientes = response.tareas.filter(t => ['pendiente', 'en_progreso'].includes(t.estado));
-                if (pendientes.length > 0) {
-                    const proximaTarea = pendientes.sort((a, b) => new Date(a.fecha_vencimiento) - new Date(b.fecha_vencimiento))[0];
-                    completarTareaRapida(proximaTarea.idtarea, proximaTarea.titulo);
-                } else {
-                    Swal.fire('Info', 'No hay tareas pendientes para este lead', 'info');
-                }
-            }
-        });
-}
-
-// Completar tarea rápida
-function completarTareaRapida(idtarea, titulo) {
-    Swal.fire({
-        title: `¿Completar "${titulo}"?`,
-        input: 'textarea',
-        inputLabel: 'Notas del resultado:',
-        inputPlaceholder: 'Describe qué se logró...',
-        showCancelButton: true,
-        confirmButtonText: 'Completar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${base_url}/tareas/completar/${idtarea}`, {
-                notas_resultado: result.value
-            })
-            .done(function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Completada!',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    cargarTareasLeads();
-                    cargarResumenTareas();
-                }
-            });
-        }
-    });
-}
-
-// Completar tarea desde modal
-function completarTareaModal(idtarea) {
-    completarTareaRapida(idtarea, 'tarea');
-}
-
-// Manejar cambio de vencimiento
-function manejarVencimiento() {
-    const valor = $('#select-vencimiento').val();
-    if (valor === 'custom') {
-        $('#fecha-personalizada').removeClass('d-none');
-    } else {
-        $('#fecha-personalizada').addClass('d-none');
-    }
-}
-
-// Abrir modal de nueva tarea general
-function abrirModalTarea() {
-    // Redirigir a página de tareas o abrir modal más completo
-    window.open(`${base_url}/tareas`, '_blank');
-}
-
-// Ver tablero completo de tareas
-function verTableroTareas() {
-    window.open(`${base_url}/tareas`, '_blank');
-}
-
-// Crear lead en etapa específica
-function crearLeadEnEtapa(idetapa) {
-    $('#idetapa').val(idetapa);
-    $('#leadModal').modal('show');
-}
-
-// Funciones auxiliares
-function getColorPrioridad(prioridad) {
-    const colores = {
-        'urgente': 'danger',
-        'alta': 'warning',
-        'media': 'info',
-        'baja': 'secondary'
-    };
-    return colores[prioridad] || 'secondary';
-}
-
-function getIconoTipo(tipo) {
-    const iconos = {
-        'llamada': 'phone',
-        'visita': 'map-marker-alt',
-        'email': 'envelope',
-        'whatsapp': 'comments',
-        'reunion': 'users',
-        'seguimiento': 'eye',
-        'documentacion': 'file-alt',
-        'otro': 'tasks'
-    };
-    return iconos[tipo] || 'tasks';
-}
-
-function formatearFecha(fecha) {
-    return new Date(fecha).toLocaleString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-function formatearFechaCorta(fecha) {
-    const ahora = new Date();
-    const fechaTarea = new Date(fecha);
-    const diffDias = Math.ceil((fechaTarea - ahora) / (1000 * 60 * 60 * 24));
-    
-    if (diffDias === 0) return 'Hoy';
-    if (diffDias === 1) return 'Mañana';
-    if (diffDias === -1) return 'Ayer';
-    if (diffDias < 0) return `${Math.abs(diffDias)}d atrás`;
-    return `${diffDias}d`;
-}
-</script>
-
-<script type="module" src="<?= base_url('js/leadsJS/index.js') ?>"></script>
+<?= $footer ?>

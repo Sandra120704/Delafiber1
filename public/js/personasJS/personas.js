@@ -20,42 +20,86 @@ document.addEventListener('DOMContentLoaded', () => {
         activarBotonesConvertirLead();
     }
 
-    btnBuscar?.addEventListener('click', async () => {
-        const dni = dniInput.value.trim();
-        if (!dni || dni.length !== 8 || isNaN(dni)) {
-            Swal.fire({ icon: 'warning', text: 'Ingrese un DNI válido de 8 dígitos', toast: true, position: 'bottom-end', timer: 3000, showConfirmButton: false });
+btnBuscar?.addEventListener('click', async () => {
+    const dni = dniInput.value.trim();
+    if (!dni || dni.length !== 8 || isNaN(dni)) {
+        Swal.fire({ 
+            icon: 'warning', 
+            text: 'Ingrese un DNI válido de 8 dígitos',
+            toast: true, 
+            position: 'bottom-end', 
+            timer: 3000, 
+            showConfirmButton: false 
+        });
+        return;
+    }
+
+    buscando.classList.remove('d-none');
+    btnBuscar.disabled = true;
+
+    try {
+        const res = await fetch(`${BASE_URL}personas/buscardni?q=${dni}`);
+        if (!res.ok) throw new Error('Error en la consulta');
+
+        const data = await res.json();
+
+        if (!data.success) {
+            apellidosInput.value = '';
+            nombresInput.value = '';
+            Swal.fire({
+                icon: 'info',
+                text: data.message || 'No se encontró la persona',
+                toast: true,
+                position: 'bottom-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
             return;
         }
 
-        buscando.classList.remove('d-none');
-        btnBuscar.disabled = true;
+        if (data.registrado) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Persona ya registrada',
+                text: `El DNI ${dni} ya está registrado como: ${data.nombres} ${data.apepaterno} ${data.apematerno}`,
+                toast: true,
+                position: 'bottom-end',
+                timer: 4000,
+                showConfirmButton: false
+            });
 
-        try {
-            const res = await fetch(`${BASE_URL}personas/buscardni?q=${dni}`);
-            if (res.status === 404) {
-                apellidosInput.value = '';
-                nombresInput.value = '';
-                Swal.fire({ icon: 'info', text: 'No se encontró la persona con ese DNI', toast: true, position: 'bottom-end', timer: 3000, showConfirmButton: false });
-                return;
-            }
-            if (!res.ok) throw new Error('Error en la consulta');
+            apellidosInput.value = '';
+            nombresInput.value = '';
 
-            const data = await res.json();
-            if (data.success) {
-                apellidosInput.value = `${data.apepaterno} ${data.apematerno}`;
-                nombresInput.value = data.nombres;
-            } else {
-                apellidosInput.value = '';
-                nombresInput.value = '';
-                Swal.fire({ icon: 'info', text: data.message || 'No se encontró la persona', toast: true, position: 'bottom-end', timer: 3000, showConfirmButton: false });
-            }
-        } catch {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al consultar el DNI', toast: true, position: 'bottom-end', timer: 3000, showConfirmButton: false });
-        } finally {
-            buscando.classList.add('d-none');
-            btnBuscar.disabled = false;
+        } else {
+            apellidosInput.value = `${data.apepaterno} ${data.apematerno}`;
+            nombresInput.value = data.nombres;
+
+            Swal.fire({
+                icon: 'success',
+                text: 'Persona encontrada. Complete y guarde para registrarla.',
+                toast: true,
+                position: 'bottom-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
         }
-    });
+
+    } catch (err) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al consultar el DNI',
+            toast: true,
+            position: 'bottom-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    } finally {
+        buscando.classList.add('d-none');
+        btnBuscar.disabled = false;
+    }
+});
 
     formPersona?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -82,9 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 if (data.errors) {
                     const mensajes = Object.values(data.errors).join('<br>');
-                    Swal.fire({ title: 'Errores de validación', html: mensajes, icon: 'error' });
+                    Swal.fire({ 
+                        title: 'Errores de validación', 
+                        html: mensajes, 
+                        icon: 'error' });
                 } else {
-                    Swal.fire({ title: 'Error', text: data.message, icon: 'error' });
+                    Swal.fire({ 
+                        title: 'Error', 
+                        text: data.message, 
+                        icon: 'error' });
                 }
             }
         } catch {
@@ -126,8 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const url = `${BASE_URL}persona/guardarLead`;
                     const formData = new FormData(leadForm);
-                    
-                    // --- Inicio de la lógica de corrección del error de llave foránea ---
+
                     const origenSelect = leadForm.querySelector('#origenSelect');
                     const selectedOption = origenSelect.options[origenSelect.selectedIndex];
                     const tipo = selectedOption ? selectedOption.dataset.tipo : '';
@@ -142,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: el campo se llama referido_por
                         formData.set('referido_por', '');
                     }
-                    // --- Fin de la lógica de corrección ---
 
                     try {
                         const res = await fetch(url, {
@@ -160,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         ? BASE_URL + 'leads/index'
                                         : BASE_URL + '/leads/index';
 
-                                    console.log("Redirigiendo a:", redirectUrl); // 👈 Te ayudará a depurar
+                                    console.log("Redirigiendo a:", redirectUrl); 
                                     window.location.href = redirectUrl;
                                 });
                             }

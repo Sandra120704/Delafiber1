@@ -9,7 +9,7 @@
         <div class="col-md-3 stretch-card grid-margin">
             <div class="card bg-gradient-primary card-img-holder text-white">
                 <div class="card-body">
-                    <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" />
+                    <!-- <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" /> -->
                     <h4 class="font-weight-normal mb-3">Total Leads <i class="bx bx-trending-up mdi-24px float-right"></i></h4>
                     <h2 class="mb-5"><?= $total_leads ?? 0 ?></h2>
                     <h6 class="card-text">Leads registrados</h6>
@@ -20,7 +20,7 @@
         <div class="col-md-3 stretch-card grid-margin">
             <div class="card bg-gradient-success card-img-holder text-white">
                 <div class="card-body">
-                    <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" />
+                    <!-- <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" /> -->
                     <h4 class="font-weight-normal mb-3">Conversiones <i class="bx bx-check-circle mdi-24px float-right"></i></h4>
                     <h2 class="mb-5"><?= $leads_convertidos ?? 0 ?></h2>
                     <h6 class="card-text">Este mes</h6>
@@ -31,7 +31,7 @@
         <div class="col-md-3 stretch-card grid-margin">
             <div class="card bg-gradient-warning card-img-holder text-white">
                 <div class="card-body">
-                    <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" />
+                    <!-- <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" /> -->
                     <h4 class="font-weight-normal mb-3">Campañas Activas <i class="bx bx-bullseye mdi-24px float-right"></i></h4>
                     <h2 class="mb-5"><?= $campanias_activas ?? 0 ?></h2>
                     <h6 class="card-text">En ejecución</h6>
@@ -42,7 +42,7 @@
         <div class="col-md-3 stretch-card grid-margin">
             <div class="card bg-gradient-info card-img-holder text-white">
                 <div class="card-body">
-                    <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" />
+                    <!-- <img src="<?= base_url('images/circle.svg') ?>" class="card-img-absolute" alt="circle-image" /> -->
                     <h4 class="font-weight-normal mb-3">Tareas Pendientes <i class="bx bx-list-check mdi-24px float-right"></i></h4>
                     <h2 class="mb-5"><?= $tareas_pendientes ?? 0 ?></h2>
                     <h6 class="card-text">Por completar</h6>

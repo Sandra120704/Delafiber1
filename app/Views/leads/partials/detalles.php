@@ -1,5 +1,5 @@
 <!-- Cabecera del modal -->
-<div class="modal-header">
+<div class="modal-header" id="modalLeadDetalle">
     <h5 class="modal-title">
         <?= esc($lead['nombres'] ?? '-') ?> <?= esc($lead['apellidos'] ?? '-') ?>
     </h5>

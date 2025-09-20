@@ -6,6 +6,7 @@ use App\Models\TareaModel;
 use App\Models\LeadModel;
 use App\Models\PersonaModel;
 use App\Models\UsuarioModel;
+use Config\Database;
 
 class TareaController extends BaseController
 {
@@ -13,6 +14,7 @@ class TareaController extends BaseController
     protected $leadModel;
     protected $personaModel;
     protected $usuarioModel;
+    protected $db;
 
     public function __construct()
     {
@@ -20,15 +22,15 @@ class TareaController extends BaseController
         $this->leadModel = new LeadModel();
         $this->personaModel = new PersonaModel();
         $this->usuarioModel = new UsuarioModel();
+        $this->db           = Database::connect();
     }
 
-    // Vista de calendario de tareas
     public function calendario()
     {
         $mes = $this->request->getVar('mes') ?? date('m');
         $anio = $this->request->getVar('anio') ?? date('Y');
 
-        $db = \Config\Database::connect();
+        $db = Database::connect();
         $builder = $db->table('tareas t');
         $builder->select('
             t.*,
@@ -58,8 +60,8 @@ class TareaController extends BaseController
         $filtro = $this->request->getVar('filtro') ?? 'todas';
         $usuarioId = session()->get('idusuario');
 
-        // Obtener tareas con información de leads y personas
-        $db = \Config\Database::connect();
+        // Obtener tareas con las informaciones de leads y personas
+        $db = Database::connect();
         $builder = $db->table('tareas t');
         $builder->select('
             t.*,
@@ -315,7 +317,7 @@ class TareaController extends BaseController
     // Método auxiliar para obtener leads con personas
     private function obtenerLeadsParaSelect()
     {
-        $db = \Config\Database::connect();
+        $db = Database::connect();
         $builder = $db->table('leads l');
         $builder->select('l.idlead, p.nombres, p.apellidos, p.telefono');
         $builder->join('personas p', 'l.idpersona = p.idpersona');

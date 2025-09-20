@@ -14,7 +14,7 @@ class MedioController extends BaseController
 
     public function guardarMedio()
     {
-        $data = $this->request->getJSON(true); // recibe JSON
+        $data = $this->request->getJSON(true); 
         if (empty($data['nombre'])) {
             return $this->response->setJSON(['success' => false, 'message' => 'El nombre es obligatorio']);
         }

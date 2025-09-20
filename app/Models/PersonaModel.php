@@ -26,7 +26,6 @@ class PersonaModel extends Model
     
     protected $useTimestamps = false;
     
-    // Validaciones a nivel de modelo
     protected $validationRules = [
         'dni' => 'required|exact_length[8]|is_unique[personas.dni,idpersona,{idpersona}]',
         'nombres' => 'required|max_length[100]',
@@ -73,10 +72,8 @@ class PersonaModel extends Model
     protected $afterFind = [];
     protected $beforeDelete = [];
     protected $afterDelete = [];
-    
-    /**
-     * Buscar personas por término de búsqueda
-     */
+
+    // Buscar personas por término de búsqueda
     public function buscarPersonas($termino)
     {
         return $this->like('nombres', $termino)
@@ -86,10 +83,8 @@ class PersonaModel extends Model
                    ->orLike('correo', $termino)
                    ->findAll();
     }
-    
-    /**
-     * Obtener persona con información del distrito
-     */
+
+     //Obtener persona con información del distrito
     public function getPersonaConDistrito($idpersona)
     {
         return $this->select('personas.*, distritos.nombre as distrito_nombre, provincias.nombre as provincia_nombre, departamentos.nombre as departamento_nombre')
@@ -99,9 +94,8 @@ class PersonaModel extends Model
                    ->find($idpersona);
     }
     
-    /**
-     * Verificar si el DNI ya existe
-     */
+    
+    //Verificar si el DNI ya existe
     public function dniExiste($dni, $excluirId = null)
     {
         $builder = $this->where('dni', $dni);

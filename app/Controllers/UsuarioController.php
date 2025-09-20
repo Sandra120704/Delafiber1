@@ -38,11 +38,10 @@ class UsuarioController extends BaseController
             return view('usuarios/index', $data);
             
         } catch (\Exception $e) {
-            // Debug temporal
             echo "Error: " . $e->getMessage();
             echo "<br>Probando query básica:";
             
-            $db = \Config\Database::connect();
+            $db = Database::connect();
             $query = $db->query("SELECT idusuario, usuario FROM usuarios LIMIT 3");
             $resultados = $query->getResultArray();
             
@@ -73,9 +72,8 @@ class UsuarioController extends BaseController
     public function guardar()
     {
         $rules = [
-            'usuario' => 'required|min_length[4]|is_unique[usuarios.usuario]', // Cambié username por usuario
-            'clave' => 'required|min_length[6]', // Cambié password por clave
-            'idrol' => 'required|integer',
+            'usuario' => 'required|min_length[4]|is_unique[usuarios.usuario]',
+            'clave' => 'required|min_length[6]', 
             'idpersona' => 'permit_empty|integer'
         ];
 
@@ -151,7 +149,6 @@ class UsuarioController extends BaseController
             'idpersona' => 'permit_empty|integer'
         ];
 
-        // Solo validar contraseña si se proporciona
         if ($this->request->getVar('clave')) {
             $rules['clave'] = 'min_length[6]';
         }
@@ -172,7 +169,6 @@ class UsuarioController extends BaseController
                 'activo' => $this->request->getVar('activo') ? 1 : 0
             ];
 
-            // Solo actualizar contraseña si se proporciona
             if ($this->request->getVar('clave')) {
                 $data['clave'] = password_hash($this->request->getVar('clave'), PASSWORD_DEFAULT);
             }
@@ -298,7 +294,7 @@ class UsuarioController extends BaseController
         }
 
         // Obtener estadísticas adicionales
-        $db = \Config\Database::connect();
+        $db = Database::connect();
         
         $estadisticas = [
             'leads_mes_actual' => $db->table('leads')
