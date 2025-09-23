@@ -7,61 +7,81 @@ use App\Models\LeadModel;
 use App\Models\CampanaModel;
 use App\Models\TareaModel;
 
+/**
+ * Controlador principal del Dashboard - Panel de control administrativo
+ * Muestra estadísticas, gráficos y resúmenes importantes del negocio
+ */
 class DashboardController extends BaseController
 {
-    protected $dashboardModel;
-    protected $leadModel;
-    protected $campaniaModel;
-    protected $tareaModel;
+    // Modelos necesarios para obtener datos del dashboard
+    protected $modeloDashboard;
+    protected $modeloLeads;
+    protected $modeloCampanas;
+    protected $modeloTareas;
 
+    /**
+     * Constructor - Inicializa todos los modelos necesarios
+     */
     public function __construct()
     {
-        $this->dashboardModel = new DashboardModel();
-        $this->leadModel = new LeadModel();
-        $this->campaniaModel = new CampanaModel();
-        $this->tareaModel = new TareaModel();
+        // Crear instancias de los modelos que vamos a usar
+        $this->modeloDashboard = new DashboardModel();
+        $this->modeloLeads = new LeadModel();
+        $this->modeloCampanas = new CampanaModel();
+        $this->modeloTareas = new TareaModel();
     }
 
+    /**
+     * Página principal del dashboard
+     * Recopila todos los datos estadísticos y los muestra
+     */
     public function index()
     {
-        // Datos Que saldra en las tarjetas Kpis
-        $data = [
-            'total_leads' => $this->dashboardModel->getTotalLeads(),
-            'leads_convertidos' => $this->dashboardModel->getLeadsConvertidosEsteMes(),
-            'campanias_activas' => $this->dashboardModel->getCampaniasActivas(),
-            'tareas_pendientes' => $this->dashboardModel->getTareasPendientes(),
+        // Preparar todos los datos para mostrar en el dashboard
+        $datosDashboard = [
+            // === TARJETAS DE ESTADÍSTICAS (KPIs) ===
+            'totalLeads' => $this->modeloDashboard->getTotalLeads(),
+            'leadsConvertidos' => $this->modeloDashboard->getLeadsConvertidosEsteMes(),
+            'campanasActivas' => $this->modeloDashboard->getCampaniasActivas(),
+            'tareasPendientes' => $this->modeloDashboard->getTareasPendientes(),
             
-            // Datos para gráficos
-            'pipeline_data' => $this->dashboardModel->getPipelineData(),
-            'campanas_data' => $this->dashboardModel->getCampanasData(),
+            // === INFORMACIÓN PARA GRÁFICOS ===
+            'datosGraficoPipeline' => $this->modeloDashboard->getPipelineData(),
+            'datosGraficoCampanas' => $this->modeloDashboard->getCampanasData(),
             
-            // Actividad reciente
-            'actividad_reciente' => $this->dashboardModel->getActividadReciente(),
+            // === ACTIVIDAD RECIENTE DEL SISTEMA ===
+            'actividadReciente' => $this->modeloDashboard->getActividadReciente(),
             
-            // Rendimiento por usuario
-            'rendimiento_usuarios' => $this->dashboardModel->getRendimientoUsuarios(),
+            // === RENDIMIENTO DE CADA USUARIO ===
+            'rendimientoUsuarios' => $this->modeloDashboard->getRendimientoUsuarios(),
             
-            // Headers y footers
-            'header' => view('layouts/header'),
-            'footer' => view('layouts/footer')
+            // === PLANTILLAS HTML (HEADER Y FOOTER) ===
+            'header' => view('layouts/header'),  // Barra superior de navegación
+            'footer' => view('layouts/footer')   // Pie de página con scripts
         ];
 
-        return view('dashboard/index', $data);
+        // Mostrar la página del dashboard con todos los datos
+        return view('dashboard/index', $datosDashboard);
     }
 
-    // Método para obtener datos vía AJAX para actualización en tiempo real
+    /**
+     * Método para obtener datos del dashboard vía AJAX
+     * Útil para actualizar estadísticas en tiempo real sin recargar la página
+     */
     public function getDashboardData()
     {
-        $data = [
-            'total_leads' => $this->dashboardModel->getTotalLeads(),
-            'leads_convertidos' => $this->dashboardModel->getLeadsConvertidosEsteMes(),
-            'campanias_activas' => $this->dashboardModel->getCampaniasActivas(),
-            'tareas_pendientes' => $this->dashboardModel->getTareasPendientes(),
-            'pipeline_data' => $this->dashboardModel->getPipelineData(),
-            'campanas_data' => $this->dashboardModel->getCampanasData(),
-            'conversion_rate' => $this->dashboardModel->getConversionRate()
+        // Recopilar solo los datos numéricos para actualización rápida
+        $datosActualizados = [
+            'totalLeads' => $this->modeloDashboard->getTotalLeads(),
+            'leadsConvertidos' => $this->modeloDashboard->getLeadsConvertidosEsteMes(),
+            'campanasActivas' => $this->modeloDashboard->getCampaniasActivas(),
+            'tareasPendientes' => $this->modeloDashboard->getTareasPendientes(),
+            'datosGraficoPipeline' => $this->modeloDashboard->getPipelineData(),
+            'datosGraficoCampanas' => $this->modeloDashboard->getCampanasData(),
+            'tasaConversion' => $this->modeloDashboard->getConversionRate()
         ];
 
-        return $this->response->setJSON($data);
+        // Devolver los datos en formato JSON para consumo vía AJAX
+        return $this->response->setJSON($datosActualizados);
     }
 }

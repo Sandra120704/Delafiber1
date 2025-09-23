@@ -1,4 +1,5 @@
-const baseUrl = '<?= base_url() ?>';
+// Obtener la URL base desde la variable global definida en la vista
+const baseUrl = typeof base_url !== 'undefined' ? base_url : '';
 
 $(document).ready(function() {
     // Cambiar estado de tarea
@@ -113,6 +114,23 @@ $(document).ready(function() {
     });
 });
 
+/**
+ * Función para mostrar la vista del calendario de tareas
+ * Redirige a la página del calendario
+ */
 function mostrarCalendario() {
-    window.location.href = `${baseUrl}tareas/calendario`;
+    // Verificar que tenemos la URL base
+    if (!baseUrl) {
+        console.error('Error: URL base no está definida');
+        alert('Error: No se puede acceder al calendario. URL base no configurada.');
+        return;
+    }
+    
+    // Construir la URL completa del calendario (según la ruta definida)
+    const urlCalendario = `${baseUrl}/calendario`;
+    
+    console.log('Redirigiendo al calendario:', urlCalendario);
+    
+    // Redirigir a la vista del calendario
+    window.location.href = urlCalendario;
 }

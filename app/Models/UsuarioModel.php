@@ -3,90 +3,108 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
-use Config\Database;
 
+/**
+ * Modelo para manejar todos los datos de usuarios del sistema
+ * Incluye autenticación, perfiles y estadísticas de rendimiento
+ */
 class UsuarioModel extends Model
 {
-    protected $table = 'usuarios';
-    protected $primaryKey = 'idusuario';
-    protected $allowedFields = ['usuario', 'clave', 'idrol', 'idpersona', 'activo'];
-    protected $useTimestamps = false; 
-    protected $db;
+    // === CONFIGURACIÓN DE LA TABLA ===
+    protected $table = 'usuarios';                    // Nombre de la tabla en la BD
+    protected $primaryKey = 'idusuario';              // Campo clave primaria
+    protected $allowedFields = ['usuario', 'clave', 'idrol', 'idpersona', 'activo']; // Campos que se pueden modificar
+    protected $useTimestamps = false;                 // No usar timestamps automáticos
+    
+    protected $conexionBD;  // Variable para manejar conexiones personalizadas
+
+    /**
+     * Obtiene lista completa de usuarios con información detallada
+     * Incluye nombre de la persona, rol, estadísticas, etc.
+     */
     public function getUsuariosConDetalle()
     {
-        // Primero prueba una query simple
-       $db = Database::connect();
-        
-        $query = "
-            SELECT 
-                u.idusuario,
-                u.usuario as username,
-                u.clave,
-                COALESCE(u.activo, 1) as activo,
-                u.idrol,
-                u.idpersona,
-                COALESCE(CONCAT(p.nombres, ' ', p.apellidos), 'Sin asignar') as nombre_persona,
-                p.correo as email,
-                p.telefono,
-                r.nombre as nombre_rol,
-                r.descripcion as descripcion_rol,
-                0 as total_leads,
-                0 as total_tareas,
-                0 as conversion_rate
-            FROM usuarios u
-            LEFT JOIN personas p ON u.idpersona = p.idpersona
-            LEFT JOIN roles r ON u.idrol = r.idrol
-            ORDER BY u.idusuario
-        ";
-        
         try {
-            return $db->query($query)->getResultArray();
-        } catch (\Exception $e) {
-            // Si falla, usar método básico sin joins
-            log_message('error', 'Error en getUsuariosConDetalle: ' . $e->getMessage());
+            // Usar Query Builder del modelo para la consulta completa
+            return $this->select('
+                usuarios.idusuario,
+                usuarios.usuario as nombreUsuario,
+                usuarios.clave,
+                COALESCE(usuarios.activo, 1) as estadoActivo,
+                usuarios.idrol,
+                usuarios.idpersona,
+                COALESCE(CONCAT(personas.nombres, " ", personas.apellidos), "Sin asignar") as nombrePersona,
+                personas.correo as emailPersona,
+                personas.telefono,
+                roles.nombre as nombreRol,
+                roles.descripcion as descripcionRol,
+                0 as totalLeads,
+                0 as totalTareas,
+                0 as tasaConversion
+            ')
+            ->join('personas', 'usuarios.idpersona = personas.idpersona', 'left')
+            ->join('roles', 'usuarios.idrol = roles.idrol', 'left')
+            ->orderBy('usuarios.idusuario')
+            ->findAll();
+            
+        } catch (\Exception $error) {
+            // Si hay error en la consulta compleja, usar método simple
             return $this->getUsuariosBasico();
         }
     }
     
+    /**
+     * Método de respaldo - Obtiene usuarios con información básica
+     * Se usa cuando falla la consulta principal
+     */
     public function getUsuariosBasico()
     {
-        $usuarios = $this->findAll();
+        // Obtener todos los usuarios de forma simple
+        $listaUsuarios = $this->findAll();
         
-        // se Agrega campos faltantes con valores por defecto
-        foreach ($usuarios as &$usuario) {
-            $usuario['username'] = $usuario['usuario'] ?? '';
-            $usuario['nombre_persona'] = 'Usuario ID: ' . $usuario['idusuario'];
-            $usuario['nombre_rol'] = 'Sin rol';
-            $usuario['activo'] = $usuario['activo'] ?? 1;
-            $usuario['email'] = '';
-            $usuario['telefono'] = '';
-            $usuario['total_leads'] = 0;
-            $usuario['total_tareas'] = 0;
-            $usuario['conversion_rate'] = 0;
+        // Agregar campos faltantes con valores por defecto
+        foreach ($listaUsuarios as &$datosUsuario) {
+            $datosUsuario['nombreUsuario'] = $datosUsuario['usuario'] ?? '';
+            $datosUsuario['nombrePersona'] = 'Usuario ID: ' . $datosUsuario['idusuario'];
+            $datosUsuario['nombreRol'] = 'Sin rol asignado';
+            $datosUsuario['estadoActivo'] = $datosUsuario['activo'] ?? 1;
+            $datosUsuario['emailPersona'] = '';
+            $datosUsuario['telefono'] = '';
+            $datosUsuario['totalLeads'] = 0;
+            $datosUsuario['totalTareas'] = 0;
+            $datosUsuario['tasaConversion'] = 0;
         }
         
-        return $usuarios;
+        return $listaUsuarios;
     }
     
-    // Método  actualizar
+    /**
+     * Obtiene usuarios con nombres completos de las personas
+     * Método optimizado para mostrar listas simples
+     */
     public function obtenerUsuariosConNombres()
     {
-        return $this->select('u.*, CONCAT(p.nombres, " ", p.apellidos) as nombre_completo')
-                    ->join('personas p', 'u.idpersona = p.idpersona', 'left')
+        // Usar el Query Builder del modelo directamente
+        return $this->select('usuarios.*, CONCAT(personas.nombres, " ", personas.apellidos) as nombreCompleto')
+                    ->join('personas', 'usuarios.idpersona = personas.idpersona', 'left')
                     ->findAll();
     }
     
-    // Método obtener usuario con detalles
-    public function obtenerUsuarioCompleto($id)
+    /**
+     * Obtiene información completa de un usuario específico
+     * Incluye todos los datos personales y del rol
+     */
+    public function obtenerUsuarioCompleto($idUsuario)
     {
+        // Usar Query Builder del modelo directamente
         return $this->select('
-            u.*,
-            CONCAT(p.nombres, " ", p.apellidos) as nombre_persona,
-            p.correo, p.telefono, p.direccion,
-            r.nombre as rol_nombre
+            usuarios.*,                                              
+            CONCAT(personas.nombres, " ", personas.apellidos) as nombrePersona,  
+            personas.correo, personas.telefono, personas.direccion,                
+            roles.nombre as nombreRol                             
         ')
-        ->join('personas p', 'u.idpersona = p.idpersona', 'left')
-        ->join('roles r', 'u.idrol = r.idrol', 'left')
-        ->find($id);
+        ->join('personas', 'usuarios.idpersona = personas.idpersona', 'left')    
+        ->join('roles', 'usuarios.idrol = roles.idrol', 'left')               
+        ->find($idUsuario);                                          
     }
 }

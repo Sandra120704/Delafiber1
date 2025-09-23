@@ -17,7 +17,8 @@
             </nav>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary" onclick="mostrarCalendario()">
+            <!-- Botón del calendario con mejor feedback -->
+            <button class="btn btn-outline-primary" onclick="mostrarCalendario()" id="btnCalendario">
                 <i class="bx bx-calendar"></i> Calendario
             </button>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTarea">
@@ -297,13 +298,18 @@
 </div>
 
 <script>
+    // Definir URL base para JavaScript
     const base_url = "<?= rtrim(base_url(), '/') ?>";
 </script>
 
-<script type="module" src="<?= base_url('js/tareaJS/tarea.js') ?>"></script>
+<!-- Cargar jQuery primero -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Luego Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Finalmente nuestro script personalizado -->
+<script src="<?= base_url('js/tareaJS/tarea.js') ?>"></script>
 
 
 
