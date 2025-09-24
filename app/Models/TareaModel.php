@@ -16,10 +16,16 @@ class TareaModel extends Model
     protected $allowedFields = [
         'idlead',
         'idusuario',
+        'titulo',
         'descripcion',
+        'tipo_tarea',
+        'prioridad',
         'fecha_inicio',
         'fecha_fin',
-        'estado'
+        'fecha_vencimiento',
+        'fecha_completado',
+        'estado',
+        'notas_resultado'
     ];
 
     protected $useTimestamps = false;
@@ -27,10 +33,13 @@ class TareaModel extends Model
     protected $validationRules = [
         'idlead' => 'required|integer',
         'idusuario' => 'required|integer',
-        'descripcion' => 'required|min_length[10]|max_length[500]',
-        'fecha_inicio' => 'required|valid_date',
-        'fecha_fin' => 'required|valid_date',
-        'estado' => 'required|in_list[Pendiente,En progreso,Completada]'
+        'titulo' => 'required|min_length[5]|max_length[200]',
+        'descripcion' => 'permit_empty|max_length[1000]',
+        'tipo_tarea' => 'permit_empty|in_list[llamada,whatsapp,email,visita,reunion,seguimiento,documentacion]',
+        'prioridad' => 'permit_empty|in_list[baja,media,alta,urgente]',
+        'fecha_inicio' => 'permit_empty|valid_date',
+        'fecha_fin' => 'permit_empty|valid_date',
+        'estado' => 'permit_empty|in_list[Pendiente,En progreso,Completada]'
     ];
 
     protected $validationMessages = [

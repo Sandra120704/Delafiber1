@@ -10,16 +10,16 @@
 <div class="p-8 bg-gray-100 min-h-screen font-sans antialiased">
     <!-- Cabecera del tablero -->
     <div class="flex justify-between items-center mb-8">
-        <h3 class="text-3xl font-bold text-gray-800">Flujo de Leads con Tareas</h3>
+        <div>
+            <h3 class="text-3xl font-bold text-gray-800">Gestión de Leads</h3>
+            <p class="text-gray-600 mt-1">Haz clic en cualquier lead para gestionar tareas y detalles</p>
+        </div>
         <div class="flex gap-2">
-            <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition duration-300 transform hover:scale-105" onclick="abrirModalTarea()">
-                <i class="fas fa-plus"></i> Nueva Tarea
-            </button>
-            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition duration-300 transform hover:scale-105" data-bs-toggle="modal" data-bs-target="#leadModal">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition duration-300 transform hover:scale-105" onclick="window.location.href='<?= base_url('personas/crear') ?>'">
                 <i class="fas fa-user-plus"></i> Nuevo Lead
             </button>
             <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition duration-300 transform hover:scale-105" onclick="verTableroTareas()">
-                <i class="fas fa-list"></i> Ver Tareas
+                <i class="fas fa-calendar-alt"></i> Calendario Tareas
             </button>
         </div>
     </div>
@@ -47,41 +47,61 @@
                 $leadsEtapa = $leadsPorEtapa[$etapa['idetapa']] ?? [];
                 foreach ($leadsEtapa as $lead): 
                 ?>
-                  <div class="kanban-card bg-white rounded-lg shadow-md mb-4 p-4 cursor-pointer transition-transform transform hover:scale-105 hover:shadow-xl" 
+                  <div class="kanban-card bg-white rounded-lg shadow-md mb-4 p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:scale-[1.02] border-l-4" 
                         id="kanban-card-<?= $lead['idlead'] ?>" 
                         data-id="<?= $lead['idlead'] ?>" 
                         data-etapa="<?= $etapa['idetapa'] ?>"
                         draggable="true" 
                         onclick="abrirDetalleLeadModal(<?= $lead['idlead'] ?>)"
-                        style="border-left:5px solid <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;">
+                        style="border-left-color: <?= htmlspecialchars($lead['estatus_color'] ?? '#007bff') ?>;">
                     
-                    <!-- Badge de tareas pendientes -->
-                    <span class="tarea-badge bg-warning text-dark d-none" id="badge-tareas-<?= $lead['idlead'] ?>">0</span>
-                    
-                    <div class="card-title text-sm font-bold text-gray-900 mb-1">
-                        <?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>
+                    <!-- Indicador de tareas pendientes (flotante) -->
+                    <div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg d-none" id="badge-tareas-<?= $lead['idlead'] ?>">
+                        0
                     </div>
-                    <div class="card-info text-xs text-gray-500">
-                      <small class="block truncate"><?= htmlspecialchars($lead['telefono']) ?> | <?= htmlspecialchars($lead['correo']) ?></small>
-                      <small class="block truncate"><?= htmlspecialchars($lead['campania'] ?? '') ?> - <?= htmlspecialchars($lead['medio'] ?? '') ?></small>
-                      <small class="block truncate">Usuario: <?= htmlspecialchars($lead['usuario'] ?? 'Sin asignar') ?></small>
+                    
+                    <!-- Información principal del lead -->
+                    <div class="lead-header mb-3">
+                        <div class="card-title text-sm font-bold text-gray-900 mb-1 flex items-center justify-between">
+                            <span><?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?></span>
+                            <div class="flex items-center space-x-1">
+                                <span class="w-2 h-2 rounded-full bg-green-400" title="Lead activo"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-info text-xs text-gray-600 space-y-1">
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-blue-500 w-4"></i>
+                                <span class="ml-1"><?= htmlspecialchars($lead['telefono']) ?></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-green-500 w-4"></i>
+                                <span class="ml-1 truncate"><?= htmlspecialchars($lead['correo']) ?></span>
+                            </div>
+                            <?php if (!empty($lead['campania'])): ?>
+                            <div class="flex items-center">
+                                <i class="fas fa-bullhorn text-purple-500 w-4"></i>
+                                <span class="ml-1 text-xs"><?= htmlspecialchars($lead['campania']) ?></span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
-                    <!-- Indicadores de tareas -->
-                    <div class="mt-2" id="tareas-info-<?= $lead['idlead'] ?>">
-                        <!-- Se llena dinámicamente con JS -->
+                    <!-- Información de tareas (se actualiza dinámicamente) -->
+                    <div class="tareas-preview border-t pt-2 mt-2" id="tareas-info-<?= $lead['idlead'] ?>">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span id="tareas-resumen-<?= $lead['idlead'] ?>">📋 Clic para ver tareas</span>
+                            <span class="text-blue-500">→ Gestionar</span>
+                        </div>
                     </div>
 
-                    <!-- Acciones rápidas -->
-                    <div class="lead-actions mt-3 d-flex gap-1">
-                        <button class="btn btn-sm btn-outline-primary flex-1" onclick="event.stopPropagation(); crearTareaRapida(<?= $lead['idlead'] ?>, '<?= htmlspecialchars($lead['nombres'].' '.$lead['apellidos']) ?>')">
-                            <i class="fas fa-plus"></i> Tarea
+                    <!-- Acciones rápidas ocultas por defecto, se muestran al hover -->
+                    <div class="lead-actions mt-2 opacity-0 transition-opacity duration-300 flex gap-1" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0'">
+                        <button class="btn btn-sm btn-outline-success flex-1 text-xs py-1" onclick="event.stopPropagation(); abrirDetalleLeadModal(<?= $lead['idlead'] ?>)" title="Ver detalles y tareas">
+                            <i class="fas fa-tasks"></i> Tareas
                         </button>
-                        <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); verTareasLead(<?= $lead['idlead'] ?>)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); completarTareaPendiente(<?= $lead['idlead'] ?>)">
-                            <i class="fas fa-check"></i>
+                        <button class="btn btn-sm btn-outline-info text-xs py-1" onclick="event.stopPropagation(); marcarComoContactado(<?= $lead['idlead'] ?>)" title="Marcar como contactado">
+                            <i class="fas fa-phone"></i>
                         </button>
                     </div>
                   </div>
@@ -95,166 +115,215 @@
       <?php endforeach; ?>
     </div>
 
-    <!-- Modal de Detalle de Lead (MEJORADO) -->
+    <!-- Modal de Detalle de Lead MEJORADO con Gestión de Tareas Integrada -->
     <div class="modal fade" id="modalLeadDetalle" tabindex="-1" data-bs-backdrop="static">
       <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header modal-header-gradient">
-            <h5 class="modal-title">
-              <i class="fas fa-user-circle"></i> Detalle del Lead
-            </h5>
+        <div class="modal-content border-0 shadow-2xl">
+          <div class="modal-header bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-user-circle me-2"></i>
+              <div>
+                <h5 class="modal-title mb-0">Gestión Completa del Lead</h5>
+                <small id="lead-etapa-badge" class="badge bg-light text-dark">Cargando...</small>
+              </div>
+            </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
-          <div class="modal-body" id="detalle-lead-content">
-            <div class="text-center py-5">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
+          
+          <div class="modal-body p-0">
+            <!-- Tabs de navegación -->
+            <ul class="nav nav-tabs border-bottom-0" id="leadTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-panel" type="button">
+                  <i class="fas fa-info-circle"></i> Información
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="tareas-tab" data-bs-toggle="tab" data-bs-target="#tareas-panel" type="button">
+                  <i class="fas fa-tasks"></i> Tareas (<span id="contador-tareas">0</span>)
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="seguimientos-tab" data-bs-toggle="tab" data-bs-target="#seguimientos-panel" type="button">
+                  <i class="fas fa-comments"></i> Seguimientos
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial-panel" type="button">
+                  <i class="fas fa-history"></i> Historial
+                </button>
+              </li>
+            </ul>
+
+            <!-- Contenido de los tabs -->
+            <div class="tab-content p-4" id="leadTabContent">
+              <!-- Panel de Información -->
+              <div class="tab-pane fade show active" id="info-panel" role="tabpanel">
+                <div id="detalle-lead-content">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Panel de Tareas MEJORADO -->
+              <div class="tab-pane fade" id="tareas-panel" role="tabpanel">
+                <!-- Formulario de nueva tarea inline -->
+                <div class="card border-success mb-4">
+                  <div class="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-success fw-bold">
+                      <i class="fas fa-plus-circle"></i> Nueva Tarea
+                    </h6>
+                    <button class="btn btn-sm btn-success" onclick="contraerFormularioTarea()" id="btn-contraer-tarea">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                  <div class="card-body" id="form-nueva-tarea">
+                    <form id="tareaFormInline">
+                      <input type="hidden" id="tarea-idlead-inline" name="idlead">
+                      <div class="row g-3">
+                        <div class="col-md-8">
+                          <label class="form-label fw-bold">Descripción de la tarea:</label>
+                          <input type="text" 
+                                 class="form-control form-control-sm" 
+                                 name="descripcion" 
+                                 placeholder="Ej: Llamar para confirmar disponibilidad y agendar visita..." 
+                                 maxlength="1000"
+                                 required
+                                 oninput="actualizarContadorCaracteres(this)">
+                          <small class="form-text text-muted">
+                            <span id="contador-caracteres">0</span>/1000 caracteres
+                          </small>
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label fw-bold">Fecha/Hora:</label>
+                          <input type="datetime-local" class="form-control form-control-sm" name="fecha_inicio" required>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label fw-bold">Tipo:</label>
+                          <select class="form-select form-select-sm" name="tipo">
+                            <option value="llamada">📞 Llamada</option>
+                            <option value="whatsapp">💬 WhatsApp</option>
+                            <option value="email">📧 Email</option>
+                            <option value="visita">🏠 Visita</option>
+                            <option value="reunion">👥 Reunión</option>
+                            <option value="seguimiento" selected>👁️ Seguimiento</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label fw-bold">Prioridad:</label>
+                          <select class="form-select form-select-sm" name="prioridad">
+                            <option value="baja">🟢 Baja</option>
+                            <option value="media" selected>🟡 Media</option>
+                            <option value="alta">🟠 Alta</option>
+                            <option value="urgente">🔴 Urgente</option>
+                          </select>
+                        </div>
+                        <div class="col-12 d-flex gap-2 justify-content-end">
+                          <button type="button" class="btn btn-sm btn-secondary" onclick="limpiarFormularioTarea()">
+                            <i class="fas fa-eraser"></i> Limpiar
+                          </button>
+                          <button type="submit" class="btn btn-sm btn-success">
+                            <i class="fas fa-save"></i> Crear Tarea
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Lista de tareas -->
+                <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">
+                      <i class="fas fa-list"></i> Tareas del Lead
+                    </h6>
+                    <div class="d-flex gap-1">
+                      <button class="btn btn-sm btn-outline-primary" onclick="filtrarTareas('pendiente')">Pendientes</button>
+                      <button class="btn btn-sm btn-outline-success" onclick="filtrarTareas('completada')">Completadas</button>
+                      <button class="btn btn-sm btn-outline-secondary" onclick="filtrarTareas('todas')">Todas</button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div id="lista-tareas-lead" class="tareas-container">
+                      <div class="text-center text-muted py-3">
+                        <i class="fas fa-tasks fa-2x mb-2"></i>
+                        <p>No hay tareas aún. ¡Crea la primera!</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Panel de Seguimientos -->
+              <div class="tab-pane fade" id="seguimientos-panel" role="tabpanel">
+                <div id="seguimientos-content">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status">
+                      <span class="visually-hidden">Cargando seguimientos...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Panel de Historial -->
+              <div class="tab-pane fade" id="historial-panel" role="tabpanel">
+                <div class="timeline">
+                  <div class="text-center text-muted py-4">
+                    <i class="fas fa-history fa-2x mb-2"></i>
+                    <p>Historial de actividades se cargará aquí</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Creación de Lead (SIN CAMBIOS) -->
-    <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-xl shadow-2xl border-t-4 border-blue-500">
-          <div class="modal-header border-b border-gray-200 p-4 flex justify-between items-center">
-            <h5 class="modal-title text-xl font-bold text-gray-800">Registrar Lead</h5>
-            <button type="button" class="btn-close text-gray-400 hover:text-gray-600 transition-colors" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-6">
-            <form id="leadForm">
-              <input type="hidden" id="idpersona" name="idpersona" value="">
-              <input type="hidden" id="idetapa" name="idetapa" value="1">
-    
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">DNI:</label>
-                <input type="text" id="dni" class="form-control mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="DNI">
-              </div>
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Nombres:</label>
-                <input type="text" id="nombres" name="nombres" class="form-control mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              </div>
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Apellidos:</label>
-                <input type="text" id="apellidos" name="apellidos" class="form-control mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              </div>
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Teléfono:</label>
-                <input type="text" id="telefono" name="telefono" class="form-control mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              </div>
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Correo:</label>
-                <input type="email" id="correo" name="correo" class="form-control mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              </div>
-              
-              <div class="modal-footer border-t border-gray-200 p-4 flex justify-end gap-2">
-                <button type="button" class="btn btn-secondary rounded-md shadow-sm px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors" data-bs-dismiss="modal">Cerrar</button>
-                <button type="submit" class="btn btn-success rounded-md shadow-sm px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">Registrar Lead</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Tarea Rápida -->
-    <div class="modal fade" id="modalTareaRapida" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-2xl">
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title">
-              <i class="fas fa-plus"></i> Nueva Tarea
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="formTareaRapida">
-              <input type="hidden" id="tarea-idlead" name="idlead">
-              <div class="mb-3">
-                <label class="form-label fw-bold">Lead:</label>
-                <div id="tarea-lead-nombre" class="form-control-plaintext fw-bold text-primary"></div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Tipo de Tarea:</label>
-                <select class="form-select" name="tipo_tarea" required>
-                  <option value="llamada">📞 Llamada</option>
-                  <option value="whatsapp">💬 WhatsApp</option>
-                  <option value="email">📧 Email</option>
-                  <option value="visita">🏠 Visita</option>
-                  <option value="reunion">👥 Reunión</option>
-                  <option value="seguimiento">👁️ Seguimiento</option>
-                  <option value="documentacion">📋 Documentación</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Título:</label>
-                <input type="text" class="form-control" name="titulo" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Descripción:</label>
-                <textarea class="form-control" name="descripcion" rows="2"></textarea>
-              </div>
-              <div class="row">
-                <div class="col-6">
-                  <label class="form-label fw-bold">Prioridad:</label>
-                  <select class="form-select" name="prioridad">
-                    <option value="baja">Baja</option>
-                    <option value="media" selected>Media</option>
-                    <option value="alta">Alta</option>
-                    <option value="urgente">Urgente</option>
-                  </select>
-                </div>
-                <div class="col-6">
-                  <label class="form-label fw-bold">Vencimiento:</label>
-                  <select class="form-select" id="select-vencimiento" onchange="manejarVencimiento()">
-                    <option value="1h">En 1 hora</option>
-                    <option value="3h">En 3 horas</option>
-                    <option value="1d" selected>Mañana</option>
-                    <option value="3d">En 3 días</option>
-                    <option value="custom">Personalizado</option>
-                  </select>
-                  <input type="datetime-local" class="form-control mt-2 d-none" name="fecha_vencimiento" id="fecha-personalizada">
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-success" onclick="guardarTareaRapida()">
-              <i class="fas fa-save"></i> Crear Tarea
+          
+          <div class="modal-footer border-top bg-light">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times"></i> Cerrar
+            </button>
+            <button type="button" class="btn btn-info" onclick="exportarDatosLead()">
+              <i class="fas fa-download"></i> Exportar
+            </button>
+            <button type="button" class="btn btn-warning" onclick="enviarResumenLead()">
+              <i class="fas fa-share"></i> Compartir
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal de Tareas del Lead -->
-    <div class="modal fade" id="modalTareasLead" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-2xl">
-          <div class="modal-header bg-info text-white">
-            <h5 class="modal-title">
-              <i class="fas fa-tasks"></i> Tareas del Lead
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div id="contenido-tareas-lead">
-              <!-- Se carga dinámicamente -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 </div>
 
 
 <script>
     const base_url = "<?= rtrim(base_url(), '/') ?>";
     console.log('Base URL configurada:', base_url);
+    
+    // Función global para el contador de caracteres
+    function actualizarContadorCaracteres(input) {
+        const contador = document.getElementById('contador-caracteres');
+        if (!contador) return;
+        
+        const longitud = input.value.length;
+        contador.textContent = longitud;
+        
+        // Cambiar color según la longitud (sin validación estricta de mínimo)
+        if (longitud === 0) {
+            contador.className = 'text-muted';
+            input.classList.remove('is-invalid', 'is-valid');
+        } else if (longitud > 0 && longitud <= 1000) {
+            contador.className = 'text-success fw-bold';
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            contador.className = 'text-danger fw-bold';
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        }
+    }
 </script>
 
 <!-- Librerías externas PRIMERO -->
@@ -262,10 +331,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Scripts especializados DESPUÉS -->
-<script src="<?= base_url('js/leadsJS/kanban.js') ?>"></script>
-<script src="<?= base_url('js/leadsJS/tareas.js') ?>"></script>
-<script src="<?= base_url('js/leadsJS/detalles.js') ?>"></script>
+<!-- ÚNICO ARCHIVO CONSOLIDADO - Reemplaza todos los otros -->
+    <!-- Sistema de leads -->
+    <script src="<?= base_url('js/leadsJS/leads.js') ?>"></script>
 
 <!-- Debug y test automático -->
 <script>

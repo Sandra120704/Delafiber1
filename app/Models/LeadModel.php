@@ -86,6 +86,42 @@ class LeadModel extends Model
         return $builder->get()->getResultArray();
     }
 
+    public function actualizarEtapa($idlead, $idetapa)
+    {
+        try {
+            // Validar que exista el lead
+            $lead = $this->find($idlead);
+            if (!$lead) {
+                throw new \Exception('Lead no encontrado');
+            }
+
+            // Validar que exista la etapa
+            $etapaModel = new \App\Models\EtapaModel();
+            $etapa = $etapaModel->find($idetapa);
+            if (!$etapa) {
+                throw new \Exception('Etapa no válida');
+            }
+
+            // Actualizar la etapa
+            $data = [
+                'idetapa' => $idetapa,
+                'fecha_modificacion' => date('Y-m-d H:i:s')
+            ];
+
+            $result = $this->update($idlead, $data);
+            
+            if (!$result) {
+                throw new \Exception('Error al actualizar la etapa');
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            log_message('error', 'Error actualizando etapa del lead ' . $idlead . ': ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
 
 }
 

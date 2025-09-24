@@ -234,7 +234,7 @@ INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('jperez', '123456', 1, 1),
 ('mlopez', '123456', 2, 2),
 ('cgarcia', '123456', 2, 3),
-('atorres', '123456', 2, 4); -- password
+('atorres', '123456', 2, 4); 
 
 -- Orígenes de leads
 INSERT INTO origenes (nombre) VALUES 

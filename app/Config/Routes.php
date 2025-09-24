@@ -18,6 +18,9 @@ $routes->get('/', 'Home::index');
 $routes->get('dashboard', 'DashboardController::index');
 $routes->get('dashboard/index', 'DashboardController::index');
 
+// Test route
+
+
 // Login
 $routes->get('login', 'LoginController::index');
 $routes->post('login/auth', 'LoginController::auth');
@@ -46,17 +49,22 @@ $routes->group('campanas', function($routes) {
     $routes->post('guardar', 'CampanaController::guardar');
     $routes->delete('eliminar/(:num)', 'CampanaController::eliminar/$1');
     $routes->get('detalle/(:num)', 'CampanaController::detalle/$1');
-    $routes->post('estado/(:num)', 'CampanaController::estado/$1');
+    $routes->put('estado/(:num)', 'CampanaController::estado/$1');
+    $routes->post('estado/(:num)', 'CampanaController::estado/$1'); // Mantener compatibilidad
     $routes->get('resumen', 'CampanaController::resumen');
     $routes->get('datos', 'CampanaController::getCampanas');
     $routes->get('exportar', 'CampanaController::exportar');
+    $routes->post('export', 'CampanaController::exportar'); // Ruta para JS moderno
     $routes->post('duplicar/(:num)', 'CampanaController::duplicar/$1');
     $routes->get('analytics', 'CampanaController::analytics');
+    $routes->post('verificar-nombre', 'CampanaController::verificarNombre'); // Nueva ruta
+    $routes->get('alertas', 'CampanaController::getAlertas'); // Nueva ruta
 });
 
 // Leads
 $routes->group('leads', function($routes) {
     $routes->get('/', 'LeadController::index');
+    $routes->get('index', 'LeadController::index');
     $routes->get('crear', 'LeadController::crear');
     $routes->get('registrar/(:num)', 'LeadController::registrar/$1');
     $routes->post('guardar', 'LeadController::guardar');
@@ -67,8 +75,13 @@ $routes->group('leads', function($routes) {
     $routes->post('actualizarEtapa', 'LeadController::actualizarEtapa');
     $routes->post('moverEtapa', 'LeadController::moverEtapa');
     $routes->post('guardarTarea', 'LeadController::guardarTarea');
+    $routes->get('obtenerTareas/(:num)', 'LeadController::obtenerTareas/$1');
+    $routes->post('actualizarEstadoTarea', 'LeadController::actualizarEstadoTarea');
     $routes->post('guardarSeguimiento', 'LeadController::guardarSeguimiento');
 });
+
+// Ruta adicional para leads/index (fuera del grupo)
+$routes->get('leads/index', 'LeadController::index');
 
 // Tareas
 $routes->get('tarea/tarea', 'TareaController::index');
@@ -127,6 +140,16 @@ $routes->get('clientes', 'ClientesController::index');
 $routes->get('mensajes', 'MensajesController::index');
 $routes->get('reportes', 'ReportesController::index');
 $routes->get('configuracion', 'ConfiguracionController::index');
+
+// Rutas específicas de reportes
+$routes->group('reportes', function($routes) {
+    $routes->get('/', 'ReportesController::index');
+    $routes->get('ventasConversion', 'ReportesController::ventasConversion');
+    $routes->get('calidadRed', 'ReportesController::calidadRed');
+    $routes->get('satisfaccionCliente', 'ReportesController::satisfaccionCliente');
+    $routes->get('operativo', 'ReportesController::operativo');
+    $routes->get('exportar', 'ReportesController::exportar');
+});
 
 // Desarrollo
 if (ENVIRONMENT === 'development') {

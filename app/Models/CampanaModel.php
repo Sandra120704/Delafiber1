@@ -22,11 +22,30 @@ class CampanaModel extends Model
     protected $dateFormat = 'datetime';
     
     protected $validationRules = [
-        'nombre' => 'required|min_length[3]|max_length[150]',
-        'presupuesto' => 'permit_empty|numeric|greater_than_equal_to[0]',
+        'nombre' => 'required|min_length[3]|max_length[150]|alpha_numeric_punct',
+        'descripcion' => 'permit_empty|max_length[1000]',
+        'presupuesto' => 'permit_empty|decimal|greater_than_equal_to[0]|less_than[99999999.99]',
         'fecha_inicio' => 'permit_empty|valid_date',
         'fecha_fin' => 'permit_empty|valid_date',
-        'estado' => 'permit_empty|in_list[Activa,Inactiva]'
+        'estado' => 'permit_empty|in_list[Activa,Inactiva]',
+        'responsable' => 'permit_empty|integer'
+    ];
+    
+    protected $validationMessages = [
+        'nombre' => [
+            'required' => 'El nombre de la campaña es obligatorio.',
+            'min_length' => 'El nombre debe tener al menos 3 caracteres.',
+            'max_length' => 'El nombre no puede exceder 150 caracteres.',
+            'alpha_numeric_punct' => 'El nombre solo puede contener letras, números y signos de puntuación.'
+        ],
+        'presupuesto' => [
+            'decimal' => 'El presupuesto debe ser un número válido.',
+            'greater_than_equal_to' => 'El presupuesto no puede ser negativo.',
+            'less_than' => 'El presupuesto no puede exceder 99,999,999.99.'
+        ],
+        'estado' => [
+            'in_list' => 'El estado debe ser Activa o Inactiva.'
+        ]
     ];
 
     public function getAllWithDetails()
@@ -342,21 +361,43 @@ class CampanaModel extends Model
 
     public function eliminarCampana($idcampania)
     {
+        // Verificar que la campaña existe
+        $campana = $this->find($idcampania);
+        if (!$campana) {
+            throw new \InvalidArgumentException('La campaña no existe.');
+        }
+        
+        // Verificar que no tenga leads asociados
+        $leadsCount = $this->contarLeadsAsociados($idcampania);
+        if ($leadsCount > 0) {
+            throw new \InvalidArgumentException("No se puede eliminar la campaña porque tiene {$leadsCount} leads asociados.");
+        }
+
         $this->db->transBegin();
 
         try {
-            // Eliminar difusiones
-            $this->db->table('difusiones')->where('idcampania', $idcampania)->delete();
+            // Eliminar difusiones primero (por integridad referencial)
+            $difusionesEliminadas = $this->db->table('difusiones')
+                ->where('idcampania', $idcampania)
+                ->delete();
+            
+            log_message('info', "Eliminadas {$difusionesEliminadas} difusiones de la campaña {$idcampania}");
             
             // Eliminar la campaña
-            $this->delete($idcampania);
+            $result = $this->delete($idcampania);
+            
+            if (!$result) {
+                throw new \Exception('Error al eliminar la campaña de la base de datos.');
+            }
 
             $this->db->transCommit();
+            log_message('info', "Campaña {$idcampania} eliminada exitosamente");
             return true;
 
         } catch (\Exception $e) {
             $this->db->transRollback();
-            return false;
+            log_message('error', "Error al eliminar campaña {$idcampania}: " . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -434,21 +475,50 @@ class CampanaModel extends Model
         return $campana !== null;
     }
 
+    /**
+     * Verifica si existe una campaña con el mismo nombre
+     */
+    public function existeNombre($nombre, $excluirId = null)
+    {
+        $builder = $this->where('nombre', $nombre);
+        
+        if ($excluirId) {
+            $builder->where('idcampania !=', $excluirId);
+        }
+        
+        return $builder->countAllResults() > 0;
+    }
+    
+    /**
+     * Cuenta los leads asociados a una campaña
+     */
+    public function contarLeadsAsociados($idcampania)
+    {
+        return $this->db->table('leads')
+            ->where('idcampania', $idcampania)
+            ->countAllResults();
+    }
+
     public function crearCampana($datos)
     {
         // Validar datos requeridos
         if (empty($datos['nombre'])) {
-            return false;
+            throw new \InvalidArgumentException('El nombre de la campaña es obligatorio.');
+        }
+        
+        // Verificar duplicados
+        if ($this->existeNombre($datos['nombre'])) {
+            throw new \InvalidArgumentException('Ya existe una campaña con ese nombre.');
         }
 
         $campanaData = [
-            'nombre' => $datos['nombre'],
-            'descripcion' => $datos['descripcion'] ?? null,
+            'nombre' => trim($datos['nombre']),
+            'descripcion' => !empty($datos['descripcion']) ? trim($datos['descripcion']) : null,
             'fecha_inicio' => $datos['fecha_inicio'] ?? null,
             'fecha_fin' => $datos['fecha_fin'] ?? null,
             'presupuesto' => floatval($datos['presupuesto'] ?? 0),
             'estado' => $datos['estado'] ?? 'Activa',
-            'responsable' => $datos['responsable'] ?? null
+            'responsable' => !empty($datos['responsable']) ? intval($datos['responsable']) : null
         ];
 
         return $this->insert($campanaData);

@@ -1,0 +1,746 @@
+/* 🎨 SISTEMA MODERNO DE LEADS - CSS MEJORADO */
+
+/* ====================================== */
+/* VARIABLES DE COLORES MODERNOS */
+/* ====================================== */
+:root {
+  /* Colores principales */
+  --primary-blue: #3b82f6;
+  --primary-blue-hover: #2563eb;
+  --primary-blue-light: #dbeafe;
+  
+  /* Gradientes modernos */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --gradient-info: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  
+  /* Sombras modernas */
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  
+  /* Estados de etapas con colores modernos */
+  --etapa-prospecto: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  --etapa-contacto: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  --etapa-interes: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+  --etapa-propuesta: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  --etapa-negociacion: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+  --etapa-cierre: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  --etapa-ganado: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+  
+  /* Transiciones suaves */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ====================================== */
+/* KANBAN CONTAINER MODERNIZADO */
+/* ====================================== */
+.kanban-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-large);
+}
+
+/* ====================================== */
+/* COLUMNAS KANBAN CON GRADIENTES */
+/* ====================================== */
+.kanban-column {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  min-height: 600px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-medium);
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.kanban-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  border-radius: 1rem 1rem 0 0;
+}
+
+.kanban-column:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-large);
+}
+
+/* ====================================== */
+/* HEADERS DE ETAPAS MODERNOS */
+/* ====================================== */
+.kanban-stage {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.kanban-stage::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
+}
+
+.kanban-stage:hover::after {
+  left: 100%;
+}
+
+/* Contador de leads con animación */
+.kanban-stage .badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: pulse 2s infinite;
+}
+
+/* ====================================== */
+/* CARDS DE LEADS MEJORADAS */
+/* ====================================== */
+.kanban-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-bounce);
+  position: relative;
+  overflow: hidden;
+}
+
+.kanban-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gradient-primary);
+  transition: width var(--transition-smooth);
+}
+
+.kanban-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-large), var(--shadow-glow);
+}
+
+.kanban-card:hover::before {
+  width: 8px;
+}
+
+/* Avatar circular moderno */
+.kanban-card .lead-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-right: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Información del lead con mejor spacing */
+.lead-header .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-info > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding: 0.25rem 0;
+}
+
+.card-info i {
+  width: 16px;
+  text-align: center;
+}
+
+/* ====================================== */
+/* ACCIONES RÁPIDAS MEJORADAS */
+/* ====================================== */
+.lead-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: var(--transition-smooth);
+}
+
+.kanban-card:hover .lead-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lead-actions .btn {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  transition: var(--transition-smooth);
+  border: 1px solid #e5e7eb;
+}
+
+.lead-actions .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ====================================== */
+/* INDICADORES DE DROP MODERNOS */
+/* ====================================== */
+.drop-indicator {
+  height: 4px;
+  background: var(--gradient-success);
+  border-radius: 2px;
+  margin: 1rem 0;
+  opacity: 0;
+  transform: scaleX(0);
+  transition: var(--transition-bounce);
+  box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+}
+
+.drop-indicator.active {
+  opacity: 1;
+  transform: scaleX(1);
+  animation: dropGlow 1s infinite alternate;
+}
+
+@keyframes dropGlow {
+  from { box-shadow: 0 0 5px rgba(79, 172, 254, 0.5); }
+  to { box-shadow: 0 0 15px rgba(79, 172, 254, 0.8); }
+}
+
+/* ====================================== */
+/* BOTONES MODERNOS */
+/* ====================================== */
+.btn-modern {
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-modern:hover::before {
+  left: 100%;
+}
+
+/* ====================================== */
+/* MODAL MEJORADO */
+/* ====================================== */
+.modal-content {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-large);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.modal-header {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  position: relative;
+}
+
+.modal-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ====================================== */
+/* ANIMACIONES Y TRANSICIONES */
+/* ====================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ====================================== */
+/* APLICAR ANIMACIONES */
+/* ====================================== */
+.kanban-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.modal.show .modal-dialog {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* ====================================== */
+/* RESPONSIVENESS MEJORADO */
+/* ====================================== */
+@media (max-width: 768px) {
+  .kanban-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .kanban-column {
+    min-height: auto;
+    padding: 1rem;
+  }
+  
+  .kanban-card {
+    padding: 1rem;
+  }
+  
+  .lead-actions {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ====================================== */
+/* UTILIDADES MODERNAS */
+/* ====================================== */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.shadow-glow-green {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+/* ======================================
+   📱 RESPONSIVE DESIGN & MOBILE OPTIMIZATION  
+   ====================================== */
+
+/* Touch-friendly interactions */
+@media (pointer: coarse) {
+    .kanban-card {
+        min-height: 60px;
+        padding: 16px !important;
+    }
+    
+    .btn {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+    
+    .form-control {
+        min-height: 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* Mobile First - Small devices (landscape phones, 576px and up) */
+@media (max-width: 767.98px) {
+    .kanban-board {
+        flex-direction: column;
+        overflow-x: visible;
+    }
+    
+    .kanban-column {
+        width: 100% !important;
+        min-width: unset;
+        margin: 0 0 20px 0;
+        flex: none;
+    }
+    
+    .kanban-header {
+        padding: 12px;
+        font-size: 1rem;
+        text-align: center;
+    }
+    
+    .kanban-body {
+        min-height: 300px;
+        max-height: 400px;
+    }
+    
+    .kanban-card {
+        margin-bottom: 12px;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    .lead-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+    
+    /* Mobile modal adjustments */
+    .modal-dialog {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .modal-content {
+        border-radius: 15px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .modal-body {
+        padding: 15px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    /* Touch-friendly tabs */
+    .nav-tabs .nav-link {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    /* Mobile form improvements */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Mobile buttons */
+    .btn-group-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-group-mobile .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Hide desktop-only elements */
+    .d-mobile-none {
+        display: none !important;
+    }
+    
+    .d-mobile-block {
+        display: block !important;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .kanban-board {
+        gap: 15px;
+    }
+    
+    .kanban-column {
+        min-width: 280px;
+        width: calc(50% - 15px);
+    }
+    
+    .kanban-card {
+        font-size: 0.95rem;
+    }
+    
+    /* Tablet modal size */
+    .modal-lg {
+        max-width: 90%;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .kanban-column {
+        min-width: 320px;
+        width: calc(20% - 16px);
+    }
+    
+    .kanban-card:hover {
+        transform: translateY(-2px) scale(1.01);
+    }
+    
+    /* Desktop-only elements */
+    .d-desktop-only {
+        display: block !important;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .container-fluid {
+        padding: 0 40px;
+    }
+    
+    .kanban-board {
+        gap: 25px;
+    }
+    
+    .kanban-column {
+        min-width: 350px;
+    }
+}
+
+/* ======================================
+   🎯 TOUCH GESTURES & INTERACTIONS
+   ====================================== */
+
+/* Improved touch targets */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Drag and drop for touch devices */
+@media (pointer: coarse) {
+    .kanban-card {
+        cursor: grab;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        position: relative;
+    }
+    
+    .kanban-card:active {
+        cursor: grabbing;
+        opacity: 0.8;
+        transform: scale(1.05);
+        z-index: 1000;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    .kanban-card.sortable-chosen {
+        opacity: 0.7;
+        transform: rotate(2deg) scale(1.02);
+    }
+    
+    .kanban-card.sortable-drag {
+        opacity: 0.8;
+        transform: rotate(1deg);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+    }
+}
+
+/* Pull to refresh indicator (if needed) */
+.pull-to-refresh {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient-primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 0 0 15px 15px;
+    font-size: 0.9rem;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.pull-to-refresh.active {
+    opacity: 1;
+}
+
+/* ======================================
+   🔍 ACCESSIBILITY IMPROVEMENTS
+   ====================================== */
+
+/* Focus indicators for keyboard navigation */
+.kanban-card:focus {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+.btn:focus {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .kanban-card {
+        border: 2px solid var(--primary-blue);
+        background: white !important;
+    }
+    
+    .btn-modern {
+        border: 2px solid var(--primary-blue);
+    }
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .kanban-card {
+        transform: none !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --border-color: #404040;
+    }
+    
+    body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+    
+    .kanban-card {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .modal-content {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+}
+
+/* Print styles */
+@media print {
+    .kanban-board {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+    
+    .kanban-column {
+        width: 100% !important;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+    }
+    
+    .kanban-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: white !important;
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+    }
+    
+    .btn, .modal, .dropdown-menu {
+        display: none !important;
+    }
+}

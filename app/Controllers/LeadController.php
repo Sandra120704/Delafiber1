@@ -10,6 +10,7 @@ use App\Models\Origen;
 use App\Models\EtapaModel;
 use App\Models\TareaModel;
 use App\Models\SeguimientoModel;
+use App\Models\DistritoModel;
 
 class LeadController extends BaseController
 {
@@ -21,6 +22,7 @@ class LeadController extends BaseController
     protected $etapaModel;
     protected $tareaModel;
     protected $seguimientoModel;
+    protected $distritoModel;
 
     public function __construct()
     {
@@ -32,6 +34,7 @@ class LeadController extends BaseController
         $this->etapaModel = new EtapaModel();
         $this->tareaModel = new TareaModel();
         $this->seguimientoModel = new SeguimientoModel();
+        $this->distritoModel = new DistritoModel();
     }
 
     public function index()
@@ -41,6 +44,7 @@ class LeadController extends BaseController
         $data['campanias'] = $this->campanaModel->findAll();
         $data['modalidades'] = $this->modalidadesModel->findAll();
         $data['origenes'] = $this->origenModel->findAll();
+        $data['distritos'] = $this->distritoModel->findAll();
         $data['leadsPorEtapa'] = $this->leadModel->getLeadsPorEtapa();
 
         $data['header'] = view('Layouts/header');
@@ -69,49 +73,107 @@ class LeadController extends BaseController
 
     public function guardar()
     {
-        $post = $this->request->getPost();
-        $idpersona = $post['idpersona'] ?? null;
-
-        if (!$idpersona) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'ID de persona no proporcionado.'
-            ]);
-        }
-
-        if ($this->leadModel->where('idpersona', $idpersona)->first()) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Esta persona ya está registrada como Lead.'
-            ]);
-        }
-
-        $etapaInicial = $this->etapaModel->orderBy('orden', 'ASC')->first();
-        if (!$etapaInicial) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'No hay etapas configuradas en el sistema.'
-            ]);
-        }
-
-        $dataLead = [
-            'idpersona' => $idpersona,
-            'idcampania' => $post['idcampania'] ?? null,
-            'idmodalidad' => $post['idmodalidad'] ?? null,
-            'idorigen' => $post['idorigen'] ?? null,
-            'referido_por' => $post['referido_por'] ?? null,
-            'estado' => 'Nuevo',
-            'idetapa' => $etapaInicial['idetapa'],
-            'idusuario' => session('idusuario') ?? 1,
-            'idusuario_registro' => session('idusuario') ?? 1,
-        ];
-
         try {
+            $post = $this->request->getPost();
+            $idpersona = $post['idpersona'] ?? null;
+
+            // Si no hay idpersona, crear una nueva persona
+            if (!$idpersona) {
+                // Validar datos requeridos para nueva persona
+                if (empty($post['nombres']) || empty($post['apellidos']) || empty($post['telefono'])) {
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'Nombres, apellidos y teléfono son campos requeridos.'
+                    ]);
+                }
+
+                // Validar DNI si se proporciona
+                if (!empty($post['dni'])) {
+                    if (strlen($post['dni']) !== 8 || !is_numeric($post['dni'])) {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'El DNI debe tener exactamente 8 dígitos numéricos.'
+                        ]);
+                    }
+
+                    // Verificar si ya existe persona con ese DNI
+                    $personaExistente = $this->personaModel->where('dni', $post['dni'])->first();
+                    if ($personaExistente) {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'Ya existe una persona registrada con este DNI.'
+                        ]);
+                    }
+                }
+
+                // Validar teléfono
+                if (strlen($post['telefono']) !== 9 || !is_numeric($post['telefono'])) {
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'El teléfono debe tener exactamente 9 dígitos numéricos.'
+                    ]);
+                }
+
+                // Crear nueva persona
+                $dataPersona = [
+                    'dni' => $post['dni'] ?? null,
+                    'nombres' => trim($post['nombres']),
+                    'apellidos' => trim($post['apellidos']),
+                    'telefono' => $post['telefono'],
+                    'correo' => $post['correo'] ?? null,
+                    'direccion' => $post['direccion'] ?? null,
+                    'iddistrito' => !empty($post['iddistrito']) ? $post['iddistrito'] : null,
+                    'referencias' => $post['referencias'] ?? null,
+                ];
+
+                $idpersona = $this->personaModel->insert($dataPersona);
+                
+                if (!$idpersona) {
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'Error al registrar la persona.'
+                    ]);
+                }
+            }
+
+            // Verificar si ya existe un lead para esta persona
+            if ($this->leadModel->where('idpersona', $idpersona)->first()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Esta persona ya está registrada como Lead.'
+                ]);
+            }
+
+            // Obtener etapa inicial
+            $etapaInicial = $this->etapaModel->orderBy('orden', 'ASC')->first();
+            if (!$etapaInicial) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'No hay etapas configuradas en el sistema.'
+                ]);
+            }
+
+            // Crear el lead
+            $dataLead = [
+                'idpersona' => $idpersona,
+                'idcampania' => !empty($post['idcampania']) ? $post['idcampania'] : null,
+                'idmodalidad' => !empty($post['idmodalidad']) ? $post['idmodalidad'] : null,
+                'idorigen' => !empty($post['idorigen']) ? $post['idorigen'] : null,
+                'referido_por' => $post['referido_por'] ?? null,
+                'estado' => 'Nuevo',
+                'idetapa' => $etapaInicial['idetapa'],
+                'idusuario' => session('idusuario') ?? 1,
+                'idusuario_registro' => session('idusuario') ?? 1,
+            ];
+
             $idlead = $this->leadModel->insert($dataLead);
 
             if ($idlead) {
                 $persona = $this->personaModel->find($idpersona);
-                $persona['idetapa'] = $dataLead['idetapa'];
+                if ($persona) {
+                    $persona = (array) $persona;  // Convertir a array
+                    $persona['idetapa'] = $dataLead['idetapa'];
+                }
 
                 return $this->response->setJSON([
                     'success' => true,
@@ -119,16 +181,19 @@ class LeadController extends BaseController
                     'idlead'  => $idlead,
                     'persona' => $persona
                 ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Error al registrar el lead.'
+                ]);
             }
 
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'No se pudo registrar el lead.'
-            ]);
         } catch (\Exception $e) {
+            log_message('error', 'Error en LeadController::guardar: ' . $e->getMessage());
+            
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Error al guardar el lead: ' . $e->getMessage()
+                'message' => 'Error interno del servidor: ' . $e->getMessage()
             ]);
         }
     }
@@ -164,16 +229,40 @@ class LeadController extends BaseController
 
     public function actualizarEtapa()
     {
-        $idlead = $this->request->getPost('idlead');
-        $idetapa = $this->request->getPost('idetapa');
+        try {
+            $idlead = $this->request->getPost('idlead');
+            $idetapa = $this->request->getPost('idetapa');
 
-        if (!$idlead || !$idetapa) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
+            if (!$idlead || !$idetapa) {
+                return $this->response->setJSON([
+                    'success' => false, 
+                    'message' => 'Datos incompletos: ID de lead e ID de etapa son requeridos'
+                ]);
+            }
+
+            // Validar que sean números válidos
+            if (!is_numeric($idlead) || !is_numeric($idetapa)) {
+                return $this->response->setJSON([
+                    'success' => false, 
+                    'message' => 'Los IDs deben ser números válidos'
+                ]);
+            }
+
+            $this->leadModel->actualizarEtapa($idlead, $idetapa);
+
+            return $this->response->setJSON([
+                'success' => true, 
+                'message' => 'Etapa actualizada correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Error actualizando etapa: ' . $e->getMessage());
+            
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Error al actualizar la etapa: ' . $e->getMessage()
+            ]);
         }
-
-        $this->leadModel->actualizarEtapa($idlead, $idetapa);
-
-        return $this->response->setJSON(['success' => true, 'message' => 'Etapa actualizada']);
     }
 
     public function eliminar()
@@ -223,6 +312,131 @@ class LeadController extends BaseController
         return $this->response->setJSON([
             'success' => false,
             'message' => 'Error al guardar seguimiento'
+        ]);
+    }
+
+    public function guardarTarea()
+    {
+        $idlead = $this->request->getPost('idlead');
+        $descripcion = $this->request->getPost('descripcion');
+        $fechaInicio = $this->request->getPost('fecha_inicio');
+        $tipoTarea = $this->request->getPost('tipo') ?? 'seguimiento';
+        $prioridad = $this->request->getPost('prioridad') ?? 'media';
+
+        // Validaciones básicas
+        if (!$idlead || !$descripcion) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Datos incompletos para la tarea'
+            ]);
+        }
+
+        // Usar descripción como título si es corto, sino crear título resumido
+        $titulo = strlen(trim($descripcion)) <= 50 
+            ? trim($descripcion)
+            : substr(trim($descripcion), 0, 47) . '...';
+
+        // Preparar fechas
+        $fechaInicioFormatted = $fechaInicio ? date('Y-m-d', strtotime($fechaInicio)) : date('Y-m-d');
+        $fechaFinFormatted = $fechaInicio ? date('Y-m-d', strtotime($fechaInicio)) : date('Y-m-d');
+        $fechaVencimiento = $fechaInicio ? date('Y-m-d H:i:s', strtotime($fechaInicio)) : date('Y-m-d H:i:s', strtotime('+1 day'));
+
+        $dataTarea = [
+            'idlead'            => $idlead,
+            'idusuario'         => session()->get('idusuario') ?? 1,
+            'titulo'            => $titulo,
+            'descripcion'       => trim($descripcion),
+            'tipo_tarea'        => $tipoTarea,
+            'prioridad'         => $prioridad,
+            'fecha_inicio'      => $fechaInicioFormatted,
+            'fecha_fin'         => $fechaFinFormatted,
+            'fecha_vencimiento' => $fechaVencimiento,
+            'estado'            => 'Pendiente'
+        ];
+
+        try {
+            $id = $this->tareaModel->insert($dataTarea);
+
+            if ($id) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'tarea' => [
+                        'id'             => $id,
+                        'titulo'         => $titulo,
+                        'descripcion'    => $descripcion,
+                        'estado'         => 'Pendiente',
+                        'prioridad'      => $prioridad,
+                        'fecha_inicio'   => $fechaInicioFormatted
+                    ],
+                    'message' => 'Tarea creada exitosamente'
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Log del error para debugging
+            log_message('error', 'Error creando tarea: ' . $e->getMessage());
+            
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al guardar la tarea: ' . $e->getMessage()
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Error desconocido al guardar la tarea'
+        ]);
+    }
+
+    public function obtenerTareas($idlead)
+    {
+        try {
+            $tareas = $this->tareaModel->where('idlead', $idlead)->orderBy('fecha_inicio', 'ASC')->findAll();
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'tareas' => $tareas
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al obtener las tareas'
+            ]);
+        }
+    }
+
+    public function actualizarEstadoTarea()
+    {
+        $idtarea = $this->request->getPost('idtarea');
+        $estado = $this->request->getPost('estado');
+
+        if (!$idtarea || !$estado) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Datos incompletos'
+            ]);
+        }
+
+        $datosActualizar = ['estado' => $estado];
+        
+        // Si se marca como completada, establecer fecha de completado
+        if ($estado === 'Completada') {
+            $datosActualizar['fecha_completado'] = date('Y-m-d H:i:s');
+        } else {
+            $datosActualizar['fecha_completado'] = null;
+        }
+
+        $resultado = $this->tareaModel->update($idtarea, $datosActualizar);
+
+        if ($resultado) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Estado de tarea actualizado'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Error al actualizar el estado de la tarea'
         ]);
     }
 
