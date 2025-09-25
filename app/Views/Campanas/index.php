@@ -45,66 +45,66 @@
     <!-- Métricas mejoradas con gráficos mini -->
     <div class="row mb-4 g-3">
         <div class="col-lg-3 col-md-6">
-            <div class="card metric-card text-white shadow-lg h-100">
+            <div class="card metric-card bg-primary text-white shadow-lg h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-bullseye fs-3 me-2"></i>
                             <h6 class="mb-0">Total Campañas</h6>
                         </div>
-                        <h2 class="mb-0" id="cardTotalCampanas"><?= $metricas['total_campanas'] ?? 0 ?></h2>
+                        <h2 class="mb-0" id="cardTotalCampanas"><?= !empty($metricas['total_campanas']) ? $metricas['total_campanas'] : '0' ?></h2>
                         <small class="opacity-75">Total registradas</small>
                     </div>
-                    <canvas id="totalChart" width="50" height="30"></canvas>
+                    <i class="bi bi-bar-chart-line-fill fs-2 opacity-75 ms-2"></i>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="card metric-card success text-white shadow-lg h-100">
+            <div class="card metric-card bg-success text-white shadow-lg h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-lightning-charge-fill fs-3 me-2"></i>
                             <h6 class="mb-0">Activas</h6>
                         </div>
-                        <h2 class="mb-0" id="cardCampanasActivas"><?= $metricas['activas'] ?? 0 ?></h2>
-                        <small class="opacity-75"><?= round(($metricas['activas'] ?? 0) / max(($metricas['total_campanas'] ?? 1), 1) * 100, 1) ?>% del total</small>
+                        <h2 class="mb-0" id="cardCampanasActivas"><?= !empty($metricas['activas']) ? $metricas['activas'] : '0' ?></h2>
+                        <small class="opacity-75"><?= round((!empty($metricas['activas']) ? $metricas['activas'] : 0) / max((!empty($metricas['total_campanas']) ? $metricas['total_campanas'] : 1), 1) * 100, 1) ?>% del total</small>
                     </div>
-                    <canvas id="activeChart" width="50" height="30"></canvas>
+                    <i class="bi bi-lightning-fill fs-2 opacity-75 ms-2"></i>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="card metric-card warning text-white shadow-lg h-100">
+            <div class="card metric-card bg-warning text-dark shadow-lg h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-cash-stack fs-3 me-2"></i>
                             <h6 class="mb-0">Presupuesto</h6>
                         </div>
-                        <h2 class="mb-0" id="cardPresupuestoTotal">S/ <?= number_format($metricas['presupuesto_total'] ?? 0, 0) ?></h2>
-                        <small class="opacity-75"><?= $metricas['porcentaje_gastado'] ?? 0 ?>% utilizado</small>
+                        <h2 class="mb-0" id="cardPresupuestoTotal">S/ <?= !empty($metricas['presupuesto_total']) ? number_format($metricas['presupuesto_total'], 0) : '0' ?></h2>
+                        <small class="opacity-75"><?= !empty($metricas['porcentaje_gastado']) ? $metricas['porcentaje_gastado'] : '0' ?>% utilizado</small>
                     </div>
                     <div class="text-end">
                         <div class="progress progress-thin mb-2" style="width: 60px;">
-                            <div class="progress-bar bg-white" style="width: <?= $metricas['porcentaje_gastado'] ?? 0 ?>%"></div>
+                            <div class="progress-bar bg-dark" style="width: <?= !empty($metricas['porcentaje_gastado']) ? $metricas['porcentaje_gastado'] : '0' ?>%"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="card metric-card info text-white shadow-lg h-100">
+            <div class="card metric-card bg-info text-white shadow-lg h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-people-fill fs-3 me-2"></i>
                             <h6 class="mb-0">Total Leads</h6>
                         </div>
-                        <h2 class="mb-0" id="cardTotalLeads"><?= $metricas['total_leads'] ?? 0 ?></h2>
-                        <small class="opacity-75">ROI: <?= $metricas['roi_promedio'] ?? 0 ?>%</small>
+                        <h2 class="mb-0" id="cardTotalLeads"><?= !empty($metricas['total_leads']) ? $metricas['total_leads'] : '0' ?></h2>
+                        <small class="opacity-75">ROI: <?= !empty($metricas['roi_promedio']) ? $metricas['roi_promedio'] : '0' ?>%</small>
                     </div>
-                    <i class="bi bi-graph-up fs-1 opacity-50"></i>
+                    <i class="bi bi-graph-up-arrow fs-2 opacity-75 ms-2"></i>
                 </div>
             </div>
         </div>
@@ -158,7 +158,26 @@
             <h5 class="mb-0">Lista de Campañas</h5>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+                <div class="table-responsive" style="height: 450px; min-height: 250px; overflow-y: scroll; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #d4d4d4 #f5f5f5;">
+                <style>
+                    /* Scrollbar vertical y horizontal estilo clásico y natural */
+                .table-responsive::-webkit-scrollbar {
+                    width: 12px;
+                }
+                    .table-responsive::-webkit-scrollbar {
+                        height: 8px;
+                    }
+                .table-responsive::-webkit-scrollbar-thumb {
+                    background: #d4d4d4;
+                    border-radius: 6px;
+                    border: 2px solid #b0b0b0;
+                    box-shadow: inset 1px 1px 3px #fff, inset -1px -1px 2px #b0b0b0;
+                }
+                .table-responsive::-webkit-scrollbar-track {
+                    background: #f5f5f5;
+                    box-shadow: inset 0 0 2px #ccc;
+                }
+                </style>
                 <table id="campaignsTable" class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>

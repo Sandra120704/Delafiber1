@@ -70,11 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.querySelectorAll('.btn-detalle').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const idcampania = btn.dataset.id;
-      console.log('Cargando detalle de campaña:', idcampania);
 
+  // Delegación de eventos para botones de detalle
+  document.addEventListener('click', async function(e) {
+    if (e.target.classList.contains('btn-detalle')) {
+      const btn = e.target;
+      const idcampania = btn.dataset.id;
       // Placeholders mientras carga
       const placeholders = {
         detalleNombre: 'Cargando...',
@@ -84,35 +85,25 @@ document.addEventListener('DOMContentLoaded', () => {
         detalleEstado: 'Cargando...',
         detalleResponsable: 'Cargando...'
       };
-      
       for (const id in placeholders) {
         const el = document.getElementById(id);
         if (el) el.textContent = placeholders[id];
       }
-      
       if (modalBody) {
         modalBody.innerHTML = '<tr><td colspan="3" class="text-center">Cargando...</td></tr>';
       }
-      
       detalleModal.show();
-
       try {
         const res = await fetch(`${BASE_URL}campanas/detalle/${idcampania}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}: Error al cargar los datos`);
-
         const data = await res.json();
-        console.log('Datos recibidos:', data);
-        
         if (!data || !data.success || !data.campana) {
           if (modalBody) {
             modalBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">No se encontraron datos de la campaña</td></tr>';
           }
           return;
         }
-
         const campana = data.campana;
-        
-        // Actualizar información general
         const mapIds = {
           detalleNombre: campana.nombre || 'Sin nombre',
           detalleDescripcion: campana.descripcion || 'Sin descripción',
@@ -123,13 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
           detalleEstado: campana.estado || 'Sin estado',
           detalleResponsable: campana.responsable_nombre || 'No asignado'
         };
-        
         for (const id in mapIds) {
           const el = document.getElementById(id);
           if (el) el.textContent = mapIds[id];
         }
-
-        // Llenar tabla de medios
         if (!data.medios || data.medios.length === 0) {
           if (modalBody) {
             modalBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay medios registrados</td></tr>';
@@ -157,82 +145,53 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       } catch (err) {
-        console.error('Error al cargar detalle:', err);
         if (modalBody) {
           modalBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar los datos</td></tr>';
         }
       }
-    });
+    }
   });
 
-  document.querySelectorAll('.toggle-estado').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      const nuevoEstado = btn.dataset.estado;
-      const estadoActual = btn.textContent.trim();
 
-      console.log(`Cambiando estado de campaña ${id}: ${estadoActual} → ${nuevoEstado}`);
-
-      // Deshabilitar botón temporalmente
-      const originalText = btn.textContent;
-      btn.textContent = 'Cambiando...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${BASE_URL}campanas/estado/${id}`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: `estado=${nuevoEstado}`
-        });
-
-        console.log('Response status:', res.status);
-        console.log('Response headers:', res.headers);
-
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-
-        const data = await res.json();
-        console.log('Respuesta cambio estado:', data);
-
-        if (data.success) {
-          // Actualizar botón
-          btn.textContent = data.estado;
-          btn.dataset.estado = data.estado === 'Activa' ? 'Inactiva' : 'Activa';
-          
-          // Actualizar clases CSS
-          btn.classList.remove('btn-success', 'btn-secondary');
-          btn.classList.add(data.estado === 'Activa' ? 'btn-success' : 'btn-secondary');
-
-          // Actualizar dashboard
-          actualizarDashboard();
-          
-          // Mostrar notificación
-          showNotification('success', `Estado cambiado a ${data.estado}`);
-        } else {
-          btn.textContent = originalText;
-          console.error('Error del servidor:', data);
-          showNotification('error', 'No se pudo cambiar el estado: ' + (data.message || 'Error desconocido'));
-        }
-      } catch (err) {
-        console.error('Error al cambiar estado:', err);
-        btn.textContent = originalText;
-        
-        if (err.message.includes('404')) {
-          showNotification('error', 'Ruta no encontrada. Verifique la configuración de rutas.');
-        } else if (err.message.includes('500')) {
-          showNotification('error', 'Error interno del servidor. Revise los logs.');
-        } else {
-          showNotification('error', 'Error en la conexión: ' + err.message);
-        }
-      } finally {
-        btn.disabled = false;
+// Delegación de eventos para botones de estado
+document.addEventListener('click', async function(e) {
+  if (e.target.classList.contains('toggle-estado')) {
+    const btn = e.target;
+    const id = btn.dataset.id;
+    const nuevoEstado = btn.dataset.estado;
+    const estadoActual = btn.textContent.trim();
+    btn.textContent = 'Cambiando...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${BASE_URL}campanas/estado/${id}`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `estado=${nuevoEstado}`
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      if (data.success) {
+        btn.textContent = data.estado;
+        btn.dataset.estado = data.estado === 'Activa' ? 'Inactiva' : 'Activa';
+        btn.classList.remove('btn-success', 'btn-secondary');
+        btn.classList.add(data.estado === 'Activa' ? 'btn-success' : 'btn-secondary');
+        actualizarDashboard && actualizarDashboard();
+        showNotification && showNotification('success', `Estado cambiado a ${data.estado}`);
+      } else {
+        btn.textContent = estadoActual;
+        showNotification && showNotification('error', 'No se pudo cambiar el estado: ' + (data.message || 'Error desconocido'));
       }
-    });
-  });
+    } catch (err) {
+      btn.textContent = estadoActual;
+      showNotification && showNotification('error', 'Error al cambiar estado: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+});
 
 
   document.querySelectorAll('.btn-eliminar').forEach(btn => {

@@ -38,10 +38,10 @@
     <!-- Navbar superior -->
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
       <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-        <a class="navbar-brand brand-logo mr-5" href="<?= base_url() ?>">
+        <a class="navbar-brand brand-logo mr-5" href="<?= base_url('dashboard') ?>">
           <img src="<?= base_url('images/logo-delafiber.png') ?>" class="mr-2" alt="Delafiber"/>
         </a>
-        <a class="navbar-brand brand-logo-mini mr-lg-2" href="<?= base_url() ?>">
+        <a class="navbar-brand brand-logo-mini mr-lg-2" href="<?= base_url('dashboard') ?>">
           <img src="<?= base_url('images/logo-delafiber.png') ?>" class="mr-4" alt="Delafiber"/>
         </a>
       </div>

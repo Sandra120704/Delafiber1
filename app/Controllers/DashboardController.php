@@ -52,17 +52,6 @@ class DashboardController extends BaseController
         $this->usuarioModel = new UsuarioModel();
     }
 
-    /**
-     * ===============================================
-     * DASHBOARD PRINCIPAL EJECUTIVO
-     * ===============================================
-     * 
-     * Panel principal con métricas clave para empresa de fibra óptica:
-     * - Indicadores de red y conectividad
-     * - Métricas de clientes y satisfacción
-     * - KPIs comerciales y financieros
-     * - Estado operativo en tiempo real
-     */
     public function index()
     {
         try {
@@ -110,9 +99,10 @@ class DashboardController extends BaseController
                 'preferencias_dashboard' => $this->obtenerPreferenciasDashboard()
             ];
 
+            // return view('Dashboard/index', $datosCompletos);
             return view('dashboard/index', $datosCompletos);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             log_message('error', 'Error en DashboardController::index: ' . $e->getMessage());
             return redirect()->to('login')->with('error', 'Error al cargar el dashboard');
         }
@@ -165,7 +155,7 @@ class DashboardController extends BaseController
                 'ultima_actualizacion' => date('Y-m-d H:i:s')
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             log_message('error', 'Error en DashboardController::getDashboardData: ' . $e->getMessage());
             return $this->response->setJSON([
                 'success' => false,

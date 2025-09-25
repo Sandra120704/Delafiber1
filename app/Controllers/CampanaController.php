@@ -26,7 +26,22 @@ class CampanaController extends BaseController
         try {
             $campanas = $this->campanaModel->getAllWithDetails();
             $metricas = $this->campanaModel->getMetricas();
+            // Si falta algún valor, asígnalo por defecto
+            $metricas = array_merge([
+                'total_campanas' => 0,
+                'activas' => 0,
+                'presupuesto_total' => 0,
+                'porcentaje_gastado' => 0,
+                'total_leads' => 0,
+                'roi_promedio' => 0
+            ], $metricas);
             $usuarios = $this->campanaModel->getUsuarios();
+
+            // Verifica que los datos no estén vacíos
+            // Puedes agregar logs temporales para depuración
+            // log_message('debug', print_r($campanas, true));
+            // log_message('debug', print_r($metricas, true));
+            // log_message('debug', print_r($usuarios, true));
 
             $datos = [
                 'header' => view('layouts/header'),
@@ -207,6 +222,7 @@ class CampanaController extends BaseController
         try {
             // Verificar que el ID sea válido
             if (!is_numeric($id) || $id <= 0) {
+                log_message('error', "CampanaController::detalle - ID inválido: {$id}");
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'ID de campaña inválido'
@@ -214,8 +230,8 @@ class CampanaController extends BaseController
             }
 
             $campana = $this->campanaModel->getDetalle($id);
-            
             if (!$campana) {
+                log_message('error', "CampanaController::detalle - Campaña no encontrada: {$id}");
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Campaña no encontrada'
@@ -224,10 +240,10 @@ class CampanaController extends BaseController
 
             // Obtener medios asociados
             $medios = $this->campanaModel->getMedios($id);
-            
             // Obtener métricas adicionales
             $metricas = $this->campanaModel->getMetricasCampana($id);
 
+            log_message('info', "CampanaController::detalle - Datos enviados para campaña {$id}");
             return $this->response->setJSON([
                 'success' => true,
                 'campana' => $campana,
@@ -248,9 +264,8 @@ class CampanaController extends BaseController
     {
         try {
             log_message('info', "CampanaController::estado - ID recibido: {$id}");
-            
             if (!is_numeric($id) || $id <= 0) {
-                log_message('error', "ID de campaña inválido: {$id}");
+                log_message('error', "CampanaController::estado - ID inválido: {$id}");
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'ID de campaña inválido'
@@ -258,41 +273,36 @@ class CampanaController extends BaseController
             }
 
             $nuevoEstado = $this->request->getPost('estado');
-            log_message('info', "Nuevo estado recibido: {$nuevoEstado}");
-            
+            log_message('info', "CampanaController::estado - Nuevo estado recibido: {$nuevoEstado}");
             $estados_validos = ['Activa', 'Inactiva'];
-
             if (!in_array($nuevoEstado, $estados_validos)) {
-                log_message('error', "Estado inválido recibido: {$nuevoEstado}");
+                log_message('error', "CampanaController::estado - Estado inválido recibido: {$nuevoEstado}");
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Estado inválido. Debe ser "Activa" o "Inactiva"'
                 ]);
             }
 
-            // Verificar que la campaña existe
             $campana = $this->campanaModel->find($id);
             if (!$campana) {
-                log_message('error', "Campaña no encontrada con ID: {$id}");
+                log_message('error', "CampanaController::estado - Campaña no encontrada: {$id}");
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Campaña no encontrada'
                 ]);
             }
 
-            log_message('info', "Actualizando campaña {$id} de '{$campana['estado']}' a '{$nuevoEstado}'");
-
-            // Actualizar estado
+            log_message('info', "CampanaController::estado - Actualizando campaña {$id} de '{$campana['estado']}' a '{$nuevoEstado}'");
             $resultado = $this->campanaModel->update($id, ['estado' => $nuevoEstado]);
-
             if ($resultado) {
-                log_message('info', "Estado actualizado exitosamente para campaña {$id}");
+                log_message('info', "CampanaController::estado - Estado actualizado exitosamente para campaña {$id}");
                 return $this->response->setJSON([
                     'success' => true,
                     'estado' => $nuevoEstado,
                     'message' => "Estado cambiado a {$nuevoEstado} correctamente"
                 ]);
             } else {
+                log_message('error', "CampanaController::estado - Error al actualizar el estado para campaña {$id}");
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Error al actualizar el estado'

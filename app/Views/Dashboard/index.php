@@ -1,4 +1,4 @@
-<?= $header ?>
+<?= view('Layouts/header') ?>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>

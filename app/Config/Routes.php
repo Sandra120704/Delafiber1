@@ -17,6 +17,7 @@ $routes->setAutoRoute(false);
 $routes->get('/', 'Home::index');
 $routes->get('dashboard', 'DashboardController::index');
 $routes->get('dashboard/index', 'DashboardController::index');
+$routes->get('Dashboard', 'DashboardController::index'); // Nueva ruta para /Dashboard
 
 // Funcionalidades del header
 $routes->post('dashboard/buscar', 'DashboardController::buscar');
