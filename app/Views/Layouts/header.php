@@ -17,6 +17,16 @@
   <link rel="stylesheet" href="<?= base_url('css/vertical-layout-light/style.css') ?>">
 
   <link rel="shortcut icon" href="<?= base_url('images/favicon.png') ?>" />
+  
+  <!-- Variables JavaScript globales -->
+  <script>
+    window.baseUrl = '<?= base_url() ?>';
+    window.csrfToken = '<?= csrf_token() ?>';
+    window.csrfHash = '<?= csrf_hash() ?>';
+  </script>
+  
+  <!-- Meta tag para CSRF -->
+  <meta name="csrf-token" content="<?= csrf_hash() ?>">
 </head>
 
 <body>

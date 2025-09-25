@@ -32,17 +32,56 @@
   <script src="<?= base_url('js/dataTables.select.min.js')?>"></script>
   <!-- End plugin js for this page -->
 
-  <!-- inject:js -->
+  <!-- inject:js - ARCHIVOS PRINCIPALES DEL LAYOUT -->
   <script src="<?= base_url('js/off-canvas.js')?>"></script>
   <script src="<?= base_url('js/hoverable-collapse.js')?>"></script>
   <script src="<?= base_url('js/template.js')?>"></script>
   <script src="<?= base_url('js/settings.js')?>"></script>
-  <script src="<?= base_url('js/todolist.js')?>"></script>
   <!-- endinject -->
 
-  <!-- Custom js for this page-->
-  <script src="<?= base_url('js/dashboard.js')?>"></script>
-  <script src="<?= base_url('js/Chart.roundedBarCharts.js')?>"></script>
+  <!-- ARCHIVOS ESPECÍFICOS POR MÓDULO -->
+  <?php 
+  $currentController = service('router')->controllerName();
+  $currentMethod = service('router')->methodName();
+  ?>
+  
+  <!-- Dashboard específico -->
+  <?php if (strpos($currentController, 'Dashboard') !== false): ?>
+    <script src="<?= base_url('js/dashboard.js')?>"></script>
+    <script src="<?= base_url('js/Chart.roundedBarCharts.js')?>"></script>
+    <script src="<?= base_url('js/todolist.js')?>"></script>
+  <?php endif; ?>
+  
+  <!-- Tareas específicas -->
+  <?php if (strpos($currentController, 'Tarea') !== false): ?>
+    <script src="<?= base_url('js/tareaJS/tarea.js')?>"></script>
+  <?php endif; ?>
+  
+  <!-- Personas específicas -->
+  <?php if (strpos($currentController, 'Persona') !== false): ?>
+    <script src="<?= base_url('js/personasJS/personas.js')?>"></script>
+    <script src="<?= base_url('js/personasJS/index.js')?>"></script>
+    <script src="<?= base_url('js/personasJS/alert.js')?>"></script>
+    <script src="<?= base_url('js/leadsJS/modals.js')?>"></script>
+  <?php endif; ?>
+  
+  <!-- Leads específicos -->
+  <?php if (strpos($currentController, 'Lead') !== false): ?>
+    <script src="<?= base_url('js/leadsJS/leads.js')?>"></script>
+    <script src="<?= base_url('js/leadsJS/kanbas.js')?>"></script>
+    <script src="<?= base_url('js/leadsJS/modals.js')?>"></script>
+  <?php endif; ?>
+  
+  <!-- Campañas específicas -->
+  <?php if (strpos($currentController, 'Campana') !== false): ?>
+    <script src="<?= base_url('js/campanasJS/campana.js')?>"></script>
+  <?php endif; ?>
+  
+  <!-- Usuarios específicos -->
+  <?php if (strpos($currentController, 'Usuario') !== false): ?>
+    <script src="<?= base_url('js/usuariosJS/usuario.js')?>"></script>
+  <?php endif; ?>
+  
   <!-- End custom js for this page-->
 </body>
 

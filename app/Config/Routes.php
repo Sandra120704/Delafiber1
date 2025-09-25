@@ -18,6 +18,13 @@ $routes->get('/', 'Home::index');
 $routes->get('dashboard', 'DashboardController::index');
 $routes->get('dashboard/index', 'DashboardController::index');
 
+// Funcionalidades del header
+$routes->post('dashboard/buscar', 'DashboardController::buscar');
+$routes->get('dashboard/notificaciones', 'DashboardController::notificaciones');
+$routes->post('dashboard/marcar-leida', 'DashboardController::marcarLeida');
+$routes->get('dashboard/perfil', 'DashboardController::perfil');
+$routes->get('dashboard/estadisticas', 'DashboardController::estadisticasRapidas');
+
 // Test route
 
 
