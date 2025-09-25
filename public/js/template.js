@@ -285,7 +285,7 @@
     }
 
     /**
-     * Toggle del sidebar - DESHABILITADO (manejado por off-canvas.js)
+     * Toggle del sidebar - DESHABILITADO 
      */
     function initializeSidebarToggle() {
         // Funcionalidad movida a off-canvas.js para evitar conflictos

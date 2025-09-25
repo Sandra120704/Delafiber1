@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <link rel="stylesheet" href="<?= base_url('css/vertical-layout-light/style.css') ?>">
+  <!-- CSS adicional para sidebar -->
+  <link rel="stylesheet" href="<?= base_url('css/sidebar-fix.css') ?>">
 
   <link rel="shortcut icon" href="<?= base_url('image/favicon.ico') ?>" />
   

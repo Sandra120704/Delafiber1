@@ -1,0 +1,82 @@
+/**
+ * CSS adicional para mejorar el funcionamiento del sidebar
+ * Sistema Delafiber - Corrección de estilos del sidebar colapsable
+ */
+
+/* Forzar la aplicación de estilos del sidebar colapsado */
+.sidebar-icon-only .sidebar {
+    width: 80px !important;
+    transition: width 0.3s ease;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-title {
+    display: none !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-arrow {
+    display: none !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link {
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-icon {
+    margin-right: 0 !important;
+    font-size: 1.5rem !important;
+}
+
+/* Ajustar el contenido principal cuando el sidebar se colapsa */
+.sidebar-icon-only .main-panel {
+    margin-left: 80px !important;
+    width: calc(100% - 80px) !important;
+    transition: all 0.3s ease;
+}
+
+/* Hover expandido */
+.sidebar-icon-only .sidebar:hover {
+    width: 255px !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .menu-title {
+    display: block !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .menu-arrow {
+    display: block !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link {
+    text-align: left !important;
+    padding-left: 2.5rem !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .menu-icon {
+    margin-right: 1rem !important;
+    font-size: 1rem !important;
+}
+
+/* Ajustar dividers en modo colapsado */
+.sidebar-icon-only .sidebar .nav .nav-divider {
+    display: none !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-divider {
+    display: block !important;
+}
+
+/* Animaciones suaves */
+.sidebar {
+    transition: width 0.3s ease;
+}
+
+.main-panel {
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.sidebar .nav .nav-item .nav-link .menu-title,
+.sidebar .nav .nav-item .nav-link .menu-arrow {
+    transition: opacity 0.3s ease;
+}

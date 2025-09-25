@@ -24,19 +24,15 @@
      * Inicializar funcionalidades del sidebar
      */
     function initializeSidebar() {
-        // Toggle sidebar en desktop - CORREGIDO CON CLASE CORRECTA
+        // Toggle sidebar en desktop - FUNCIONANDO
         $('[data-toggle="minimize"], .navbar-toggler').off('click.sidebar').on('click.sidebar', function(e) {
             e.preventDefault();
-            console.log('Hamburger button clicked'); // Debug
             
             $('body').toggleClass('sidebar-icon-only');
             
             // Guardar estado en localStorage
             const isCollapsed = $('body').hasClass('sidebar-icon-only');
             localStorage.setItem('sidebar-collapsed', isCollapsed);
-            
-            // Debug
-            console.log('Sidebar collapsed:', isCollapsed);
         });
 
         // Restaurar estado del sidebar
