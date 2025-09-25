@@ -43,13 +43,13 @@ cp .env.example .env
 Editar `.env` con tus datos:
 ```env
 database.default.hostname = localhost
-database.default.database = delafiber_db
+database.default.database = delafiber
 database.default.username = root
 database.default.password = 
 ```
 
 ### 4. Importar base de datos
-- Crear base de datos `delafiber_db`
+- Crear base de datos `delafiber`
 - Importar `app/Database/db.sql`
 
 ### 5. Configurar servidor local
@@ -82,7 +82,7 @@ public/
 - **Usuarios** - Administración de usuarios
 - **Tareas** - Sistema de tareas y seguimiento
 
-## 🔧 Desarrollo
+## Desarrollo
 ```bash
 # Verificar sintaxis PHP
 php -l app/Controllers/NombreController.php
