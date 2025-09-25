@@ -15,8 +15,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <link rel="stylesheet" href="<?= base_url('css/vertical-layout-light/style.css') ?>">
-  <!-- CSS adicional para sidebar -->
-  <link rel="stylesheet" href="<?= base_url('css/sidebar-fix.css') ?>">
+  
+  <!-- CSS personalizado para sidebar -->
+  <link rel="stylesheet" href="<?= base_url('css/sidebar-clean.css') ?>?v=<?= time() ?>">
 
   <link rel="shortcut icon" href="<?= base_url('image/favicon.ico') ?>" />
   
@@ -38,10 +39,10 @@
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
       <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
         <a class="navbar-brand brand-logo mr-5" href="<?= base_url() ?>">
-          <img src="<?= base_url('images/logo-delafiber.png') ?>" class="mr-2" alt="logo"/>
+          <img src="<?= base_url('images/logo-delafiber.png') ?>" class="mr-2" alt="Delafiber"/>
         </a>
-        <a class="navbar-brand brand-logo-mini" href="<?= base_url() ?>">
-          <img src="<?= base_url('images/logo-mini.svg') ?>" alt="logo"/>
+        <a class="navbar-brand brand-logo-mini mr-lg-2" href="<?= base_url() ?>">
+          <img src="<?= base_url('images/logo-delafiber.png') ?>" class="mr-4" alt="Delafiber"/>
         </a>
       </div>
 

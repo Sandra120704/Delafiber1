@@ -1,0 +1,356 @@
+/**
+ * CSS SIDEBAR DELAFIBER - Versión Simple y Funcional
+ * Solo lo esencial para que funcione correctamente
+ */
+
+/* SIDEBAR COLAPSADO - REGLAS BÁSICAS */
+.sidebar-icon-only .sidebar {
+    width: 60px !important;
+    transition: width 0.3s ease;
+    margin-left: 0 !important;
+    position: relative !important;
+}
+
+.sidebar-icon-only .main-panel {
+    margin-left: 255px !important;
+    width: calc(100% - 255px) !important;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* MANTENER NAVBAR BRAND WRAPPER SIEMPRE IGUAL */
+.navbar .navbar-brand-wrapper {
+    width: 255px !important;
+    min-width: 255px !important;
+    max-width: 255px !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: none !important;
+    flex-shrink: 0 !important;
+    border-right: 1px solid #e3e6f0 !important;
+}
+
+/* ASEGURAR QUE EL NAVBAR SE MANTENGA EN UNA FILA */
+.navbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    gap: 0 !important;
+}
+
+.navbar .navbar-menu-wrapper {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    height: 60px !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* LOGO - SIEMPRE IGUAL (NO CAMBIA) */
+.navbar-brand-wrapper .brand-logo {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.navbar-brand-wrapper .brand-logo img {
+    max-height: 40px !important;
+    max-width: 200px !important;
+    object-fit: contain !important;
+}
+
+/* OCULTAR LOGO MINI SIEMPRE */
+.navbar-brand-wrapper .brand-logo-mini {
+    display: none !important;
+}
+
+/* OCULTAR TEXTOS EN MODO COLAPSADO */
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-title,
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-arrow,
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .badge {
+    display: none !important;
+}
+
+/* CENTRAR ICONOS EN MODO COLAPSADO */
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link {
+    text-align: center !important;
+    padding: 8px 0 !important;
+    justify-content: center !important;
+    margin: 2px 8px !important;
+    border-radius: 8px !important;
+    min-height: 36px !important;
+    transition: all 0.2s ease !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-icon {
+    margin: 0 !important;
+    font-size: 1.1rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* HOVER EN ICONOS COLAPSADOS */
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link:hover {
+    background-color: #eaecf4 !important;
+    transform: scale(1.05) !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link:hover .menu-icon {
+    color: #4e73df !important;
+}
+
+/* ESTADO ACTIVO EN MODO COLAPSADO */
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link.active {
+    background-color: #4e73df !important;
+    color: white !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link.active .menu-icon {
+    color: white !important;
+}
+
+/* HOVER PARA EXPANDIR TEMPORALMENTE */
+.sidebar-icon-only .sidebar:hover {
+    width: 255px !important;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1001;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .menu-title,
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .menu-arrow,
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .badge {
+    display: inline-block !important;
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    font-size: inherit !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link {
+    text-align: left !important;
+    padding: 18px 24px !important;
+    justify-content: flex-start !important;
+    background: transparent !important;
+    color: inherit !important;
+}
+
+.sidebar-icon-only .sidebar:hover .nav .nav-item .nav-link .menu-icon {
+    margin-right: 16px !important;
+}
+
+/* TRANSICIONES SUAVES */
+.sidebar {
+    transition: width 0.3s ease;
+}
+
+.main-panel {
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* NO TRANSICIÓN EN NAVBAR - SE MANTIENE FIJO */
+
+/* BOTÓN HAMBURGUESA PEGADO AL LOGO - SOLO UNO */
+.navbar .navbar-menu-wrapper .navbar-toggler {
+    order: 1 !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    flex-shrink: 0 !important;
+    border-left: 1px solid #e3e6f0 !important;
+    border-right: 1px solid #e3e6f0 !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    background: #f8f9fc !important;
+}
+
+/* OCULTAR BOTONES HAMBURGUESA DUPLICADOS */
+.navbar .navbar-menu-wrapper .navbar-toggler:not(:first-of-type) {
+    display: none !important;
+}
+
+.navbar .navbar-menu-wrapper .navbar-toggler ~ .navbar-toggler {
+    display: none !important;
+}
+
+.navbar .navbar-menu-wrapper .navbar-nav {
+    flex-direction: row !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+/* ASEGURAR QUE SOLO APAREZCA UNA BÚSQUEDA EN EL NAVBAR */
+.navbar .navbar-menu-wrapper .navbar-nav:not(.navbar-nav-right) .nav-item.nav-search ~ .nav-item.nav-search {
+    display: none !important;
+}
+
+/* SOLO UNA BARRA DE BÚSQUEDA */
+.navbar .navbar-menu-wrapper .nav-item.nav-search {
+    order: 2 !important;
+    flex: 1 !important;
+    max-width: 400px !important;
+    margin: 0 1rem !important;
+}
+
+.navbar .navbar-menu-wrapper .nav-item.nav-search .input-group {
+    width: 100% !important;
+}
+
+.navbar .navbar-menu-wrapper .nav-item.nav-search .form-control {
+    min-width: 250px !important;
+}
+
+/* OCULTAR BARRAS DE BÚSQUEDA DUPLICADAS */
+.navbar .navbar-menu-wrapper .nav-item.nav-search:not(:first-of-type) {
+    display: none !important;
+}
+
+/* REGLA ADICIONAL PARA PREVENIR DUPLICACIÓN */
+.navbar .navbar-menu-wrapper .navbar-nav .nav-item.nav-search:nth-child(n+2) {
+    display: none !important;
+}
+
+/* PREVENIR DUPLICACIÓN DE ELEMENTOS EN NAVBAR */
+.navbar .navbar-menu-wrapper > *:nth-child(n+4) {
+    display: none !important;
+}
+
+/* MANTENER SOLO: HAMBURGUESA + BÚSQUEDA + NOTIFICACIONES */
+.navbar .navbar-menu-wrapper > .navbar-toggler:nth-child(n+2),
+.navbar .navbar-menu-wrapper > button:nth-child(n+2) {
+    display: none !important;
+}
+
+.navbar .navbar-menu-wrapper .navbar-nav-right {
+    order: 3 !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    padding-right: 1rem !important;
+}
+
+/* HOVER EFFECT SIMPLE */
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link:hover {
+    background-color: rgba(255,255,255,0.1) !important;
+    border-radius: 6px;
+}
+
+/* ARREGLAR APARIENCIA DE TEXTOS EN SIDEBAR NORMAL */
+.sidebar .nav .nav-item .nav-link .menu-title {
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    font-size: 14px !important;
+    font-weight: normal !important;
+    display: inline-block !important;
+}
+
+/* ARREGLAR DIVISORES DE SECCIÓN */
+.sidebar .nav .nav-divider {
+    background: transparent !important;
+    border: none !important;
+    margin: 8px 0 4px 0 !important;
+    padding: 0 !important;
+}
+
+/* DIVISORES EN MODO COLAPSADO - MÁS COMPACTOS */
+.sidebar-icon-only .sidebar .nav .nav-divider {
+    margin: 6px 0 2px 0 !important;
+    height: auto !important;
+}
+
+.sidebar .nav .nav-divider .menu-title {
+    font-size: 11px !important;
+    color: #858796 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 16px !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+/* ARREGLAR SIDEBAR NORMAL (NO COLAPSADO) */
+.sidebar .nav .nav-item .nav-link {
+    background: transparent !important;
+    color: #5a5c69 !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 15px 20px !important;
+    margin: 2px 8px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.sidebar .nav .nav-item .nav-link:hover {
+    background-color: #eaecf4 !important;
+    color: #3a3b45 !important;
+}
+
+.sidebar .nav .nav-item .nav-link.active {
+    background-color: #4e73df !important;
+    color: white !important;
+}
+
+.sidebar .nav .nav-item .nav-link .menu-icon {
+    margin-right: 12px !important;
+    font-size: 1.1rem !important;
+    width: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* ESPACIADO MEJORADO PARA ITEMS DEL MENU */
+.sidebar-icon-only .sidebar .nav .nav-item {
+    margin-bottom: 1px !important;
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* MEJORAS ADICIONALES PARA MODO COLAPSADO */
+.sidebar-icon-only .sidebar .nav {
+    padding: 8px 0 !important;
+}
+
+.sidebar-icon-only {
+    overflow: visible !important;
+}
+
+.sidebar-icon-only .sidebar:hover {
+    overflow-y: auto !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 991px) {
+    .sidebar-icon-only .sidebar {
+        width: 0 !important;
+        margin-left: -255px;
+    }
+    
+    .sidebar-icon-only .main-panel {
+        margin-left: 255px !important;
+        width: calc(100% - 255px) !important;
+    }
+    
+    /* NAVBAR SIEMPRE MANTIENE SU ANCHO */
+    .navbar .navbar-brand-wrapper {
+        width: 255px !important;
+    }
+}

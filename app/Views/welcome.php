@@ -1,3 +1,3 @@
 <?= $header ?>
-<h3>Web</h3>
+<h3>Dashboard</h3>
 <?= $footer ?>
