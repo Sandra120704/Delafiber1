@@ -16,7 +16,7 @@
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <link rel="stylesheet" href="<?= base_url('css/vertical-layout-light/style.css') ?>">
 
-  <link rel="shortcut icon" href="<?= base_url('images/favicon.png') ?>" />
+  <link rel="shortcut icon" href="<?= base_url('image/favicon.ico') ?>" />
   
   <!-- Variables JavaScript globales -->
   <script>

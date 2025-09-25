@@ -285,16 +285,11 @@
     }
 
     /**
-     * Toggle del sidebar
+     * Toggle del sidebar - DESHABILITADO (manejado por off-canvas.js)
      */
     function initializeSidebarToggle() {
-        $('.navbar-toggler').on('click', function() {
-            if ($(this).hasClass('navbar-toggler-right')) {
-                $('body').toggleClass('sidebar-mini');
-            } else {
-                $('body').toggleClass('sidebar-collapse');
-            }
-        });
+        // Funcionalidad movida a off-canvas.js para evitar conflictos
+        console.log('Sidebar toggle manejado por off-canvas.js');
     }
 
     /**

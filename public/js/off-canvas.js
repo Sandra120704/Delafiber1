@@ -6,8 +6,15 @@
 (function($) {
     'use strict';
 
+    // Verificar que jQuery esté disponible
+    if (typeof $ === 'undefined') {
+        console.error('jQuery no está cargado - off-canvas.js');
+        return;
+    }
+
     // Inicialización del sidebar
     $(document).ready(function() {
+        console.log('off-canvas.js iniciando...');
         initializeSidebar();
         initializeOffCanvas();
         setActiveMenuItem();
@@ -17,29 +24,42 @@
      * Inicializar funcionalidades del sidebar
      */
     function initializeSidebar() {
-        // Toggle sidebar en desktop
-        $('[data-toggle="minimize"]').on('click', function() {
-            $('body').toggleClass('sidebar-collapse');
+        // Toggle sidebar en desktop - CORREGIDO CON CLASE CORRECTA
+        $('[data-toggle="minimize"], .navbar-toggler').off('click.sidebar').on('click.sidebar', function(e) {
+            e.preventDefault();
+            console.log('Hamburger button clicked'); // Debug
+            
+            $('body').toggleClass('sidebar-icon-only');
             
             // Guardar estado en localStorage
-            const isCollapsed = $('body').hasClass('sidebar-collapse');
+            const isCollapsed = $('body').hasClass('sidebar-icon-only');
             localStorage.setItem('sidebar-collapsed', isCollapsed);
+            
+            // Debug
+            console.log('Sidebar collapsed:', isCollapsed);
         });
 
         // Restaurar estado del sidebar
         const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
         if (isCollapsed) {
-            $('body').addClass('sidebar-collapse');
+            $('body').addClass('sidebar-icon-only');
         }
 
-        // Hover en sidebar colapsado
-        if ($('body').hasClass('sidebar-collapse')) {
-            $('.sidebar').on('mouseenter', function() {
+        // Hover en sidebar colapsado - mejorado
+        setupSidebarHover();
+    }
+
+    /**
+     * Configurar hover del sidebar
+     */
+    function setupSidebarHover() {
+        $('.sidebar').off('mouseenter.hover mouseleave.hover').on('mouseenter.hover', function() {
+            if ($('body').hasClass('sidebar-icon-only')) {
                 $('body').addClass('sidebar-hover');
-            }).on('mouseleave', function() {
-                $('body').removeClass('sidebar-hover');
-            });
-        }
+            }
+        }).on('mouseleave.hover', function() {
+            $('body').removeClass('sidebar-hover');
+        });
     }
 
     /**
