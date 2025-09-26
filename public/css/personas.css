@@ -1,11 +1,14 @@
+/* Tarjeta principal del módulo personas */
 .main-card {
     max-width: 120rem; /* corregido: no 12000rem */
     width: 100%;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(12, 38, 63, 0.08);
     background: #fff;
+    padding: 2rem 1.5rem; /* Mejor espaciado */
 }
 
+/* Avatar circular para personas */
 .person-avatar {
     width: 40px;
     height: 40px;
@@ -15,19 +18,51 @@
     justify-content: center;
     color: #fff;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 1rem; /* Más legible */
     text-transform: uppercase;
+    background: #007bff; /* Mejor contraste */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 
+/* Hover en filas de la tabla */
 .table-hover tbody tr:hover {
-    background: #f8f9fa;
+    background: #e9f5ff; /* Color más notorio */
+    cursor: pointer;
 }
 
+/* Texto pequeño y desvanecido */
 .small-muted {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #6c757d;
+    letter-spacing: 0.02em;
 }
 
+/* Botones de acciones agrupados */
 .btn-group-actions > * {
     margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Mejor accesibilidad en botones */
+.btn-group-actions .btn {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 0.95rem;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .main-card {
+        padding: 1rem 0.5rem;
+    }
+    .person-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+    .btn-group-actions .btn {
+        min-width: 28px;
+        min-height: 28px;
+        font-size: 0.85rem;
+    }
 }

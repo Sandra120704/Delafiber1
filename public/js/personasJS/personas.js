@@ -1,369 +1,573 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const dniInput = document.getElementById('dni');
-    const btnBuscar = document.getElementById('buscar-dni');
-    const apellidosInput = document.getElementById('apellidos');
-    const nombresInput = document.getElementById('nombres');
-    const buscando = document.getElementById('searching');
-    const formPersona = document.getElementById('form-persona');
-    const modalContainer = document.getElementById("modalContainer");
-    const inputBuscar = document.getElementById("buscar-persona");
-    const tablaPersonas = document.getElementById("tabla-personas");
+/**
+ * Gestor de Personas - JavaScript Optimizado
+ * Maneja formularios, búsquedas y conversión a leads
+ */
 
-    // Asegura que estas funciones existan
-    if (typeof activarBotonesEliminar === 'function') {
-        activarBotonesEliminar();
-    }
-    if (typeof activarBotonesEditar === 'function') {
-        activarBotonesEditar();
-    }
-    if (typeof activarBotonesConvertirLead === 'function') {
-        activarBotonesConvertirLead();
+class PersonaManager {
+    constructor() {
+        this.elements = this.getElements();
+        this.init();
     }
 
-btnBuscar?.addEventListener('click', async () => {
-    const dni = dniInput.value.trim();
-    if (!dni || dni.length !== 8 || isNaN(dni)) {
-        Swal.fire({ 
-            icon: 'warning', 
-            text: 'Ingrese un DNI válido de 8 dígitos',
-            toast: true, 
-            position: 'bottom-end', 
-            timer: 3000, 
-            showConfirmButton: false 
+    getElements() {
+        return {
+            dniInput: document.getElementById('dni'),
+            btnBuscar: document.getElementById('buscar-dni'),
+            apellidosInput: document.getElementById('apellidos'),
+            nombresInput: document.getElementById('nombres'),
+            buscando: document.getElementById('searching'),
+            formPersona: document.getElementById('form-persona'),
+            modalContainer: document.getElementById('modalContainer'),
+            inputBuscar: document.getElementById('buscar-persona'),
+            tablaPersonas: document.getElementById('tabla-personas')
+        };
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.activarBotonesAccion();
+        this.setupFormValidation();
+    }
+
+    setupEventListeners() {
+        // Búsqueda DNI
+        this.elements.btnBuscar?.addEventListener('click', () => this.buscarDNI());
+        
+        // Enter en campo DNI
+        this.elements.dniInput?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.buscarDNI();
+            }
         });
-        return;
+
+        // Envío de formulario
+        this.elements.formPersona?.addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // Búsqueda con debounce
+        if (this.elements.inputBuscar) {
+            this.elements.inputBuscar.addEventListener('input', 
+                this.debounce(() => this.buscarPersonas(), 300)
+            );
+        }
+
+        // Delegación de eventos para botones dinámicos
+        document.addEventListener('click', (e) => this.handleGlobalClick(e));
     }
 
-    buscando.classList.remove('d-none');
-    btnBuscar.disabled = true;
+    setupFormValidation() {
+        // Validación en tiempo real para DNI
+        this.elements.dniInput?.addEventListener('input', (e) => {
+            const value = e.target.value.replace(/\D/g, ''); // Solo números
+            e.target.value = value;
+            
+            if (value.length === 8) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-valid');
+                if (value.length > 0) e.target.classList.add('is-invalid');
+            }
+        });
 
-    try {
-        const res = await fetch(`${BASE_URL}personas/buscardni?q=${dni}`);
-        if (!res.ok) throw new Error('Error en la consulta');
+        // Validación para teléfono
+        const telefonoInput = document.getElementById('telefono');
+        telefonoInput?.addEventListener('input', (e) => {
+            const value = e.target.value.replace(/\D/g, ''); // Solo números
+            e.target.value = value;
+            
+            if (value.length === 9) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-valid');
+                if (value.length > 0) e.target.classList.add('is-invalid');
+            }
+        });
+    }
 
-        const data = await res.json();
+    async buscarDNI() {
+        const dni = this.elements.dniInput?.value.trim();
+        
+        if (!this.validarDNI(dni)) {
+            this.showMessage('warning', 'Ingrese un DNI válido de 8 dígitos');
+            return;
+        }
 
+        this.toggleLoading(true);
+
+        try {
+            const res = await fetch(`${BASE_URL}personas/buscardni?q=${dni}`);
+            const data = await res.json();
+
+            this.procesarRespuestaDNI(data, dni);
+            
+        } catch (error) {
+            console.error('Error buscando DNI:', error);
+            this.showMessage('error', 'Error al consultar el DNI');
+        } finally {
+            this.toggleLoading(false);
+        }
+    }
+
+    procesarRespuestaDNI(data, dni) {
         if (!data.success) {
-            apellidosInput.value = '';
-            nombresInput.value = '';
-            Swal.fire({
-                icon: 'info',
-                text: data.message || 'No se encontró la persona',
-                toast: true,
-                position: 'bottom-end',
-                timer: 3000,
-                showConfirmButton: false
-            });
+            this.limpiarCampos();
+            this.showMessage('info', data.message || 'No se encontró información');
             return;
         }
 
         if (data.registrado) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Persona ya registrada',
-                text: `El DNI ${dni} ya está registrado como: ${data.nombres} ${data.apepaterno} ${data.apematerno}`,
-                toast: true,
-                position: 'bottom-end',
-                timer: 4000,
-                showConfirmButton: false
-            });
-
-            apellidosInput.value = '';
-            nombresInput.value = '';
-
+            this.showMessage('info', 
+                `El DNI ${dni} ya está registrado como: ${data.nombres} ${data.apepaterno} ${data.apematerno}`,
+                'Persona ya registrada'
+            );
+            this.limpiarCampos();
         } else {
-            apellidosInput.value = `${data.apepaterno} ${data.apematerno}`;
-            nombresInput.value = data.nombres;
-
-            Swal.fire({
-                icon: 'success',
-                text: 'Persona encontrada. Complete y guarde para registrarla.',
-                toast: true,
-                position: 'bottom-end',
-                timer: 3000,
-                showConfirmButton: false
-            });
+            this.autocompletarCampos(data);
+            this.showMessage('success', 'Datos encontrados. Complete la información restante.');
         }
-
-    } catch (err) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Ocurrió un error al consultar el DNI',
-            toast: true,
-            position: 'bottom-end',
-            timer: 3000,
-            showConfirmButton: false
-        });
-    } finally {
-        buscando.classList.add('d-none');
-        btnBuscar.disabled = false;
     }
-});
 
-    formPersona?.addEventListener('submit', async (e) => {
+    autocompletarCampos(data) {
+        if (this.elements.apellidosInput) {
+            this.elements.apellidosInput.value = `${data.apepaterno || ''} ${data.apematerno || ''}`.trim();
+        }
+        if (this.elements.nombresInput) {
+            this.elements.nombresInput.value = data.nombres || '';
+        }
+        
+        // Enfocar siguiente campo
+        const telefonoInput = document.getElementById('telefono');
+        telefonoInput?.focus();
+    }
+
+    limpiarCampos() {
+        if (this.elements.apellidosInput) this.elements.apellidosInput.value = '';
+        if (this.elements.nombresInput) this.elements.nombresInput.value = '';
+    }
+
+    toggleLoading(show) {
+        if (this.elements.buscando) {
+            this.elements.buscando.classList.toggle('d-none', !show);
+        }
+        if (this.elements.btnBuscar) {
+            this.elements.btnBuscar.disabled = show;
+        }
+    }
+
+    async handleSubmit(e) {
         e.preventDefault();
-        const formData = new FormData(formPersona);
-        const submitBtn = formPersona.querySelector('[type="submit"]');
-        if (submitBtn) submitBtn.disabled = true;
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('[type="submit"]');
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Guardando...';
 
         try {
-            const res = await fetch(formPersona.action, { method: 'POST', body: formData });
+            const res = await fetch(form.action, { method: 'POST', body: formData });
             const data = await res.json();
 
             if (data.success) {
-                Swal.fire({
-                    title: 'Persona registrada',
-                    text: '¿Deseas convertirla en lead?',
-                    icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, convertir',
-                    cancelButtonText: 'No por ahora'
-                }).then(result => {
-                    if (result.isConfirmed) abrirModalLead(data.idpersona);
-                    else if (inputBuscar) inputBuscar.dispatchEvent(new Event("keyup"));
-                });
+                await this.handleSuccessfulSave(data);
             } else {
-                if (data.errors) {
-                    const mensajes = Object.values(data.errors).join('<br>');
-                    Swal.fire({ 
-                        title: 'Errores de validación', 
-                        html: mensajes, 
-                        icon: 'error' });
-                } else {
-                    Swal.fire({ 
-                        title: 'Error', 
-                        text: data.message, 
-                        icon: 'error' });
-                }
+                this.handleValidationErrors(data);
             }
-        } catch {
-            Swal.fire('Error', 'Error al registrar la persona', 'error');
+        } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('error', 'Error al procesar la solicitud');
         } finally {
-            if (submitBtn) submitBtn.disabled = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar';
         }
-    });
+    }
 
-    document.addEventListener('click', (e) => {
+    async handleSuccessfulSave(data) {
+        const result = await Swal.fire({
+            title: 'Persona guardada correctamente',
+            text: '¿Deseas convertirla en lead?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, convertir',
+            cancelButtonText: 'No por ahora',
+            reverseButtons: true
+        });
+
+        if (result.isConfirmed) {
+            await this.abrirModalLead(data.idpersona);
+        } else {
+            window.location.href = `${BASE_URL}personas`;
+        }
+    }
+
+    handleValidationErrors(data) {
+        // Limpiar errores previos
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+
+        if (data.errors) {
+            let firstError = null;
+            
+            Object.entries(data.errors).forEach(([field, message]) => {
+                const input = document.querySelector(`[name="${field}"]`);
+                if (input) {
+                    input.classList.add('is-invalid');
+                    const feedback = input.parentElement.querySelector('.invalid-feedback');
+                    if (feedback) feedback.textContent = message;
+                    if (!firstError) firstError = input;
+                }
+            });
+
+            firstError?.focus();
+            
+            const mensajes = Object.values(data.errors).join('<br>');
+            Swal.fire({ 
+                title: 'Errores de validación', 
+                html: mensajes, 
+                icon: 'error' 
+            });
+        } else {
+            this.showMessage('error', data.message);
+        }
+    }
+
+    handleGlobalClick(e) {
         if (e.target.matches('.btn-convertir-lead') || e.target.closest('.btn-convertir-lead')) {
             const button = e.target.closest('.btn-convertir-lead');
-            abrirModalLead(button.dataset.id);
+            this.abrirModalLead(button.dataset.id);
+        } else if (e.target.matches('.btn-eliminar') || e.target.closest('.btn-eliminar')) {
+            const button = e.target.closest('.btn-eliminar');
+            this.eliminarPersona(button.dataset.id);
+        } else if (e.target.matches('.btn-editar') || e.target.closest('.btn-editar')) {
+            const button = e.target.closest('.btn-editar');
+            this.editarPersona(button.dataset.id);
         }
-    });
+    }
 
-    // Función central para abrir el modal de Lead
-    async function abrirModalLead(idpersona) {
+    async abrirModalLead(idpersona) {
         try {
             const res = await fetch(`${BASE_URL}personas/modalCrear/${idpersona}`);
             if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+            
             const html = await res.text();
-            modalContainer.innerHTML = html;
+            this.elements.modalContainer.innerHTML = html;
 
-            const modalEl = document.getElementById("leadModal");
-            if (!modalEl) throw new Error("No se encontró el modal en el HTML");
+            const modalEl = document.getElementById('leadModal');
+            if (!modalEl) throw new Error('Modal no encontrado en el HTML');
 
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
 
-            // Lógica para manejar el envío del formulario del modal
-            const leadForm = modalEl.querySelector("#leadForm");
-            if (leadForm) {
-                leadForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const submitBtn = leadForm.querySelector('[type="submit"]');
-                    if (submitBtn) submitBtn.disabled = true;
+            this.setupLeadModalHandlers(modalEl);
 
-                    const url = `${BASE_URL}persona/guardarLead`;
-                    const formData = new FormData(leadForm);
-
-                    const origenSelect = leadForm.querySelector('#origenSelect');
-                    const selectedOption = origenSelect.options[origenSelect.selectedIndex];
-                    const tipo = selectedOption ? selectedOption.dataset.tipo : '';
-
-                    // Si el origen no es "Campaña", nos aseguramos de no enviar un valor que viole la llave foránea
-                    if (tipo !== 'campaña') {
-                        formData.set('idcampania', '');
-                    }
-                    
-                    // Si el origen no es "Referido", nos aseguramos de no enviar un valor que viole la llave foránea
-                    if (tipo !== 'referido') {
-                        // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: el campo se llama referido_por
-                        formData.set('referido_por', '');
-                    }
-
-                    try {
-                        const res = await fetch(url, {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const data = await res.json();
-
-                        if (data.success) {
-                                Swal.fire('¡Éxito!', data.message, 'success').then(() => {
-                                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                                    if (modalInstance) modalInstance.hide();
-
-                                    const redirectUrl = BASE_URL.endsWith('/')
-                                        ? BASE_URL + 'leads/index'
-                                        : BASE_URL + '/leads/index';
-
-                                    console.log("Redirigiendo a:", redirectUrl); 
-                                    window.location.href = redirectUrl;
-                                });
-                            }
-                            else {
-                            modalEl.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-
-                            if (data.errors) {
-                                for (const field in data.errors) {
-                                    const errorEl = modalEl.querySelector(`#${field}-error`);
-                                    if (errorEl) {
-                                        errorEl.textContent = data.errors[field];
-                                    }
-                                }
-                                Swal.fire('Errores de validación', 'Por favor, revise los campos marcados.', 'error');
-                            } else {
-                                Swal.fire('Error', data.message, 'error');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        Swal.fire('Error', 'Ocurrió un error al guardar el lead.', 'error');
-                    } finally {
-                        if (submitBtn) submitBtn.disabled = false;
-                    }
-                });
-            }
-
-            // Lógica para mostrar/ocultar campos del modal
-            const origenSelect = modalEl.querySelector('#origenSelect');
-            const campaniaDiv = modalEl.querySelector('#campaniaDiv');
-            const referidoDiv = modalEl.querySelector('#referidoDiv');
-
-            function toggleConditionalFields() {
-                const selectedOption = origenSelect.options[origenSelect.selectedIndex];
-                const tipo = selectedOption ? selectedOption.dataset.tipo : '';
-                
-                campaniaDiv.style.display = 'none';
-                referidoDiv.style.display = 'none';
-                
-                if (tipo === 'campaña') {
-                    campaniaDiv.style.display = 'block';
-                } else if (tipo === 'referido') {
-                    referidoDiv.style.display = 'block';
-                }
-            }
-            
-            toggleConditionalFields();
-            origenSelect.addEventListener('change', toggleConditionalFields);
-
-        } catch (err) {
-            console.error(err);
-            Swal.fire('Error', 'No se pudo abrir el modal de Lead', 'error');
+        } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('error', 'No se pudo abrir el modal de Lead');
         }
     }
 
-    if (inputBuscar) {
-        inputBuscar.addEventListener("keyup", async () => {
-            const query = inputBuscar.value;
+    setupLeadModalHandlers(modalEl) {
+        const leadForm = modalEl.querySelector('#leadForm');
+        if (!leadForm) return;
+
+        leadForm.addEventListener('submit', async (e) => {
+            await this.handleLeadSubmit(e, modalEl);
+        });
+
+        // Manejo de campos condicionales
+        const origenSelect = modalEl.querySelector('#origenSelect');
+        if (origenSelect) {
+            const toggleFields = () => this.toggleConditionalFields(modalEl);
+            toggleFields();
+            origenSelect.addEventListener('change', toggleFields);
+        }
+    }
+
+    toggleConditionalFields(modalEl) {
+        const origenSelect = modalEl.querySelector('#origenSelect');
+        const campaniaDiv = modalEl.querySelector('#campaniaDiv');
+        const referidoDiv = modalEl.querySelector('#referidoDiv');
+
+        if (!origenSelect) return;
+
+        const selectedOption = origenSelect.options[origenSelect.selectedIndex];
+        const tipo = selectedOption?.dataset.tipo || '';
+        
+        if (campaniaDiv) campaniaDiv.style.display = 'none';
+        if (referidoDiv) referidoDiv.style.display = 'none';
+        
+        if (tipo === 'campaña' && campaniaDiv) {
+            campaniaDiv.style.display = 'block';
+        } else if (tipo === 'referido' && referidoDiv) {
+            referidoDiv.style.display = 'block';
+        }
+    }
+
+    async handleLeadSubmit(e, modalEl) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const submitBtn = form.querySelector('[type="submit"]');
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+        
+        // Corregir URL aquí
+        const url = `${BASE_URL}personas/guardarLead`; // Agregada la 's'
+
+        try {
+            const res = await fetch(url, { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                await Swal.fire('¡Éxito!', data.message, 'success');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                modalInstance?.hide();
+                window.location.href = `${BASE_URL}leads/index`;
+            } else {
+                this.handleLeadErrors(data, modalEl);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('error', 'Error al guardar el lead');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    }
+
+    handleLeadErrors(data, modalEl) {
+        modalEl.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        if (data.errors) {
+            Object.entries(data.errors).forEach(([field, message]) => {
+                const errorEl = modalEl.querySelector(`#${field}-error`);
+                if (errorEl) errorEl.textContent = message;
+            });
+            this.showMessage('error', 'Revise los campos marcados');
+        } else {
+            this.showMessage('error', data.message);
+        }
+    }
+
+    async buscarPersonas() {
+        if (!this.elements.inputBuscar || !this.elements.tablaPersonas) return;
+
+        const query = this.elements.inputBuscar.value.trim();
+        
+        this.elements.tablaPersonas.innerHTML = 
+            '<tr><td colspan="6" class="text-center"><div class="spinner-border spinner-border-sm"></div> Buscando...</td></tr>';
+
+        try {
+            const res = await fetch(`${BASE_URL}personas/buscarAjax?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            
+            this.renderResultados(data);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            this.elements.tablaPersonas.innerHTML = 
+                '<tr><td colspan="6" class="text-center text-danger">Error al realizar la búsqueda</td></tr>';
+        }
+    }
+
+    renderResultados(personas) {
+        if (personas.length === 0) {
+            this.elements.tablaPersonas.innerHTML = 
+                '<tr><td colspan="6" class="text-center text-muted">No se encontraron resultados</td></tr>';
+            return;
+        }
+
+        const colors = ['#8e44ad','#2980b9','#16a085','#e67e22','#c0392b'];
+        
+        this.elements.tablaPersonas.innerHTML = personas.map((persona, index) => {
+            const color = colors[index % colors.length];
+            const iniciales = persona.nombres.charAt(0) + (persona.apellidos?.charAt(0) || '');
+            
+            return `
+                <tr>
+                    <td>${persona.idpersona}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="person-avatar" style="background:${color};">
+                                    ${iniciales.toUpperCase()}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fw-bold">${persona.nombres} ${persona.apellidos}</div>
+                                <div class="small text-muted">${persona.direccion || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${persona.dni}</td>
+                    <td><a href="tel:${persona.telefono}">${persona.telefono}</a></td>
+                    <td><a href="mailto:${persona.correo || ''}">${persona.correo || 'Sin correo'}</a></td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-actions" role="group">
+                            <button class="btn btn-sm btn-outline-warning btn-editar" data-id="${persona.idpersona}">Editar</button>
+                            <button class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${persona.idpersona}">Eliminar</button>
+                            <button class="btn btn-sm btn-success btn-convertir-lead" data-id="${persona.idpersona}" title="Convertir en Lead">
+                                <i class="bi bi-arrow-right-circle"></i> Lead
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async eliminarPersona(personaId) {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'No podrás revertir esta acción.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33'
+        });
+
+        if (result.isConfirmed) {
             try {
-                const res = await fetch(`${BASE_URL}personas/buscarAjax?q=${query}`);
-                const data = await res.json();
-                tablaPersonas.innerHTML = '';
-
-                if (data.length === 0) {
-                    tablaPersonas.innerHTML = `<tr><td colspan="4" class="text-center">No se encontraron resultados</td></tr>`;
-                    return;
-                }
-
-                data.forEach(persona => {
-                    tablaPersonas.innerHTML += `
-                        <tr>
-                            <td>${persona.dni}</td>
-                            <td>${persona.nombres}</td>
-                            <td>${persona.apellidos}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary btn-editar" data-id="${persona.idpersona}">Editar</button>
-                                <button class="btn btn-sm btn-danger btn-eliminar" data-id="${persona.idpersona}">Eliminar</button>
-                                <button class="btn btn-sm btn-success btn-convertir-lead" data-id="${persona.idpersona}">Convertir Lead</button>
-                            </td>
-                        </tr>
-                    `;
+                const res = await fetch(`${BASE_URL}personas/eliminar/${personaId}`, { 
+                    method: 'POST' 
                 });
+                const data = await res.json();
 
-                activarBotonesEliminar();
-                activarBotonesEditar();
-            } catch {
-                tablaPersonas.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error al buscar</td></tr>`;
+                if (data.success) {
+                    this.showMessage('success', data.message, 'Eliminado');
+                    // Actualizar tabla si existe
+                    if (this.elements.inputBuscar) {
+                        this.buscarPersonas();
+                    }
+                } else {
+                    this.showMessage('error', data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showMessage('error', 'Error al eliminar la persona');
+            }
+        }
+    }
+
+    async editarPersona(personaId) {
+        try {
+            const res = await fetch(`${BASE_URL}personas/editar/${personaId}`);
+            if (!res.ok) throw new Error('Error al cargar datos');
+            
+            const html = await res.text();
+            this.elements.modalContainer.innerHTML = html;
+            
+            const modalEl = document.getElementById('editModal');
+            if (!modalEl) throw new Error('Modal de edición no encontrado');
+
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+
+            this.setupEditModalHandlers(modalEl, modal);
+
+        } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('error', 'No se pudo abrir el modal de edición');
+        }
+    }
+
+    setupEditModalHandlers(modalEl, modal) {
+        const editForm = modalEl.querySelector('#form-editar-persona');
+        if (!editForm) return;
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = editForm.querySelector('[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Actualizando...';
+
+            try {
+                const formData = new FormData(editForm);
+                const res = await fetch(editForm.action, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    this.showMessage('success', data.message, 'Actualizado');
+                    modal.hide();
+                    
+                    // Actualizar tabla si existe
+                    if (this.elements.inputBuscar) {
+                        this.buscarPersonas();
+                    }
+                } else {
+                    this.handleValidationErrors(data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showMessage('error', 'Error al actualizar la persona');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
             }
         });
     }
 
-    function activarBotonesEliminar() {
-        document.querySelectorAll(".btn-eliminar").forEach(button => {
-            button.addEventListener("click", () => {
-                const personaId = button.dataset.id;
-                Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "No podrás revertir esta acción.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "Cancelar"
-                }).then(result => {
-                    if (result.isConfirmed) {
-                        fetch(`${BASE_URL}personas/eliminar/${personaId}`, { method: "POST" })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) Swal.fire("Eliminado!", data.message, "success").then(() => inputBuscar.dispatchEvent(new Event("keyup")));
-                                else Swal.fire("Error!", data.message, "error");
-                            });
-                    }
-                });
-            });
-        });
+    // Funciones auxiliares
+    activarBotonesAccion() {
+        // Ya se maneja con delegación de eventos
+        console.log('Eventos de botones configurados mediante delegación');
     }
 
-    function activarBotonesEditar() {
-        document.querySelectorAll('.btn-editar').forEach(button => {
-            button.addEventListener('click', async () => {
-                const personaId = button.dataset.id;
-                try {
-                    const res = await fetch(`${BASE_URL}personas/editar/${personaId}`);
-                    if (!res.ok) throw new Error();
-                    const html = await res.text();
-                    modalContainer.innerHTML = html;
-                    const modalEl = document.getElementById("editModal");
-                    const modal = new bootstrap.Modal(modalEl);
-                    modal.show();
-
-                    const editForm = modalEl.querySelector("#form-editar-persona");
-                    if (!editForm) throw new Error();
-
-                    editForm.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const formData = new FormData(editForm);
-                        try {
-                            const res = await fetch(editForm.action, { method: 'POST', body: formData });
-                            const data = await res.json();
-                            if (data.success) {
-                                Swal.fire('¡Actualizado!', data.message, 'success').then(() => inputBuscar.dispatchEvent(new Event("keyup")));
-                                modal.hide();
-                            } else if (data.errors) {
-                                const mensajes = Object.values(data.errors).join('<br>');
-                                Swal.fire({ title: 'Errores de validación', html: mensajes, icon: 'error' });
-                            } else {
-                                Swal.fire('Error!', data.message, 'error');
-                            }
-                        } catch {
-                            Swal.fire('Error!', 'No se pudo actualizar la persona.', 'error');
-                        }
-                    });
-                } catch {
-                    Swal.fire('Error', 'No se pudo abrir el modal de edición', 'error');
-                }
-            });
-        });
+    validarDNI(dni) {
+        return dni && dni.length === 8 && /^\d+$/.test(dni);
     }
+
+    showMessage(type, message, title = '') {
+        const config = {
+            icon: type,
+            text: message,
+            toast: true,
+            position: 'bottom-end',
+            timer: 4000,
+            showConfirmButton: false,
+            timerProgressBar: true
+        };
+
+        if (title) config.title = title;
+        
+        Swal.fire(config);
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    window.personaManager = new PersonaManager();
 });
+
+// Funciones globales para compatibilidad (si se necesitan)
+function activarBotonesEliminar() {
+    console.log('Función legacy - ahora manejada por PersonaManager');
+}
+
+function activarBotonesEditar() {
+    console.log('Función legacy - ahora manejada por PersonaManager');
+}
+
+function activarBotonesConvertirLead() {
+    console.log('Función legacy - ahora manejada por PersonaManager');
+}

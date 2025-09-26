@@ -1,5 +1,5 @@
 <?= $header ?>
- <link rel="stylesheet" href="<?= base_url('css/personas.css') ?>"> 
+<link rel="stylesheet" href="<?= base_url('css/personas.css') ?>">
 
 <div class="d-flex justify-content-center py-5">
   <div class="main-card p-4 mx-auto">
@@ -83,9 +83,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
   const BASE_URL = "<?= rtrim(base_url(), '/') ?>/";
 </script>
-
 <script src="<?= base_url('js/personasJS/personas.js') ?>"></script>

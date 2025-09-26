@@ -23,11 +23,15 @@ class PersonaModel extends Model
         'telefono',
         'direccion',
         'iddistrito',
-        'referencias'
+        'referencias',
+        'created_at',
+        'updated_at'
     ];
     
-    protected $useTimestamps = false; 
-    
+    protected $useTimestamps = true; // Activa timestamps
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+
     protected $validationRules = [
         'dni' => 'required|exact_length[8]|is_unique[personas.dni,idpersona,{idpersona}]',
         'nombres' => 'required|max_length[100]',

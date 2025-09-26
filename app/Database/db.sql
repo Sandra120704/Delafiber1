@@ -1,4 +1,4 @@
--- Active: 1757456393932@@127.0.0.1@3306@delafiber
+-- Active: 1758854975906@@127.0.0.1@3306@delafiber
 drop DATABASE if exists delafiber;
 CREATE DATABASE delafiber;
 USE delafiber;
@@ -31,14 +31,21 @@ CREATE TABLE personas (
     idpersona INT AUTO_INCREMENT PRIMARY KEY,
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
-    dni VARCHAR(20) UNIQUE,
+    dni VARCHAR(8) UNIQUE,
     correo VARCHAR(150),
     telefono VARCHAR(9),
     direccion VARCHAR(255),
     referencias VARCHAR(255),
     iddistrito INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_personas_nombre ON personas(nombres, apellidos);
+CREATE INDEX idx_personas_telefono ON personas(telefono);
+CREATE INDEX idx_personas_dni ON personas(dni);
+CREATE INDEX idx_personas_correo ON personas(correo);
 
 CREATE TABLE roles (
     idrol INT AUTO_INCREMENT PRIMARY KEY,
@@ -143,6 +150,32 @@ CREATE TABLE leads (
     CONSTRAINT fk_lead_usuario_registro FOREIGN KEY (idusuario_registro)REFERENCES usuarios(idusuario) ON DELETE SET NULL,
     CONSTRAINT fk_lead_referido_por FOREIGN KEY (referido_por)REFERENCES personas(idpersona) ON DELETE SET NULL
 );
+CREATE TABLE leads_historial (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  idlead int(11) NOT NULL,
+  idusuario int(11) NOT NULL,
+  accion varchar(50) NOT NULL,
+  descripcion text NOT NULL,
+  etapa_anterior int(11) NULL,
+  etapa_nueva int(11) NULL,
+  fecha datetime NOT NULL,
+  datos_adicionales json NULL,
+  PRIMARY KEY (id),
+  KEY idx_idlead (idlead),
+  KEY idx_fecha (fecha)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE oportunidades (
+    idoportunidad INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    idlead INT,
+    valor_estimado DECIMAL(12,2) DEFAULT 0,
+    fecha_cierre DATE,
+    estado VARCHAR(50),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+SHOW CREATE TABLE oportunidades;
 
 CREATE TABLE seguimiento (
     idseguimiento INT AUTO_INCREMENT PRIMARY KEY,
@@ -236,6 +269,7 @@ INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('cgarcia', '123456', 2, 3),
 ('atorres', '123456', 2, 4); 
 
+
 -- Orígenes de leads
 INSERT INTO origenes (nombre) VALUES 
 ('Campaña Digital'), 
@@ -324,4 +358,5 @@ FROM campanias c
 LEFT JOIN usuarios u ON u.idusuario = c.responsable
 LEFT JOIN personas p ON p.idpersona = u.idpersona
 LEFT JOIN difusiones d ON d.idcampania = c.idcampania
+GROUP BY c.idcampania;
 GROUP BY c.idcampania;

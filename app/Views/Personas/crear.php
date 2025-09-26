@@ -1,5 +1,5 @@
 <?= $header ?>
- <link rel="stylesheet" href="<?= base_url('css/persona.css') ?>"> 
+<link rel="stylesheet" href="<?= base_url('css/personas.css') ?>"> 
 
 <div class="container-fluid mt-4 custom-container">
   <div class="row justify-content-center">
@@ -71,6 +71,8 @@
                           <input type="text" class="form-control" name="referencias" id="referencias" value="<?= esc($persona['referencias'] ?? '') ?>">
                       </div>
                   </div>
+
+                  <input type="hidden" name="idpersona" value="<?= esc($persona['idpersona'] ?? '') ?>">
 
               </div>
               <div class="card-footer text-end">

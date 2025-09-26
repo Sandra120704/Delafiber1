@@ -6,27 +6,11 @@ use App\Models\PersonaModel;
 use App\Models\LeadModel;
 use App\Models\CampanaModel;
 
-/**
- * ===================================================
- * CONTROLADOR DE GESTIÓN DE OPORTUNIDADES - DELAFIBER
- * ===================================================
- * 
- * Este controlador maneja las oportunidades de negocio:
- * - Prospectos potenciales de fibra óptica
- * - Oportunidades de venta (upgrades, nuevos servicios)
- * - Pipeline de ventas y seguimiento
- * - Cotizaciones y propuestas comerciales
- * - Análisis de mercado y territorios
- * 
- * Empresa: Delafiber (Servicios de Fibra Óptica)
- * @author Tu Nombre
- * @date 2025
- */
 class OportunidadesController extends BaseController
 {
     // ===== MODELOS PRINCIPALES =====
     protected $personaModel;      // Para datos de prospectos
-    protected $leadModel;         // Para oportunidades de venta
+    protected $oportunidadesModel; // Para oportunidades de venta
     protected $campanaModel;      // Para campañas comerciales
 
     /**
@@ -34,22 +18,11 @@ class OportunidadesController extends BaseController
      */
     public function __construct()
     {
-        $this->personaModel = new PersonaModel();
-        $this->leadModel = new LeadModel();
-        $this->campanaModel = new CampanaModel();
+    $this->personaModel = new PersonaModel();
+    $this->oportunidadesModel = new \App\Models\OportunidadesModel();
+    $this->campanaModel = new CampanaModel();
     }
 
-    /**
-     * ===============================================
-     * DASHBOARD DE OPORTUNIDADES DE NEGOCIO
-     * ===============================================
-     * 
-     * Panel principal que muestra:
-     * - Pipeline de ventas por etapas
-     * - Oportunidades de mayor valor
-     * - Territorios con potencial
-     * - Métricas de conversión
-     */
     public function index()
     {
         $datosOportunidades = [
@@ -115,7 +88,7 @@ class OportunidadesController extends BaseController
             $datosOportunidad = $this->prepararDatosOportunidad();
             
             // Guardar en base de datos
-            $idOportunidad = $this->leadModel->insert($datosOportunidad);
+            $idOportunidad = $this->oportunidadesModel->insert($datosOportunidad);
             
             if ($idOportunidad) {
                 return redirect()->to('oportunidades')
@@ -143,7 +116,7 @@ class OportunidadesController extends BaseController
      */
     private function contarOportunidadesAbiertas()
     {
-        return $this->leadModel
+        return $this->oportunidadesModel
             ->where('estado !=', 'cerrado')
             ->where('estado !=', 'perdido')
             ->countAllResults();
@@ -154,13 +127,12 @@ class OportunidadesController extends BaseController
      */
     private function calcularValorTotalPipeline()
     {
-        $resultado = $this->leadModel
+        $resultado = $this->oportunidadesModel
             ->selectSum('valor_estimado')
             ->where('estado !=', 'cerrado')
             ->where('estado !=', 'perdido')
             ->get()
             ->getRow();
-            
         return $resultado->valor_estimado ?? 0;
     }
 
@@ -170,19 +142,16 @@ class OportunidadesController extends BaseController
     private function calcularTasaConversion()
     {
         $inicioMes = date('Y-m-01');
-        
         // Oportunidades cerradas exitosamente este mes
-        $cerradasGanadas = $this->leadModel
+        $cerradasGanadas = $this->oportunidadesModel
             ->where('estado', 'cerrado')
             ->where('fecha_cierre >=', $inicioMes)
             ->countAllResults();
-            
         // Total de oportunidades trabajadas este mes
-        $totalTrabajadas = $this->leadModel
+        $totalTrabajadas = $this->oportunidadesModel
             ->where('updated_at >=', $inicioMes)
             ->whereIn('estado', ['cerrado', 'perdido', 'en_proceso'])
             ->countAllResults();
-            
         return $totalTrabajadas > 0 ? round(($cerradasGanadas / $totalTrabajadas) * 100, 2) : 0;
     }
 
@@ -200,7 +169,7 @@ class OportunidadesController extends BaseController
      */
     private function obtenerPipelinePorEtapas()
     {
-        return $this->leadModel
+        return $this->oportunidadesModel
             ->select('estado, COUNT(*) as cantidad, SUM(valor_estimado) as valor_total')
             ->where('estado !=', 'cerrado')
             ->where('estado !=', 'perdido')
@@ -213,11 +182,8 @@ class OportunidadesController extends BaseController
      */
     private function obtenerOportunidadesPorTerritorio()
     {
-        return $this->leadModel
-            ->select('territorio, COUNT(*) as cantidad, AVG(valor_estimado) as valor_promedio')
-            ->groupBy('territorio')
-            ->orderBy('cantidad', 'DESC')
-            ->findAll();
+
+        return [];
     }
 
     /**
@@ -226,8 +192,7 @@ class OportunidadesController extends BaseController
     private function obtenerTendenciaVentas()
     {
         $seisMesesAtras = date('Y-m-01', strtotime('-6 months'));
-        
-        return $this->leadModel
+        return $this->oportunidadesModel
             ->select('DATE_FORMAT(fecha_cierre, "%Y-%m") as mes, 
                      COUNT(*) as oportunidades_cerradas,
                      SUM(valor_estimado) as ingresos')
@@ -243,12 +208,12 @@ class OportunidadesController extends BaseController
      */
     private function obtenerOportunidadesDestacadas()
     {
-        return $this->leadModel
-            ->select('leads.*, personas.nombres, personas.apellidos, personas.telefono')
-            ->join('personas', 'leads.idpersona = personas.idpersona')
-            ->where('leads.estado !=', 'cerrado')
-            ->where('leads.estado !=', 'perdido')
-            ->orderBy('leads.valor_estimado', 'DESC')
+        return $this->oportunidadesModel
+            ->select('oportunidades.*, personas.nombres, personas.apellidos, personas.telefono')
+            ->join('personas', 'oportunidades.idlead = personas.idpersona')
+            ->where('oportunidades.estado !=', 'cerrado')
+            ->where('oportunidades.estado !=', 'perdido')
+            ->orderBy('oportunidades.valor_estimado', 'DESC')
             ->limit(10)
             ->findAll();
     }
@@ -259,13 +224,12 @@ class OportunidadesController extends BaseController
     private function obtenerProximosVencimientos()
     {
         $dentroDeUnaSemana = date('Y-m-d', strtotime('+7 days'));
-        
-        return $this->leadModel
-            ->select('leads.*, personas.nombres, personas.apellidos')
-            ->join('personas', 'leads.idpersona = personas.idpersona')
-            ->where('leads.fecha_vencimiento <=', $dentroDeUnaSemana)
-            ->where('leads.estado !=', 'cerrado')
-            ->orderBy('leads.fecha_vencimiento', 'ASC')
+        return $this->oportunidadesModel
+            ->select('oportunidades.*, personas.nombres, personas.apellidos')
+            ->join('personas', 'oportunidades.idlead = personas.idpersona')
+            ->where('oportunidades.fecha_cierre <=', $dentroDeUnaSemana)
+            ->where('oportunidades.estado !=', 'cerrado')
+            ->orderBy('oportunidades.fecha_cierre', 'ASC')
             ->findAll();
     }
 

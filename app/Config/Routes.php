@@ -6,6 +6,7 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+// Configuración base
 $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Home');
 $routes->setDefaultMethod('index');
@@ -13,43 +14,38 @@ $routes->setTranslateURIDashes(false);
 $routes->set404Override();
 $routes->setAutoRoute(false);
 
-// Home
+// -------------------- HOME & DASHBOARD --------------------
 $routes->get('/', 'Home::index');
 $routes->get('dashboard', 'DashboardController::index');
 $routes->get('dashboard/index', 'DashboardController::index');
-$routes->get('Dashboard', 'DashboardController::index'); // Nueva ruta para /Dashboard
+$routes->get('Dashboard', 'DashboardController::index'); // Compatibilidad
 
-// Funcionalidades del header
+// -------------------- HEADER FUNCIONALIDADES --------------------
 $routes->post('dashboard/buscar', 'DashboardController::buscar');
 $routes->get('dashboard/notificaciones', 'DashboardController::notificaciones');
 $routes->post('dashboard/marcar-leida', 'DashboardController::marcarLeida');
 $routes->get('dashboard/perfil', 'DashboardController::perfil');
 $routes->get('dashboard/estadisticas', 'DashboardController::estadisticasRapidas');
 
-// Test route
-
-
-// Login
+// -------------------- LOGIN --------------------
 $routes->get('login', 'LoginController::index');
 $routes->post('login/auth', 'LoginController::auth');
 $routes->get('logout', 'LoginController::logout');
 
-// Personas
+// -------------------- PERSONAS --------------------
 $routes->group('personas', function($routes) {
     $routes->get('/', 'PersonaController::index');
     $routes->get('crear', 'PersonaController::crear');
     $routes->get('editar/(:num)', 'PersonaController::editar/$1');
     $routes->post('guardar', 'PersonaController::guardar');
     $routes->post('eliminar/(:num)', 'PersonaController::eliminar/$1');
-    $routes->get('buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
-    $routes->get('buscarAjax', 'PersonaController::buscarAjax');
-    $routes->get('modalCrear/(:num)', 'PersonaController::modalCrear/$1');
-    $routes->post('guardarLead', 'PersonaController::guardarLead');
+    $routes->get('buscardni', 'PersonaController::buscardni'); // AJAX: Buscar DNI por GET ?q=xxxxxxx
+    $routes->get('buscarAjax', 'PersonaController::buscarAjax'); // AJAX: Buscador general
+    $routes->get('modalCrear/(:num)', 'PersonaController::modalCrear/$1'); // Modal para crear lead desde persona
+    $routes->post('guardarLead', 'PersonaController::guardarLead'); // Guardar lead desde persona
 });
 
-$routes->post('persona/guardarLead', 'PersonaController::guardarLead');
-
-// Campañas
+// -------------------- CAMPAÑAS --------------------
 $routes->group('campanas', function($routes) {
     $routes->get('/', 'CampanaController::index');
     $routes->get('crear', 'CampanaController::crear');
@@ -58,18 +54,18 @@ $routes->group('campanas', function($routes) {
     $routes->delete('eliminar/(:num)', 'CampanaController::eliminar/$1');
     $routes->get('detalle/(:num)', 'CampanaController::detalle/$1');
     $routes->put('estado/(:num)', 'CampanaController::estado/$1');
-    $routes->post('estado/(:num)', 'CampanaController::estado/$1'); // Mantener compatibilidad
+    $routes->post('estado/(:num)', 'CampanaController::estado/$1');
     $routes->get('resumen', 'CampanaController::resumen');
     $routes->get('datos', 'CampanaController::getCampanas');
     $routes->get('exportar', 'CampanaController::exportar');
-    $routes->post('export', 'CampanaController::exportar'); // Ruta para JS moderno
+    $routes->post('export', 'CampanaController::exportar');
     $routes->post('duplicar/(:num)', 'CampanaController::duplicar/$1');
     $routes->get('analytics', 'CampanaController::analytics');
-    $routes->post('verificar-nombre', 'CampanaController::verificarNombre'); // Nueva ruta
-    $routes->get('alertas', 'CampanaController::getAlertas'); // Nueva ruta
+    $routes->post('verificar-nombre', 'CampanaController::verificarNombre');
+    $routes->get('alertas', 'CampanaController::getAlertas');
 });
 
-// Leads
+// -------------------- LEADS --------------------
 $routes->group('leads', function($routes) {
     $routes->get('/', 'LeadController::index');
     $routes->get('index', 'LeadController::index');
@@ -87,11 +83,9 @@ $routes->group('leads', function($routes) {
     $routes->post('actualizarEstadoTarea', 'LeadController::actualizarEstadoTarea');
     $routes->post('guardarSeguimiento', 'LeadController::guardarSeguimiento');
 });
+$routes->get('leads/index', 'LeadController::index'); // Compatibilidad
 
-// Ruta adicional para leads/index (fuera del grupo)
-$routes->get('leads/index', 'LeadController::index');
-
-// Tareas
+// -------------------- TAREAS --------------------
 $routes->get('tarea/tarea', 'TareaController::index');
 $routes->group('tareas', function($routes) {
     $routes->get('/', 'TareaController::index');
@@ -102,7 +96,7 @@ $routes->group('tareas', function($routes) {
     $routes->get('calendario', 'TareaController::calendario');
 });
 
-// Usuarios
+// -------------------- USUARIOS --------------------
 $routes->group('usuarios', function($routes) {
     $routes->get('/', 'UsuarioController::index');
     $routes->get('crear', 'UsuarioController::crear');
@@ -112,20 +106,20 @@ $routes->group('usuarios', function($routes) {
     $routes->post('cambiarEstado/(:num)', 'UsuarioController::cambiarEstado/$1');
 });
 
-// Ubicación
+// -------------------- UBICACIÓN --------------------
 $routes->group('ubicacion', function($routes) {
     $routes->get('provincias/(:num)', 'UbicacionController::getProvincias/$1');
     $routes->get('distritos/(:num)', 'UbicacionController::getDistritos/$1');
 });
 
-// Medios
+// -------------------- MEDIOS --------------------
 $routes->group('medios', function($routes) {
     $routes->get('/', 'MedioController::index');
     $routes->post('guardar', 'MedioController::guardar');
     $routes->get('activos', 'MedioController::getActivos');
 });
 
-// API
+// -------------------- API --------------------
 $routes->group('api', function($routes) {
     $routes->get('personas/buscardni/(:num)', 'PersonaController::BuscadorDni/$1');
     $routes->group('campanas', function($routes) {
@@ -138,18 +132,18 @@ $routes->group('api', function($routes) {
     });
 });
 
-// Compatibilidad
+// -------------------- COMPATIBILIDAD --------------------
 $routes->get('campana/(:any)', 'CampanaController::$1');
 $routes->get('persona/(:any)', 'PersonaController::$1');
 
-// Rutas adicionales del menú
+// -------------------- MENÚ PRINCIPAL --------------------
 $routes->get('oportunidades', 'OportunidadesController::index');
 $routes->get('clientes', 'ClientesController::index');
 $routes->get('mensajes', 'MensajesController::index');
 $routes->get('reportes', 'ReportesController::index');
 $routes->get('configuracion', 'ConfiguracionController::index');
 
-// Rutas específicas de reportes
+// -------------------- REPORTES --------------------
 $routes->group('reportes', function($routes) {
     $routes->get('/', 'ReportesController::index');
     $routes->get('ventasConversion', 'ReportesController::ventasConversion');
@@ -159,7 +153,7 @@ $routes->group('reportes', function($routes) {
     $routes->get('exportar', 'ReportesController::exportar');
 });
 
-// Desarrollo
+// -------------------- DESARROLLO --------------------
 if (ENVIRONMENT === 'development') {
     $routes->get('debug/routes', function() {
         $routes = service('routes');
@@ -180,3 +174,7 @@ if (ENVIRONMENT === 'development') {
         }
     });
 }
+
+// -------------------- RUTAS AJAX ESPECÍFICAS --------------------
+$routes->get('personas/buscardni', 'PersonaController::buscardni'); // AJAX: Buscar DNI
+$routes->get('configuracion/obtener-preferencias', 'Configuracion::obtener_preferencias');
