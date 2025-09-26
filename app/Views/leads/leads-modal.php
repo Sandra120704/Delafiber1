@@ -1,4 +1,3 @@
-
 <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -203,6 +202,14 @@
             </form>
         </div>
     </div>
+</div>
+<!-- Agregar esto temporalmente en tu modal para debug -->
+<div class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px;">
+    <h6>Debug Info:</h6>
+    <p>Origenes disponibles:</p>
+    <?php foreach($origenes as $origen): ?>
+        <small>- <?= $origen['nombre'] ?> (tipo: <?= $origen['tipo'] ?? 'NULL' ?>)</small><br>
+    <?php endforeach; ?>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

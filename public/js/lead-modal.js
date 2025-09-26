@@ -424,3 +424,13 @@ window.debugLeadModal = function() {
     console.log('Referido div:', document.getElementById('referidoDiv'));
     console.log('BASE_URL:', typeof BASE_URL !== 'undefined' ? BASE_URL : 'NO DEFINIDA');
 };
+
+// Código para cargar el contenido del modal dinámicamente
+function cargarContenidoModal(html) {
+    const modal = document.getElementById("leadModal");
+    if (!modal) {
+        Swal.fire('Error', 'No se encontró el elemento #leadModal en el DOM', 'error');
+        return;
+    }
+    modal.innerHTML = html;
+}

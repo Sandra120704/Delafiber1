@@ -104,21 +104,23 @@ class PersonaController extends BaseController
         }
 
         $modalidades = $this->modalidadesModel->findAll();
-        $origenes    = $this->origenModel->findAll();
+        // Asegúrate de que 'tipo' está presente en cada origen
+        $origenes = $this->origenModel->findAll(); // Si tu modelo no lo trae, usa un select personalizado
+
         $campanias   = $this->campaniaModel->findAll();
         $distritos   = $this->distritoModel->findAll();
-        $personas = $this->personaModel->findAll();
+        $personas    = $this->personaModel->findAll();
 
         $data = [
             'persona'     => $persona,
             'modalidades' => $modalidades,
-            'origenes'    => $origenes,
+            'origenes'    => $origenes,    // ← Debe incluir el campo 'tipo'
             'campanias'   => $campanias,
             'distritos'   => $distritos,
             'personas'    => $personas, 
         ];
 
-        return view('leads/leads-modal', $data); // Usa la vista refactorizada
+        return view('leads/leads-modal', $data);
     }
 
     public function guardarLead()
@@ -145,7 +147,7 @@ class PersonaController extends BaseController
 
             // 2. Verificar que no tenga leads activos
             $leadExistente = $this->leadModel
-                ->where('idpersona', $persona['idpersona'])
+                ->where('idpersona', $persona->idpersona) 
                 ->where('estado !=', 'Descartado')
                 ->first();
             
@@ -401,7 +403,6 @@ class PersonaController extends BaseController
                 return $this->response->setJSON(['success' => false, 'message' => 'Lead no encontrado']);
             }
 
-            // Obtener información adicional según el origen
             $detalles = ['lead' => $lead];
             
             if ($lead['idcampania']) {
@@ -412,7 +413,6 @@ class PersonaController extends BaseController
                 $detalles['referido_por'] = $this->personaModel->find($lead['referido_por']);
             }
 
-            // Obtener historial
             $historialModel = new LeadHistorialModel();
             $detalles['historial'] = $historialModel->where('idlead', $idlead)
                                                    ->orderBy('fecha', 'DESC')

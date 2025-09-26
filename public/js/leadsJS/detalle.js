@@ -1,4 +1,18 @@
 // detalle.js
+function bindFormAjax(formSelector, url, successCallback) {
+    $(formSelector).off('submit').on('submit', function(e) {
+        e.preventDefault();
+        $.post(url, $(this).serialize(), function(res) {
+            if (res.success) {
+                successCallback(res);
+                $(formSelector)[0].reset();
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        }, 'json');
+    });
+}
+
 $(document).ready(function() {
 
     $(document).on('click', '.kanban-card', function() {
@@ -36,31 +50,15 @@ $(document).ready(function() {
                     // ----------------------------
                     // Agregar Tareas
                     // ----------------------------
-                    $('#tareaForm').off('submit').on('submit', function(e) {
-                        e.preventDefault();
-                        $.post(`${base_url}/lead/guardarTarea`, $(this).serialize(), function(res) {
-                            if (res.success) {
-                                $('#listaTareas').append(`<li>${res.tarea.descripcion} <small class="text-muted">${res.tarea.fecha_registro}</small></li>`);
-                                $('#tareaForm')[0].reset();
-                            } else {
-                                Swal.fire('Error', res.message, 'error');
-                            }
-                        }, 'json');
+                    bindFormAjax('#tareaForm', `${base_url}/lead/guardarTarea`, function(res) {
+                        $('#listaTareas').append(`<li>${res.tarea.descripcion} <small class="text-muted">${res.tarea.fecha_registro}</small></li>`);
                     });
 
                     // ----------------------------
                     // Agregar Seguimientos
                     // ----------------------------
-                    $('#seguimientoForm').off('submit').on('submit', function(e) {
-                        e.preventDefault();
-                        $.post(`${base_url}/lead/guardarSeguimiento`, $(this).serialize(), function(res) {
-                            if (res.success) {
-                                $('#listaSeguimientos').append(`<li>${res.seguimiento.comentario} <small class="text-muted">${res.seguimiento.fecha}</small></li>`);
-                                $('#seguimientoForm')[0].reset();
-                            } else {
-                                Swal.fire('Error', res.message, 'error');
-                            }
-                        }, 'json');
+                    bindFormAjax('#seguimientoForm', `${base_url}/lead/guardarSeguimiento`, function(res) {
+                        $('#listaSeguimientos').append(`<li>${res.seguimiento.comentario} <small class="text-muted">${res.seguimiento.fecha}</small></li>`);
                     });
 
                 } else {

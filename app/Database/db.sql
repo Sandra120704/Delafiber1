@@ -42,10 +42,6 @@ CREATE TABLE personas (
     CONSTRAINT fk_persona_distrito FOREIGN KEY (iddistrito) REFERENCES distritos(iddistrito) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_personas_nombre ON personas(nombres, apellidos);
-CREATE INDEX idx_personas_telefono ON personas(telefono);
-CREATE INDEX idx_personas_dni ON personas(dni);
-CREATE INDEX idx_personas_correo ON personas(correo);
 
 CREATE TABLE roles (
     idrol INT AUTO_INCREMENT PRIMARY KEY,
@@ -102,6 +98,11 @@ CREATE TABLE origenes (
     idorigen INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL
 );
+
+ALTER TABLE origenes ADD COLUMN tipo VARCHAR(20) DEFAULT NULL;
+
+UPDATE origenes SET tipo = 'campaña' WHERE nombre LIKE '%campaña%' OR nombre LIKE '%publicidad%';
+UPDATE origenes SET tipo = 'referido' WHERE nombre LIKE '%referido%' OR nombre LIKE '%recomend%';
 
 CREATE TABLE modalidades (
     idmodalidad INT AUTO_INCREMENT PRIMARY KEY,
@@ -213,6 +214,9 @@ CREATE INDEX idx_personas_dni ON personas(dni);
 CREATE INDEX idx_personas_correo ON personas(correo);
 CREATE INDEX idx_usuarios_usuario ON usuarios(usuario);
 CREATE INDEX idx_usuarios_activo ON usuarios(activo);
+CREATE INDEX idx_personas_nombre ON personas(nombres, apellidos);
+CREATE INDEX idx_personas_telefono ON personas(telefono);
+CREATE INDEX idx_personas_correo ON personas(correo);
 
 -- Índices para campañas 
 CREATE INDEX idx_campanias_estado ON campanias(estado);
@@ -270,15 +274,15 @@ INSERT INTO usuarios (usuario, clave, idrol, idpersona) VALUES
 ('atorres', '123456', 2, 4); 
 
 
--- Orígenes de leads
-INSERT INTO origenes (nombre) VALUES 
-('Campaña Digital'), 
-('Referido'), 
-('Contacto Directo'), 
-('Evento'), 
-('Marketing Offline'), 
-('Redes Sociales'), 
-('Página Web');
+-- Orígenes de leads (con tipo explícito)
+INSERT INTO origenes (nombre, tipo) VALUES 
+('Campaña Digital', 'campaña'), 
+('Referido', 'referido'), 
+('Contacto Directo', NULL), 
+('Evento', NULL), 
+('Marketing Offline', 'campaña'), 
+('Redes Sociales', 'campaña'), 
+('Página Web', NULL);
 
 -- Modalidades de contacto
 INSERT INTO modalidades (nombre) VALUES 
@@ -358,5 +362,4 @@ FROM campanias c
 LEFT JOIN usuarios u ON u.idusuario = c.responsable
 LEFT JOIN personas p ON p.idpersona = u.idpersona
 LEFT JOIN difusiones d ON d.idcampania = c.idcampania
-GROUP BY c.idcampania;
 GROUP BY c.idcampania;

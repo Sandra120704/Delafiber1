@@ -160,11 +160,7 @@
               <!-- Panel de Información -->
               <div class="tab-pane fade show active" id="info-panel" role="tabpanel">
                 <div id="detalle-lead-content">
-                  <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                      <span class="visually-hidden">Cargando...</span>
-                    </div>
-                  </div>
+                  <!-- Aquí tu JS debe cargar los detalles del lead -->
                 </div>
               </div>
 
@@ -248,10 +244,7 @@
                   </div>
                   <div class="card-body">
                     <div id="lista-tareas-lead" class="tareas-container">
-                      <div class="text-center text-muted py-3">
-                        <i class="fas fa-tasks fa-2x mb-2"></i>
-                        <p>No hay tareas aún. ¡Crea la primera!</p>
-                      </div>
+                      <!-- Aquí tu JS debe cargar la lista de tareas -->
                     </div>
                   </div>
                 </div>
@@ -260,21 +253,14 @@
               <!-- Panel de Seguimientos -->
               <div class="tab-pane fade" id="seguimientos-panel" role="tabpanel">
                 <div id="seguimientos-content">
-                  <div class="text-center py-5">
-                    <div class="spinner-border text-info" role="status">
-                      <span class="visually-hidden">Cargando seguimientos...</span>
-                    </div>
-                  </div>
+                  <!-- Aquí tu JS debe cargar los seguimientos -->
                 </div>
               </div>
 
               <!-- Panel de Historial -->
               <div class="tab-pane fade" id="historial-panel" role="tabpanel">
                 <div class="timeline">
-                  <div class="text-center text-muted py-4">
-                    <i class="fas fa-history fa-2x mb-2"></i>
-                    <p>Historial de actividades se cargará aquí</p>
-                  </div>
+                  <!-- Aquí tu JS debe cargar el historial -->
                 </div>
               </div>
             </div>
@@ -324,6 +310,54 @@
             input.classList.remove('is-valid');
         }
     }
+
+    // Función global para abrir el modal de detalle del lead
+    function abrirDetalleLeadModal(idlead) {
+        // Ejemplo: abrir el modal y cargar los detalles por AJAX
+        $('#modalLeadDetalle').modal('show');
+        // Aquí deberías llamar a tu función JS que carga los detalles del lead
+        if (typeof window.LeadsSystem !== 'undefined' && typeof window.LeadsSystem.abrirModalDetalle === 'function') {
+            window.LeadsSystem.abrirModalDetalle(idlead);
+        }
+    }
+
+    // Función global para marcar lead como contactado
+    function marcarComoContactado(idlead) {
+        // Ejemplo: mostrar confirmación y llamar a tu endpoint
+        Swal.fire({
+            icon: 'question',
+            title: '¿Marcar como contactado?',
+            text: '¿Deseas marcar este lead como contactado?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, marcar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí deberías llamar a tu endpoint para actualizar el estado
+                $.post(base_url + '/leads/marcarContactado', { idlead }, function(res) {
+                    if (res.success) {
+                        Swal.fire('¡Listo!', 'Lead marcado como contactado', 'success');
+                        // Opcional: recargar o actualizar la tarjeta
+                    } else {
+                        Swal.fire('Error', res.message, 'error');
+                    }
+                }, 'json');
+            }
+        });
+    }
+
+    function reconectarWhatsapp() {
+        fetch(base_url + '/whatsapp/reconectar')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Reconectado', 'La conexión con WhatsApp Web se ha restablecido.', 'success');
+                    // Opcional: recargar el estado de la interfaz
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            });
+    }
 </script>
 
 <!-- Librerías externas PRIMERO -->
@@ -335,7 +369,7 @@
     <!-- Sistema de leads -->
     <script src="<?= base_url('js/leadsJS/leads.js') ?>"></script>
 
-<!-- Debug y test automático -->
+<!-- Debug y test automático: por ejemplo revisa la carpeta js/leadsJS -->
 <script>
 $(document).ready(function() {
     console.log('Test automático del sistema...');
